@@ -25,7 +25,7 @@ See: [`packages/project-prompt-kit/README.md`](./packages/project-prompt-kit/REA
 
 ## Quick Validation
 ```bash
-bash /tmp/workspace/KangSage/agent-harness/packages/project-prompt-kit/scripts/validate.sh
+bash packages/project-prompt-kit/scripts/validate.sh
 ```
 
 ## License

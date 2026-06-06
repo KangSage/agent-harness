@@ -25,7 +25,7 @@
 
 ## クイック検証
 ```bash
-bash /tmp/workspace/KangSage/agent-harness/packages/project-prompt-kit/scripts/validate.sh
+bash packages/project-prompt-kit/scripts/validate.sh
 ```
 
 ## ライセンス
