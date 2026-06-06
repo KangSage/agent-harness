@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/agent-harness/project-prompt-kit/prompt-contract.schema.json",
+  "title": "Project Prompt Contract",
+  "type": "object",
+  "required": ["command", "alias", "target", "instructions", "safety"],
+  "properties": {
+    "command": {
+      "type": "string",
+      "const": "/prompt"
+    },
+    "alias": {
+      "type": "string",
+      "const": "/project-prompt"
+    },
+    "target": {
+      "type": "string",
+      "enum": ["codex", "claude", "generic"]
+    },
+    "instructions": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1
+    },
+    "safety": {
+      "type": "object",
+      "required": ["telemetry", "localFirst", "redaction", "promptInjectionBoundary"],
+      "properties": {
+        "telemetry": {
+          "type": "string",
+          "const": "off"
+        },
+        "localFirst": {
+          "type": "boolean",
+          "const": true
+        },
+        "redaction": {
+          "type": "boolean",
+          "const": true
+        },
+        "promptInjectionBoundary": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

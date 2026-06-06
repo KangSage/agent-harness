@@ -1,0 +1,12 @@
+# Default prompt kit ignore patterns
+.git/
+.github/
+node_modules/
+dist/
+build/
+coverage/
+*.log
+*.tmp
+*.secret
+.env
+.env.*
