@@ -1,0 +1,156 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:agent-harness:project-prompt-kit:prompt-contract:v0.1",
+  "title": "Project Prompt Contract",
+  "type": "object",
+  "required": [
+    "command",
+    "alias",
+    "target",
+    "mode",
+    "project",
+    "role",
+    "objective",
+    "current_state",
+    "inputs",
+    "constraints",
+    "success_criteria",
+    "risks",
+    "output_format",
+    "evidence_required",
+    "stop_condition",
+    "safety"
+  ],
+  "properties": {
+    "command": {
+      "type": "string",
+      "const": "/prompt"
+    },
+    "alias": {
+      "type": "string",
+      "const": "/project-prompt"
+    },
+    "target": {
+      "type": "string",
+      "enum": ["codex", "claude", "generic"]
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "choose",
+        "task",
+        "implement",
+        "review",
+        "debug",
+        "research",
+        "docs",
+        "release",
+        "correction",
+        "handoff"
+      ]
+    },
+    "project": {
+      "type": "string",
+      "minLength": 1
+    },
+    "role": {
+      "type": "string",
+      "minLength": 1
+    },
+    "objective": {
+      "type": "string",
+      "minLength": 1
+    },
+    "current_state": {
+      "type": "string",
+      "minLength": 1
+    },
+    "inputs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1
+    },
+    "constraints": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1
+    },
+    "success_criteria": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1
+    },
+    "risks": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1
+    },
+    "output_format": {
+      "type": "string",
+      "minLength": 1
+    },
+    "evidence_required": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1
+    },
+    "stop_condition": {
+      "type": "string",
+      "minLength": 1
+    },
+    "safety": {
+      "type": "object",
+      "required": [
+        "telemetry",
+        "local_first",
+        "no_network",
+        "redaction",
+        "prompt_injection_boundary",
+        "preview_before_share"
+      ],
+      "properties": {
+        "telemetry": {
+          "type": "string",
+          "const": "off"
+        },
+        "local_first": {
+          "type": "boolean",
+          "const": true
+        },
+        "no_network": {
+          "type": "boolean",
+          "const": true
+        },
+        "redaction": {
+          "type": "boolean",
+          "const": true
+        },
+        "prompt_injection_boundary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "preview_before_share": {
+          "type": "boolean",
+          "const": true
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

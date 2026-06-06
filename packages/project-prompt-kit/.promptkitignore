@@ -1,0 +1,21 @@
+# Default prompt kit ignore patterns
+.git/
+.github/
+.ssh/
+node_modules/
+vendor/
+dist/
+build/
+target/
+coverage/
+*.log
+*.tmp
+*.secret
+*.pem
+*.key
+*.p12
+*.pfx
+.env
+.env.*
+id_rsa
+id_ed25519
