@@ -4,6 +4,7 @@
 - Establish monorepo foundations
 - Scaffold `project-prompt-kit`
 - Add validation workflow and baseline docs
+- Document universal prompt contract, mode specs, renderer templates, safe defaults, and sanitized examples
 
 ## Next
 - Expand prompt schemas and fixture coverage

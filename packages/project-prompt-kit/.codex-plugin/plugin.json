@@ -1,0 +1,13 @@
+{
+  "name": "project-prompt-kit",
+  "version": "0.1.0",
+  "description": "Generate high-quality project prompts for Codex and other coding agents.",
+  "license": "MIT",
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Project Prompt Kit",
+    "category": "Developer Tools",
+    "capabilities": ["Read", "Interactive"],
+    "defaultPrompt": "Use Project Prompt Kit to generate mode-specific project prompts."
+  }
+}
