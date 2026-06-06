@@ -25,9 +25,10 @@ This package currently provides:
 - command specs
 - a skill scaffold
 - mode specs
-- prompt contract schema and renderer templates
+- prompt contract, prompt request, and mode metadata schemas
+- renderer templates
 - safety defaults
-- examples, golden sample outputs, and validation script
+- examples, fixture-backed golden output shapes, and validation scripts
 
 It intentionally does **not** include a full CLI in v0.1. Handoff is one supported mode, not the default or only use case.
 
@@ -50,9 +51,17 @@ Generated prompts may contain project context. Review them before sharing.
 - `examples/` — example prompt payloads
 - `examples/sample-outputs/` — golden sample output shape
 - `scripts/validate.sh` — structure/contract validation
-- `tests/` — placeholder for future automated tests
+- `tests/fixtures/` — valid and invalid contract fixtures
+- `tests/golden/` — static mode output shape examples
+- `tests/validate-fixtures.sh` — fixture validation entry point
 
 ## Validation
 ```bash
 bash packages/project-prompt-kit/scripts/validate.sh
+```
+
+Fixture-only validation:
+
+```bash
+bash packages/project-prompt-kit/tests/validate-fixtures.sh
 ```

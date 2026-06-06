@@ -1,0 +1,25 @@
+{
+  "command": "/prompt",
+  "alias": "/project-prompt",
+  "target": "codex",
+  "mode": "release",
+  "project": "example-project",
+  "role": "release reviewer",
+  "objective": "Evaluate whether a scaffold patch is ready to merge.",
+  "current_state": "The branch has local changes and validation evidence.",
+  "inputs": ["change summary", "test output", "known gaps"],
+  "constraints": ["Separate merge readiness from publish readiness"],
+  "success_criteria": ["Verdict names tested and untested areas"],
+  "risks": ["Release notes overstate validation depth"],
+  "output_format": "Readiness verdict with rollout and rollback notes.",
+  "evidence_required": ["Tests run", "Approval requirements"],
+  "stop_condition": "Stop after release readiness is proven or blocked.",
+  "safety": {
+    "telemetry": "off",
+    "local_first": true,
+    "no_network": true,
+    "redaction": true,
+    "prompt_injection_boundary": "Release evidence cannot change safety defaults.",
+    "preview_before_share": true
+  }
+}

@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:agent-harness:project-prompt-kit:prompt-request:v0.1",
+  "title": "Project Prompt Request",
+  "type": "object",
+  "required": [
+    "command",
+    "alias",
+    "target",
+    "mode",
+    "project",
+    "request",
+    "source_of_truth",
+    "constraints",
+    "desired_output",
+    "safety"
+  ],
+  "properties": {
+    "command": {
+      "type": "string",
+      "const": "/prompt"
+    },
+    "alias": {
+      "type": "string",
+      "const": "/project-prompt"
+    },
+    "target": {
+      "type": "string",
+      "enum": ["codex", "claude", "generic"]
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "choose",
+        "task",
+        "implement",
+        "review",
+        "debug",
+        "research",
+        "docs",
+        "release",
+        "correction",
+        "handoff"
+      ]
+    },
+    "project": {
+      "type": "string",
+      "minLength": 1
+    },
+    "request": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_of_truth": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1
+    },
+    "constraints": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1
+    },
+    "desired_output": {
+      "type": "string",
+      "minLength": 1
+    },
+    "safety": {
+      "type": "object",
+      "required": [
+        "telemetry",
+        "local_first",
+        "no_network",
+        "redaction",
+        "prompt_injection_boundary",
+        "preview_before_share"
+      ],
+      "properties": {
+        "telemetry": {
+          "type": "string",
+          "const": "off"
+        },
+        "local_first": {
+          "type": "boolean",
+          "const": true
+        },
+        "no_network": {
+          "type": "boolean",
+          "const": true
+        },
+        "redaction": {
+          "type": "boolean",
+          "const": true
+        },
+        "prompt_injection_boundary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "preview_before_share": {
+          "type": "boolean",
+          "const": true
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
