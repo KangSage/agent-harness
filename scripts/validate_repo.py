@@ -45,6 +45,7 @@ SCAN_PATHS = [
     ROOT / "CHANGELOG.md",
     ROOT / ".github" / "workflows",
     ROOT / "docs",
+    ROOT / "packages",
     ROOT / "scripts",
 ]
 
@@ -57,7 +58,7 @@ def rel(path: Path) -> str:
 
 
 def text_files() -> list[Path]:
-    return collect_text_files(SCAN_PATHS, extra_names={".gitignore"})
+    return collect_text_files(SCAN_PATHS, extra_names={".gitignore", ".promptkitignore"})
 
 
 def main() -> int:

@@ -10,8 +10,8 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 - Package validation now checks fixture coverage, schema keyword support, mode taxonomy drift, and safety-default failures
-- Root and package validation share public hygiene scanning rules
-- Package validation reports malformed schema shapes without re-running fixture checks
+- Root validation owns public hygiene scanning across repository docs, scripts, and package files
+- Package validation reports malformed schema shapes without repo-root helper imports or duplicate fixture runs
 
 ## [0.1.0] - 2026-06-06
 ### Added

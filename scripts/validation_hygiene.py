@@ -31,6 +31,8 @@ SECRET_PATTERNS = [
     re.compile(r"://[^/\s]+:[^/\s]+@"),
 ]
 
+# Best-effort host-neutrality guardrail, not a complete model registry.
+# Require a numeric family suffix to avoid product/tool slugs such as claude-code.
 MODEL_NAME_PATTERNS = [
     re.compile(r"\bgpt-[0-9][A-Za-z0-9_.-]*", re.IGNORECASE),
     re.compile(r"\bclaude-[0-9][A-Za-z0-9_.-]*", re.IGNORECASE),
