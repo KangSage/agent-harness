@@ -11,6 +11,6 @@ Thanks for contributing to `agent-harness`.
 1. Make focused changes.
 2. Run validation:
    ```bash
-   bash packages/project-prompt-kit/scripts/validate.sh
+   bash scripts/validate.sh
    ```
 3. Submit a pull request with clear rationale.

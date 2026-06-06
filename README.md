@@ -28,7 +28,7 @@ See: [`packages/project-prompt-kit/README.md`](./packages/project-prompt-kit/REA
 
 ## Quick Validation
 ```bash
-bash packages/project-prompt-kit/scripts/validate.sh
+bash scripts/validate.sh
 ```
 
 Generated prompts may contain project context. Review them before sharing. Generated prompt output belongs to the user or project that created it, not to this repository.
