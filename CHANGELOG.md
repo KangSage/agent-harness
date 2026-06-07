@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 ### Added
 - Korean and Japanese companion docs for `project-prompt-kit` developer-facing guides
+- Validation for package README language navigation
+
+### Changed
+- Polished localized `project-prompt-kit` heading style and Japanese wording consistency
 
 ## [0.1.2] - 2026-06-07
 ### Added

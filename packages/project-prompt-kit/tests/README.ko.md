@@ -10,7 +10,7 @@ contract fixture gate만 필요할 때는 `validate-fixtures.sh`를 사용합니
 bash packages/project-prompt-kit/tests/validate-fixtures.sh
 ```
 
-## Fixtures
+## Fixture
 
 - `fixtures/valid/`는 지원 mode 전체, 지원 target 전체, 최소 하나의 prompt request fixture를 포함한 valid prompt contract를 담습니다.
 - `fixtures/invalid/`는 required field, enum, const value, type check, string/array minimum, extra property, unsafe safety default, nested safety shape, unsupported schema keyword에 대한 독립 실패 사례를 담습니다.

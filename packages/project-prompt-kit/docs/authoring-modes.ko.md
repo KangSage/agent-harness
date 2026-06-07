@@ -1,4 +1,4 @@
-# Authoring Modes
+# Mode 작성
 
 mode spec은 생성된 prompt가 에이전트에게 무엇을 요청해야 하는지 설명합니다.
 

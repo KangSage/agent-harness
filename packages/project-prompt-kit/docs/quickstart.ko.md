@@ -1,4 +1,4 @@
-# Quickstart
+# 빠른 시작
 
 `project-prompt-kit`은 prompt contract와 renderer scaffold입니다. 현재 저장소에서 바로 사용할 수 있지만, 아직 packaged CLI나 registry install은 아닙니다.
 

@@ -38,7 +38,7 @@ v0.1 で対応する mode:
 
 v0.1 では、意図的に full CLI は含めません。`handoff` は対応 mode の一つであり、default や唯一の用途ではありません。
 
-## Quickstart
+## クイックスタート
 
 このキットは repo-distributed prompt scaffold として使います。
 
@@ -49,12 +49,12 @@ v0.1 では、意図的に full CLI は含めません。`handoff` は対応 mod
 5. 実プロジェクトへ適用する前に `examples/rendered/` と比較します。
 6. 変更を共有する前に validation を実行します。
 
-この package は、repository を clone するか vendor すれば使えます。まだ install 型 CLI や registry package ではありません。
+この package は、repository を clone するか vendor すれば使えます。まだインストール型 CLI や registry package ではありません。
 
-## Safety Defaults
+## 安全なデフォルト
 
-- default で telemetry なし
-- default で network call なし
+- デフォルトで telemetry なし
+- デフォルトで network call なし
 - local-first の利用方針
 - 機密情報は redaction-first で扱う
 - `.promptkitignore` 対応
@@ -77,7 +77,7 @@ v0.1 では、意図的に full CLI は含めません。`handoff` は対応 mod
 - `tests/golden/` — static mode output shape の例
 - `tests/validate-fixtures.sh` — fixture validation entry point
 
-## Validation
+## 検証
 
 ```bash
 bash packages/project-prompt-kit/scripts/validate.sh

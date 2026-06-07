@@ -38,7 +38,7 @@ v0.1에서 지원하는 mode:
 
 v0.1에서는 의도적으로 full CLI를 제공하지 않습니다. `handoff`는 지원 mode 중 하나일 뿐이며, 기본값이나 유일한 사용 사례가 아닙니다.
 
-## Quickstart
+## 빠른 시작
 
 이 키트는 repo-distributed prompt scaffold로 사용합니다.
 
@@ -51,7 +51,7 @@ v0.1에서는 의도적으로 full CLI를 제공하지 않습니다. `handoff`�
 
 이 패키지는 저장소를 clone하거나 vendor해서 바로 사용할 수 있습니다. 아직 설치형 CLI나 registry package는 아닙니다.
 
-## Safety Defaults
+## 안전 기본값
 
 - 기본 telemetry 없음
 - 기본 network call 없음
@@ -77,7 +77,7 @@ v0.1에서는 의도적으로 full CLI를 제공하지 않습니다. `handoff`�
 - `tests/golden/` — static mode output shape 예제
 - `tests/validate-fixtures.sh` — fixture validation entry point
 
-## Validation
+## 검증
 
 ```bash
 bash packages/project-prompt-kit/scripts/validate.sh

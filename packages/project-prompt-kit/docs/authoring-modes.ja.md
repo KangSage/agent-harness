@@ -1,4 +1,4 @@
-# Authoring Modes
+# Mode 作成
 
 mode spec は、生成された prompt がエージェントに何を依頼するべきかを説明します。
 
