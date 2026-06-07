@@ -445,20 +445,44 @@ def validate_sample_outputs(errors: list[str]) -> None:
 
 def validate_rendered_examples(errors: list[str]) -> None:
     expected = {
-        "codex-review.md": ("Codex", "review", "examples/sample-contract.codex.json"),
-        "claude-implement.md": ("Claude", "implement", "examples/sample-contract.claude.json"),
-        "generic-task.md": ("Generic", "task", "examples/sample-contract.generic.json"),
+        "codex-review.md": "examples/sample-contract.codex.json",
+        "claude-implement.md": "examples/sample-contract.claude.json",
+        "generic-task.md": "examples/sample-contract.generic.json",
     }
     rendered_dir = PKG / "examples" / "rendered"
-    for name, (target_label, mode, source_contract) in expected.items():
+    actual = sorted(path.name for path in rendered_dir.glob("*.md"))
+    extra = sorted(set(actual) - set(expected))
+    for name in extra:
+        errors.append(f"Rendered example is not registered for validation: {rel(rendered_dir / name)}")
+
+    for name, source_contract in expected.items():
         example = rendered_dir / name
         if not example.is_file():
             errors.append(f"Missing rendered example: {rel(example)}")
             continue
+
+        contract, load_errors = load_json(PKG / source_contract)
+        errors.extend(load_errors)
+        if not isinstance(contract, dict):
+            errors.append(f"Rendered example {rel(example)} source contract must be an object")
+            continue
+
         text = read(example)
+        target = contract.get("target")
+        mode = contract.get("mode")
+        if not isinstance(target, str) or target not in TARGETS:
+            errors.append(f"Rendered example {rel(example)} source contract has invalid target")
+            continue
+        if not isinstance(mode, str) or mode not in MODES:
+            errors.append(f"Rendered example {rel(example)} source contract has invalid mode")
+            continue
+
+        target_label = {"codex": "Codex", "claude": "Claude", "generic": "Generic"}[target]
+        renderer_template = f"skills/project-prompt/references/templates/{target}.md"
         for phrase in [
             f"# Rendered Example: {target_label}",
             f"Source contract: `{source_contract}`",
+            f"Renderer template: `{renderer_template}`",
             f"Mode: `{mode}`",
             PROMPT_INJECTION_BOUNDARY,
             "Preview before sharing.",
@@ -466,6 +490,12 @@ def validate_rendered_examples(errors: list[str]) -> None:
         ]:
             if phrase not in text:
                 errors.append(f"Rendered example {rel(example)} missing {phrase}")
+        for field in ["role", "objective", "output_format", "stop_condition"]:
+            value = contract.get(field)
+            if not isinstance(value, str) or not value:
+                errors.append(f"Rendered example {rel(example)} source contract missing string field: {field}")
+            elif value not in text:
+                errors.append(f"Rendered example {rel(example)} does not include contract field: {field}")
         if "{{" in text or "}}" in text:
             errors.append(f"Rendered example {rel(example)} contains unresolved template placeholder")
 
