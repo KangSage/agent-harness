@@ -22,7 +22,7 @@
 
 rendered example は documentation fixture であり、generated snapshot ではありません。手動利用時に期待される prompt shape を示します。
 
-## Sample Output
+## Sample Outputs
 
 `sample-outputs/` には mode-level output shape の例があります。rendered prompt を使った後、agent response がどのような形になり得るかを説明します。
 

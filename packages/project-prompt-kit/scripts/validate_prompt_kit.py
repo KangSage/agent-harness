@@ -118,9 +118,9 @@ SUPPORTED_SCHEMA_KEYS = {
 }
 
 PACKAGE_README_LANGUAGE_LINKS = [
-    "[English](README.md)",
-    "[한국어](README.ko.md)",
-    "[日本語](README.ja.md)",
+    ("English", "README.md"),
+    ("한국어", "README.ko.md"),
+    ("日本語", "README.ja.md"),
 ]
 
 def read(path: Path) -> str:
@@ -129,6 +129,10 @@ def read(path: Path) -> str:
 
 def rel(path: Path) -> str:
     return str(path.relative_to(PKG))
+
+
+def has_markdown_link(text: str, label: str, target: str) -> bool:
+    return f"[{label}]({target})" in text or f"[{label}](./{target})" in text
 
 
 def load_json(path: Path) -> tuple[Any | None, list[str]]:
@@ -532,11 +536,11 @@ def validate_language_docs(errors: list[str]) -> None:
             continue
         text = read(path)
         if not text.strip():
-            errors.append(f"Localized package doc is empty: {rel(path)}")
+            errors.append(f"Package README is empty: {rel(path)}")
             continue
-        for link in PACKAGE_README_LANGUAGE_LINKS:
-            if link not in text:
-                errors.append(f"Package README language navigation missing {link}: {rel(path)}")
+        for label, target in PACKAGE_README_LANGUAGE_LINKS:
+            if not has_markdown_link(text, label, target):
+                errors.append(f"Package README language navigation missing [{label}]({target}): {rel(path)}")
 
 
 def validate_golden_outputs(errors: list[str]) -> None:
