@@ -1,6 +1,6 @@
 {
   "name": "project-prompt-kit",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Generate high-quality project prompts for Codex and other coding agents.",
   "license": "MIT",
   "skills": "./skills/",
