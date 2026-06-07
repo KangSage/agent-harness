@@ -2,6 +2,8 @@
 
 Repo-aware prompt templates for coding agents.
 
+Languages: [English](README.md) | [한국어](README.ko.md) | [日本語](README.ja.md)
+
 `project-prompt-kit` is a lightweight host-neutral prompt kit scaffold for coding-agent and project-agent workflows. It turns loose intent into a structured prompt contract with objective, context, scope, constraints, evidence requirements, output format, and stop condition.
 
 ## Command Contract
