@@ -3,6 +3,9 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+### Added
+- Quickstart documentation for using `project-prompt-kit` without a packaged CLI
+- Renderer-specific prompt examples for Codex, Claude, and generic targets
 
 ## [0.1.1] - 2026-06-07
 ### Added

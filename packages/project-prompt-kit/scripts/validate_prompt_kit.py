@@ -55,7 +55,9 @@ REQUIRED_FILES = [
     PKG / "commands" / "project-prompt.md",
     PKG / "docs" / "architecture.md",
     PKG / "docs" / "authoring-modes.md",
+    PKG / "docs" / "quickstart.md",
     PKG / "docs" / "portability.md",
+    PKG / "examples" / "README.md",
     CONTRACT_SCHEMA,
     REQUEST_SCHEMA,
     MODE_SCHEMA,
@@ -70,6 +72,7 @@ REQUIRED_DIRS = [
     PKG / "commands",
     PKG / "docs",
     PKG / "examples",
+    PKG / "examples" / "rendered",
     PKG / "examples" / "sample-outputs",
     PKG / "schemas",
     PKG / "scripts",
@@ -440,6 +443,33 @@ def validate_sample_outputs(errors: list[str]) -> None:
                 errors.append(f"Sample output {rel(sample_file)} missing {phrase}")
 
 
+def validate_rendered_examples(errors: list[str]) -> None:
+    expected = {
+        "codex-review.md": ("Codex", "review", "examples/sample-contract.codex.json"),
+        "claude-implement.md": ("Claude", "implement", "examples/sample-contract.claude.json"),
+        "generic-task.md": ("Generic", "task", "examples/sample-contract.generic.json"),
+    }
+    rendered_dir = PKG / "examples" / "rendered"
+    for name, (target_label, mode, source_contract) in expected.items():
+        example = rendered_dir / name
+        if not example.is_file():
+            errors.append(f"Missing rendered example: {rel(example)}")
+            continue
+        text = read(example)
+        for phrase in [
+            f"# Rendered Example: {target_label}",
+            f"Source contract: `{source_contract}`",
+            f"Mode: `{mode}`",
+            PROMPT_INJECTION_BOUNDARY,
+            "Preview before sharing.",
+            "No network calls are required by default.",
+        ]:
+            if phrase not in text:
+                errors.append(f"Rendered example {rel(example)} missing {phrase}")
+        if "{{" in text or "}}" in text:
+            errors.append(f"Rendered example {rel(example)} contains unresolved template placeholder")
+
+
 def validate_golden_outputs(errors: list[str]) -> None:
     golden_dir = PKG / "tests" / "golden"
     golden_files = sorted(path.stem for path in golden_dir.glob("*.md"))
@@ -602,6 +632,7 @@ def validate_scaffold(schemas: dict[str, dict[str, Any]], errors: list[str]) -> 
     validate_schema_contracts(schemas, errors)
     validate_sample_contracts(schemas, errors)
     validate_sample_outputs(errors)
+    validate_rendered_examples(errors)
 
     prompt_doc = PKG / "commands" / "prompt.md"
     alias_doc = PKG / "commands" / "project-prompt.md"

@@ -32,6 +32,18 @@ This package currently provides:
 
 It intentionally does **not** include a full CLI in v0.1. Handoff is one supported mode, not the default or only use case.
 
+## Quickstart
+Use the kit as a repo-distributed prompt scaffold:
+
+1. Read `docs/quickstart.md`.
+2. Pick a mode from `skills/project-prompt/references/modes/`.
+3. Pick a target renderer from `skills/project-prompt/references/templates/`.
+4. Start from `examples/sample-contract.*.json`.
+5. Compare against `examples/rendered/` before adapting it to a real project.
+6. Run validation before sharing changes.
+
+The package is usable after cloning or vendoring this repository. It is not yet an installed CLI or registry package.
+
 ## Safety Defaults
 - No telemetry by default
 - No network calls by default
@@ -49,6 +61,7 @@ Generated prompts may contain project context. Review them before sharing.
 - `skills/project-prompt/` — skill definition
 - `schemas/` — host-neutral contracts
 - `examples/` — example prompt payloads
+- `examples/rendered/` — target-specific rendered prompt examples
 - `examples/sample-outputs/` — golden sample output shape
 - `scripts/validate.sh` — structure/contract validation
 - `tests/fixtures/` — valid and invalid contract fixtures
