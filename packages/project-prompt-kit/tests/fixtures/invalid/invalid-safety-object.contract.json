@@ -1,0 +1,18 @@
+{
+  "command": "/prompt",
+  "alias": "/project-prompt",
+  "target": "generic",
+  "mode": "task",
+  "project": "example-project",
+  "role": "task writer",
+  "objective": "Use a non-object safety value.",
+  "current_state": "The fixture is intentionally invalid.",
+  "inputs": ["source"],
+  "constraints": ["local only"],
+  "success_criteria": ["validation fails"],
+  "risks": ["invalid safety shape is accepted"],
+  "output_format": "error",
+  "evidence_required": ["validator output"],
+  "stop_condition": "stop after failure",
+  "safety": "off"
+}
