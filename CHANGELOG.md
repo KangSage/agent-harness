@@ -3,6 +3,8 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+
+## [0.1.1] - 2026-06-07
 ### Added
 - Schema-backed `project-prompt-kit` fixture validation for the v0.1.1 contract hardening path
 - Prompt request and mode metadata schemas alongside the canonical prompt contract schema
