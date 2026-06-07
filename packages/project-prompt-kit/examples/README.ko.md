@@ -1,8 +1,8 @@
-# Examples
+# 예제
 
 이 디렉터리는 `project-prompt-kit`의 public-safe 예제를 담고 있습니다.
 
-## Contract Examples
+## Contract 예제
 
 `sample-contract.*.json` 파일은 `schemas/prompt-contract.schema.json`으로 검증되는 normalized prompt payload입니다.
 
@@ -12,7 +12,7 @@
 
 새 prompt contract를 작성할 때 이 파일들을 시작점으로 사용합니다.
 
-## Rendered Examples
+## Rendered 예제
 
 `rendered/`에는 sample contract를 target renderer template에 적용한 최종 prompt 예제가 있습니다.
 
@@ -26,7 +26,7 @@ rendered example은 documentation fixture이며 generated snapshot이 아닙니�
 
 `sample-outputs/`에는 mode-level output shape 예제가 있습니다. rendered prompt를 사용한 뒤 agent response가 어떤 형태가 될 수 있는지 설명합니다.
 
-## Safety Rules
+## 안전 규칙
 
 예제는 portable해야 합니다.
 

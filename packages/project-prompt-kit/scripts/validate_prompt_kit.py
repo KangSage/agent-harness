@@ -117,12 +117,22 @@ SUPPORTED_SCHEMA_KEYS = {
     "items",
 }
 
+PACKAGE_README_LANGUAGE_LINKS = [
+    ("English", "README.md"),
+    ("한국어", "README.ko.md"),
+    ("日本語", "README.ja.md"),
+]
+
 def read(path: Path) -> str:
     return path.read_text(encoding="utf-8")
 
 
 def rel(path: Path) -> str:
     return str(path.relative_to(PKG))
+
+
+def has_markdown_link(text: str, label: str, target: str) -> bool:
+    return f"[{label}]({target})" in text or f"[{label}](./{target})" in text
 
 
 def load_json(path: Path) -> tuple[Any | None, list[str]]:
@@ -519,6 +529,20 @@ def validate_rendered_examples(errors: list[str]) -> None:
             errors.append(f"Rendered example {rel(example)} contains unresolved template placeholder")
 
 
+def validate_language_docs(errors: list[str]) -> None:
+    for readme in ["README.md", "README.ko.md", "README.ja.md"]:
+        path = PKG / readme
+        if not path.is_file():
+            continue
+        text = read(path)
+        if not text.strip():
+            errors.append(f"Package README is empty: {rel(path)}")
+            continue
+        for label, target in PACKAGE_README_LANGUAGE_LINKS:
+            if not has_markdown_link(text, label, target):
+                errors.append(f"Package README language navigation missing [{label}]({target}): {rel(path)}")
+
+
 def validate_golden_outputs(errors: list[str]) -> None:
     golden_dir = PKG / "tests" / "golden"
     golden_files = sorted(path.stem for path in golden_dir.glob("*.md"))
@@ -682,6 +706,7 @@ def validate_scaffold(schemas: dict[str, dict[str, Any]], errors: list[str]) -> 
     validate_sample_contracts(schemas, errors)
     validate_sample_outputs(errors)
     validate_rendered_examples(errors)
+    validate_language_docs(errors)
 
     prompt_doc = PKG / "commands" / "prompt.md"
     alias_doc = PKG / "commands" / "project-prompt.md"
