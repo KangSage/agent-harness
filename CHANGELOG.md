@@ -3,6 +3,8 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+### Added
+- Korean and Japanese companion docs for `project-prompt-kit` developer-facing guides
 
 ## [0.1.2] - 2026-06-07
 ### Added
