@@ -70,6 +70,8 @@ path는 relative path로 유지하고 public-safe하게 작성합니다. token, 
 
 ## 7. 선택적 Host Wiring
 
+prompt 작성만 담당하는 전용 세션이 필요하면 host별 wiring을 시작하기 전에 `docs/prompt-builder-session.ko.md`를 사용합니다.
+
 사용 중인 agent host가 local command나 skill을 지원하면 아래를 복사하거나 참조합니다.
 
 - `commands/prompt.md`

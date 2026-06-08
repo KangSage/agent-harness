@@ -70,6 +70,8 @@ path は relative path のままにし、public-safe に書きます。token, cr
 
 ## 7. 任意の Host Wiring
 
+prompt 作成だけを担当する専用セッションが必要な場合は、host ごとの wiring を始める前に `docs/prompt-builder-session.ja.md` を使います。
+
 利用している agent host が local command や skill をサポートする場合、次をコピーまたは参照します。
 
 - `commands/prompt.md`

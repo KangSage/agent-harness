@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.1.4] - 2026-06-09
+### Added
+- Prompt Builder session guide for using `project-prompt-kit` as a dedicated prompt-authoring surface in existing projects
+
 ## [0.1.3] - 2026-06-07
 ### Added
 - Korean and Japanese companion docs for `project-prompt-kit` developer-facing guides

@@ -42,7 +42,8 @@ Use the kit as a repo-distributed prompt scaffold:
 3. Pick a target renderer from `skills/project-prompt/references/templates/`.
 4. Start from `examples/sample-contract.*.json`.
 5. Compare against `examples/rendered/` before adapting it to a real project.
-6. Run validation before sharing changes.
+6. Use `docs/prompt-builder-session.md` when you want a dedicated session that only writes prompts.
+7. Run validation before sharing changes.
 
 The package is usable after cloning or vendoring this repository. It is not yet an installed CLI or registry package.
 
@@ -65,6 +66,7 @@ Generated prompts may contain project context. Review them before sharing.
 - `examples/` — example prompt payloads
 - `examples/rendered/` — target-specific rendered prompt examples
 - `examples/sample-outputs/` — golden sample output shape
+- `docs/prompt-builder-session.md` — dedicated prompt-authoring session pattern
 - `scripts/validate.sh` — structure/contract validation
 - `tests/fixtures/` — valid and invalid contract fixtures
 - `tests/golden/` — static mode output shape examples
