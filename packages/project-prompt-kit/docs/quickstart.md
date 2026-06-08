@@ -70,6 +70,8 @@ Before sending the prompt to another agent or publishing it:
 
 ## 7. Optional Host Wiring
 
+If you want a dedicated session that only writes prompts, use `docs/prompt-builder-session.md` before starting host-specific wiring.
+
 If your agent host supports local commands or skills, copy or reference:
 
 - `commands/prompt.md`

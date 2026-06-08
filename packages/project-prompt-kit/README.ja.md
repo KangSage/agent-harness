@@ -47,7 +47,8 @@ v0.1 では、意図的に full CLI は含めません。`handoff` は対応 mod
 3. `skills/project-prompt/references/templates/` から target renderer を選びます。
 4. `examples/sample-contract.*.json` から始めます。
 5. 実プロジェクトへ適用する前に `examples/rendered/` と比較します。
-6. 変更を共有する前に validation を実行します。
+6. prompt 作成だけを担当する専用セッションが必要な場合は `docs/prompt-builder-session.ja.md` を使います。
+7. 変更を共有する前に validation を実行します。
 
 この package は、repository を clone するか vendor すれば使えます。まだインストール型 CLI や registry package ではありません。
 
@@ -72,6 +73,7 @@ v0.1 では、意図的に full CLI は含めません。`handoff` は対応 mod
 - `examples/` — prompt payload の例
 - `examples/rendered/` — target-specific rendered prompt の例
 - `examples/sample-outputs/` — golden sample output shape
+- `docs/prompt-builder-session.ja.md` — prompt 作成専用セッションのパターン
 - `scripts/validate.sh` — 構造/契約 validation
 - `tests/fixtures/` — valid/invalid contract fixture
 - `tests/golden/` — static mode output shape の例

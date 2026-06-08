@@ -47,7 +47,8 @@ v0.1에서는 의도적으로 full CLI를 제공하지 않습니다. `handoff`�
 3. `skills/project-prompt/references/templates/`에서 target renderer를 고릅니다.
 4. `examples/sample-contract.*.json`에서 시작합니다.
 5. 실제 프로젝트에 적용하기 전에 `examples/rendered/`와 비교합니다.
-6. 변경사항을 공유하기 전에 validation을 실행합니다.
+6. prompt 작성만 담당하는 전용 세션이 필요하면 `docs/prompt-builder-session.ko.md`를 사용합니다.
+7. 변경사항을 공유하기 전에 validation을 실행합니다.
 
 이 패키지는 저장소를 clone하거나 vendor해서 바로 사용할 수 있습니다. 아직 설치형 CLI나 registry package는 아닙니다.
 
@@ -72,6 +73,7 @@ v0.1에서는 의도적으로 full CLI를 제공하지 않습니다. `handoff`�
 - `examples/` — 예제 prompt payload
 - `examples/rendered/` — target-specific rendered prompt 예제
 - `examples/sample-outputs/` — golden sample output shape
+- `docs/prompt-builder-session.ko.md` — prompt 작성 전용 세션 패턴
 - `scripts/validate.sh` — 구조/계약 validation
 - `tests/fixtures/` — valid/invalid contract fixture
 - `tests/golden/` — static mode output shape 예제
