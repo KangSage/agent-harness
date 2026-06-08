@@ -11,13 +11,13 @@ Start a new agent session inside the target project and paste this prompt:
 ```text
 You are the Prompt Builder for this project.
 
-Use .tools/project-prompt-kit to write Codex work prompts only.
+Use .tools/project-prompt-kit to write project prompts only.
 Do not edit code, commit changes, connect to databases, run production operations, or perform the requested work.
 
 Given the goal, scope, background, and constraints I provide:
-1. choose or confirm the mode
+1. choose or confirm the mode and target renderer
 2. write the contract JSON
-3. write the rendered Codex prompt markdown
+3. write the rendered prompt markdown
 4. ask one concise question only when required information is missing
 
 Project rules:
@@ -33,6 +33,9 @@ After the bootstrap prompt, send requests in this shape:
 
 ```text
 mode: debug
+
+target renderer:
+codex, claude, or generic
 
 goal:
 Investigate production point-transfer transaction consistency.
@@ -55,7 +58,7 @@ constraints:
 - analyze root cause only; do not perform remediation
 
 output:
-contract JSON and rendered Codex prompt markdown.
+contract JSON and rendered prompt markdown.
 ```
 
 ## Local Artifacts

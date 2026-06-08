@@ -2,7 +2,7 @@
 
 Prompt Builder セッションは、1つのエージェントセッションで project prompt だけを作り、実際の作業は別のエージェントセッションで行うためのパターンです。
 
-既存プロジェクト、リスクの高い作業、本番調査、長い handoff に向いています。Prompt Builder セッションは、まだ粗い意図を contract JSON と rendered prompt に変換します。コード編集、本番システム接続、実作業の実行は行いません。
+既存プロジェクト、リスクの高い作業、本番調査、長い handoff に向いています。Prompt Builder セッションは、まだ整理されていない意図を contract JSON と rendered prompt に変換します。コード編集、本番システムへの接続、実作業の実行は行いません。
 
 ## セッション開始プロンプト
 
@@ -11,13 +11,13 @@ Prompt Builder セッションは、1つのエージェントセッションで 
 ```text
 あなたはこのプロジェクトの Prompt Builder です。
 
-.tools/project-prompt-kit を使って、Codex 作業用 prompt だけを作成してください。
+.tools/project-prompt-kit を使って、project prompt のみを作成してください。
 コード編集、git commit、DB 接続、本番作業、依頼された実作業の実行はしないでください。
 
 私が提供する目標、範囲、背景、制約をもとに:
-1. mode を選ぶ、または確認する
+1. mode と target renderer を選ぶ、または確認する
 2. contract JSON を作成する
-3. rendered Codex prompt markdown を作成する
+3. rendered prompt markdown を作成する
 4. 必須情報が不足している場合だけ、短い質問を1つする
 
 プロジェクトルール:
@@ -34,8 +34,11 @@ Prompt Builder セッションは、1つのエージェントセッションで 
 ```text
 mode: debug
 
+target renderer:
+codex、claude、generic のいずれか
+
 目標:
-本番環境のポイント送信トランザクションデータの整合性を調査する。
+本番環境のポイント移転トランザクションデータの整合性を調査する。
 
 進め方:
 worker は本番 DB に直接接続しない。
@@ -55,7 +58,7 @@ worker は結果を解釈し、次の read-only SQL を提案する。
 - 原因分析のみ行い、補正作業は実行しない
 
 出力:
-contract JSON と rendered Codex prompt markdown。
+contract JSON と rendered prompt markdown。
 ```
 
 ## ローカル成果物
@@ -67,7 +70,7 @@ contract JSON と rendered Codex prompt markdown。
 .tools/project-prompt-kit/local/rendered/
 ```
 
-プロジェクトで kit を意図的に vendor 管理しない場合は、`.tools/` を git から除外してください。
+プロジェクトで kit を意図的に vendor として取り込まない場合は、`.tools/` を git から除外してください。
 
 ## 役割分離
 

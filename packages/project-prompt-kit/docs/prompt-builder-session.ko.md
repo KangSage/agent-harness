@@ -2,7 +2,7 @@
 
 Prompt Builder 세션은 한 에이전트 세션이 project prompt만 만들고, 실제 작업은 다른 에이전트 세션이 수행하게 할 때 사용합니다.
 
-이 패턴은 이미 진행 중인 프로젝트, 위험도가 높은 작업, 운영 조사, 긴 handoff에 유용합니다. Prompt Builder 세션은 느슨한 의도를 contract JSON과 rendered prompt로 바꿉니다. 코드 수정, 운영 시스템 접속, 실제 작업 수행은 하지 않아야 합니다.
+이 패턴은 기존 프로젝트, 위험도가 높은 작업, 운영 조사, 장기 handoff에 유용합니다. Prompt Builder 세션은 아직 정리되지 않은 의도를 contract JSON과 rendered prompt로 바꿉니다. 코드 수정, 운영 시스템 접속, 실제 작업 수행은 하지 않아야 합니다.
 
 ## 세션 시작 프롬프트
 
@@ -11,13 +11,13 @@ Prompt Builder 세션은 한 에이전트 세션이 project prompt만 만들고,
 ```text
 너는 이 프로젝트의 Prompt Builder다.
 
-.tools/project-prompt-kit를 사용해서 Codex 작업 프롬프트만 작성해라.
+.tools/project-prompt-kit를 사용해서 project prompt만 작성해라.
 직접 코드 수정, git commit, DB 접속, 운영 작업, 요청된 실제 작업 수행은 하지 마라.
 
 내가 제공하는 목표, 범위, 배경, 제약을 바탕으로:
-1. mode를 선택하거나 확인한다.
+1. mode와 target renderer를 선택하거나 확인한다.
 2. contract JSON을 작성한다.
-3. rendered Codex prompt markdown을 작성한다.
+3. rendered prompt markdown을 작성한다.
 4. 필수 정보가 부족할 때만 짧은 질문 하나를 한다.
 
 프로젝트 규칙:
@@ -33,6 +33,9 @@ Prompt Builder 세션은 한 에이전트 세션이 project prompt만 만들고,
 
 ```text
 mode: debug
+
+target renderer:
+codex, claude, generic 중 하나
 
 목표:
 운영 환경 포인트 전송 트랜잭션 데이터 정합성을 조사한다.
@@ -55,7 +58,7 @@ worker는 결과를 해석하고 다음 read-only SQL을 제안한다.
 - 원인 분석만 하고 보정은 수행하지 않는다.
 
 출력:
-contract JSON과 rendered Codex prompt markdown.
+contract JSON과 rendered prompt markdown.
 ```
 
 ## 로컬 산출물
@@ -67,7 +70,7 @@ contract JSON과 rendered Codex prompt markdown.
 .tools/project-prompt-kit/local/rendered/
 ```
 
-프로젝트가 kit를 의도적으로 vendoring하지 않는다면 `.tools/`는 git에서 제외하세요.
+프로젝트가 kit를 의도적으로 vendor로 포함하지 않는다면 `.tools/`는 git에서 제외하세요.
 
 ## 역할 분리
 
