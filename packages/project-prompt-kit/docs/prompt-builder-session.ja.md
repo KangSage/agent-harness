@@ -20,7 +20,8 @@ Prompt Builder セッションは、1つのエージェントセッションで 
 3. rendered prompt markdown を作成する
 4. workspace strategy が提供された場合は rendered prompt に反映する
 5. infrastructure boundaries が提供された場合は rendered prompt に反映する
-6. 必須情報が不足している場合だけ、短い質問を1つする
+6. communication policy が提供された場合は rendered prompt に反映する
+7. 必須情報が不足している場合だけ、短い質問を1つする
 
 プロジェクトルール:
 - AGENTS.md と下位の AGENTS.md に従う
@@ -56,6 +57,14 @@ worker は本番 DB、本番 API、cloud console、secret store、admin dashboar
 禁止 SQL: UPDATE、DELETE、INSERT、ALTER、DROP、LOCK、transaction control statement。
 worker は secret、credential、token、environment 値を要求、出力、推測しない。
 worker は返された本番結果を sensitive data として扱い、必要な最小限の根拠だけ引用する。
+
+communication policy:
+worker はユーザーへの質問、進捗報告、最終まとめをユーザーの言語で書く。
+agent-to-agent handoff、内部調整メモ、短い技術 brief は simple English を使う。
+agent-to-agent English は短く、直接的で、余計な表現を減らす。
+code、command、SQL、log、error、identifier、file path は翻訳しない。
+SQL の目的と解釈はユーザーの言語で説明し、SQL 本文はそのまま維持する。
+本番 query の結果が必要な場合、ユーザーに一度に1つずつユーザーの言語で質問する。
 
 目標:
 本番環境のポイント移転トランザクションデータの整合性を調査する。
@@ -110,6 +119,23 @@ worker は各 query の目的を先に説明してから query を提示する�
 worker は人間が返した結果を受け取ってから、次の本番 query を提案する。
 worker は secret、token、credential、environment 値を要求、公開、推測しない。
 返された本番データは sensitive data として扱い、必要な最小限の根拠だけ引用する。
+```
+
+## コミュニケーション方針 (Communication Policy)
+
+rendered prompt は一つの言語で書かれていても、worker がユーザーには別の言語で話す必要がある場合は communication policy を使います。Prompt Builder は、user-facing language と agent-to-agent coordination language を分けて明確に書きます。
+
+v0.1 では、optional contract schema field として扱います。すべての prompt で必須にはしません。prompt によっては、すでに一つの明確なコミュニケーション言語があるためです。
+
+推奨 worker 方針:
+
+```text
+ユーザーへの質問、進捗報告、最終まとめはユーザーの言語で書く。
+agent-to-agent handoff と短い技術調整メモは simple English を使う。
+agent-to-agent English は短く、直接的で、余計な表現を減らす。
+code、command、SQL、log、error、identifier、file path は翻訳しない。
+SQL の目的と解釈はユーザーの言語で説明し、SQL 本文はそのまま維持する。
+本番結果が必要な場合、user-facing question は一度に1つだけにする。
 ```
 
 ## ローカル成果物

@@ -26,6 +26,12 @@
     "forbidden_operations": ["UPDATE", "DELETE", "INSERT", "ALTER", "DROP", "LOCK"],
     "data_handling": ["Returned production data is sensitive"]
   },
+  "communication_policy": {
+    "user_facing_language": "match the user's language",
+    "agent_facing_language": "simple English",
+    "agent_facing_style": "terse and direct",
+    "preserve_verbatim": ["SQL", "logs", "errors", "file paths"]
+  },
   "success_criteria": ["Root cause is identified and fixed"],
   "risks": ["Patching symptoms without proving the failing condition"],
   "output_format": "Root cause, patch summary, and rerun evidence.",

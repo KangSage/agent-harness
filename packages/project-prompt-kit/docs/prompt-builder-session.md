@@ -20,7 +20,8 @@ Given the goal, scope, background, and constraints I provide:
 3. write the rendered prompt markdown
 4. include any workspace strategy I provide in the rendered prompt
 5. include any infrastructure boundaries I provide in the rendered prompt
-6. ask one concise question only when required information is missing
+6. include any communication policy I provide in the rendered prompt
+7. ask one concise question only when required information is missing
 
 Project rules:
 - follow AGENTS.md and any nested AGENTS.md files
@@ -56,6 +57,14 @@ Allowed SQL: read-only SELECT/WITH queries.
 Forbidden SQL: UPDATE, DELETE, INSERT, ALTER, DROP, LOCK, or transaction control statements.
 The worker must not request, reveal, or infer secrets, credentials, tokens, or environment values.
 The worker should treat returned production results as sensitive and quote only the minimum evidence needed.
+
+communication policy:
+The worker should ask questions, report progress, and summarize results in the user's language.
+Agent-to-agent handoffs, internal coordination notes, and compact technical briefs should use simple English.
+Agent-to-agent English should be terse, direct, and low-filler.
+Do not translate code, commands, SQL, logs, errors, identifiers, or file paths.
+Explain SQL purpose and interpretation in the user's language, but keep SQL text exact.
+When production query results are needed, ask one user-facing question at a time in the user's language.
 
 goal:
 Investigate production point-transfer transaction consistency.
@@ -110,6 +119,23 @@ The worker must state the purpose of each query before presenting it.
 The worker must wait for human-returned results before proposing the next production query.
 The worker must not request, expose, or infer secrets, tokens, credentials, or environment values.
 Returned production data is sensitive; quote only the minimum evidence needed.
+```
+
+## Communication Policy
+
+Use a communication policy when the rendered prompt may be written in one language but the worker should speak to the user in another. The Prompt Builder should make user-facing language separate from agent-to-agent coordination language.
+
+For v0.1, this is an optional contract schema field. Do not make it required for every prompt because some prompts already have a single obvious communication language.
+
+Recommended worker policy:
+
+```text
+User-facing questions, progress updates, and final summaries must use the user's language.
+Agent-to-agent handoffs and compact technical coordination notes should use simple English.
+Agent-to-agent English should be terse, direct, and low-filler.
+Do not translate code, commands, SQL, logs, errors, identifiers, or file paths.
+Explain SQL purpose and interpretation in the user's language, but keep SQL text exact.
+When production results are needed, ask one user-facing question at a time.
 ```
 
 ## Local Artifacts

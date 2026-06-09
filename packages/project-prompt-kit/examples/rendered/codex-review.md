@@ -29,6 +29,9 @@ Not specified.
 Infrastructure boundaries:
 Not specified.
 
+Communication policy:
+Not specified.
+
 Success criteria:
 - Findings are grounded in file evidence
 - Verdict is one of merge possible, needs changes, or rewrite recommended

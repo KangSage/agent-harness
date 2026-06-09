@@ -425,6 +425,7 @@ def validate_templates(errors: list[str]) -> None:
             "{{constraints}}",
             "{{workspace_strategy}}",
             "{{infrastructure_boundaries}}",
+            "{{communication_policy}}",
             "{{success_criteria}}",
             "{{evidence_required}}",
             "{{output_format}}",
@@ -520,6 +521,7 @@ def validate_rendered_examples(errors: list[str]) -> None:
             f"Mode: `{mode}`",
             "Workspace strategy:",
             "Infrastructure boundaries:",
+            "Communication policy:",
             PROMPT_INJECTION_BOUNDARY,
             "Preview before sharing.",
             "No network calls are required by default.",
@@ -576,6 +578,18 @@ def validate_rendered_examples(errors: list[str]) -> None:
             if "Infrastructure boundaries:\nNot specified." not in text:
                 errors.append(f"Rendered example {rel(example)} missing empty infrastructure boundaries marker")
 
+        communication_policy = contract.get("communication_policy")
+        if isinstance(communication_policy, dict):
+            for field in ["user_facing_language", "agent_facing_language", "agent_facing_style"]:
+                check_rendered_value(f"communication_policy.{field}", communication_policy.get(field))
+            preserve_verbatim = communication_policy.get("preserve_verbatim")
+            if isinstance(preserve_verbatim, list):
+                for item in preserve_verbatim:
+                    check_rendered_value("communication_policy.preserve_verbatim[]", item)
+        else:
+            if "Communication policy:\nNot specified." not in text:
+                errors.append(f"Rendered example {rel(example)} missing empty communication policy marker")
+
         if "{{" in text or "}}" in text:
             errors.append(f"Rendered example {rel(example)} contains unresolved template placeholder")
 
@@ -630,6 +644,7 @@ def validate_fixture_files(schemas: dict[str, dict[str, Any]], errors: list[str]
         "extra-safety-field.contract.json",
         "extra-property.contract.json",
         "invalid-command.contract.json",
+        "invalid-communication-policy.contract.json",
         "invalid-workspace-strategy.contract.json",
         "invalid-mode.contract.json",
         "invalid-safety-object.contract.json",

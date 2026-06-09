@@ -20,7 +20,8 @@ Prompt Builder 세션은 한 에이전트 세션이 project prompt만 만들고,
 3. rendered prompt markdown을 작성한다.
 4. 내가 workspace strategy를 제공하면 rendered prompt에 반영한다.
 5. 내가 infrastructure boundaries를 제공하면 rendered prompt에 반영한다.
-6. 필수 정보가 부족할 때만 짧은 질문 하나를 한다.
+6. 내가 communication policy를 제공하면 rendered prompt에 반영한다.
+7. 필수 정보가 부족할 때만 짧은 질문 하나를 한다.
 
 프로젝트 규칙:
 - AGENTS.md와 하위 AGENTS.md를 지켜라.
@@ -56,6 +57,14 @@ worker는 운영 DB, 운영 API, cloud console, secret store, admin dashboard에
 금지 SQL: UPDATE, DELETE, INSERT, ALTER, DROP, LOCK, transaction control statement.
 worker는 secret, credential, token, environment 값을 요청하거나 출력하거나 추론하지 않는다.
 worker는 전달받은 운영 결과를 민감한 정보로 취급하고 필요한 최소 근거만 인용한다.
+
+communication policy:
+worker는 사용자에게 질문하거나 진행 상황을 보고하거나 최종 요약을 작성할 때 사용자의 언어를 사용한다.
+agent-to-agent handoff, 내부 조율 메모, 압축된 기술 brief는 simple English를 사용한다.
+agent-to-agent English는 짧고 직접적이며 불필요한 표현을 줄인다.
+code, command, SQL, log, error, identifier, file path는 번역하지 않는다.
+SQL의 목적과 해석은 사용자의 언어로 설명하되 SQL 본문은 그대로 유지한다.
+운영 query 결과가 필요하면 사용자에게 한 번에 하나씩 사용자의 언어로 질문한다.
 
 목표:
 운영 환경 포인트 전송 트랜잭션 데이터 정합성을 조사한다.
@@ -110,6 +119,23 @@ worker는 각 query의 목적을 먼저 설명한 뒤 query를 제시한다.
 worker는 사람이 반환한 결과를 받은 뒤 다음 운영 query를 제안한다.
 worker는 secret, token, credential, environment 값을 요청하거나 노출하거나 추론하지 않는다.
 반환된 운영 데이터는 민감 정보로 취급하고 필요한 최소 근거만 인용한다.
+```
+
+## 커뮤니케이션 정책 (Communication Policy)
+
+rendered prompt는 한 언어로 작성되지만 worker가 사용자에게는 다른 언어로 말해야 할 수 있다면 communication policy를 사용합니다. Prompt Builder는 사용자-facing 언어와 agent-to-agent 조율 언어를 분리해서 명확히 적어야 합니다.
+
+v0.1에서는 이 내용을 optional contract schema field로 둡니다. 모든 prompt에 필수로 만들지는 않습니다. 어떤 prompt는 이미 하나의 명확한 커뮤니케이션 언어를 갖고 있기 때문입니다.
+
+권장 worker 정책:
+
+```text
+사용자에게 하는 질문, 진행 상황 보고, 최종 요약은 사용자의 언어로 작성한다.
+agent-to-agent handoff와 압축된 기술 조율 메모는 simple English를 사용한다.
+agent-to-agent English는 짧고 직접적이며 불필요한 표현을 줄인다.
+code, command, SQL, log, error, identifier, file path는 번역하지 않는다.
+SQL의 목적과 해석은 사용자의 언어로 설명하되 SQL 본문은 그대로 유지한다.
+운영 결과가 필요하면 사용자-facing 질문을 한 번에 하나씩 한다.
 ```
 
 ## 로컬 산출물

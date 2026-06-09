@@ -54,6 +54,20 @@
       "quote only the minimum evidence needed"
     ]
   },
+  "communication_policy": {
+    "user_facing_language": "match the user's language",
+    "agent_facing_language": "simple English",
+    "agent_facing_style": "terse, direct, low-filler technical coordination",
+    "preserve_verbatim": [
+      "code",
+      "commands",
+      "SQL",
+      "logs",
+      "errors",
+      "identifiers",
+      "file paths"
+    ]
+  },
   "success_criteria": [
     "Validation fails on missing required scaffold files",
     "Validation passes on the checked-in scaffold"
