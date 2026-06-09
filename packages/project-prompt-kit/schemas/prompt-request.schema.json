@@ -67,6 +67,105 @@
       },
       "minItems": 1
     },
+    "workspace_strategy": {
+      "type": "object",
+      "required": [
+        "current_checkout",
+        "write_scope"
+      ],
+      "properties": {
+        "current_checkout": {
+          "type": "string",
+          "enum": ["read_only", "writable"]
+        },
+        "worktree": {
+          "type": "object",
+          "required": [
+            "required"
+          ],
+          "properties": {
+            "required": {
+              "type": "boolean"
+            },
+            "base_ref": {
+              "type": "string",
+              "minLength": 1
+            },
+            "branch_prefix": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "additionalProperties": false
+        },
+        "write_scope": {
+          "type": "string",
+          "minLength": 1
+        },
+        "forbidden_git_actions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "infrastructure_boundaries": {
+      "type": "object",
+      "required": [
+        "forbidden_direct_access",
+        "human_mediated_actions",
+        "allowed_operations",
+        "forbidden_operations",
+        "data_handling"
+      ],
+      "properties": {
+        "forbidden_direct_access": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1
+        },
+        "human_mediated_actions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1
+        },
+        "allowed_operations": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1
+        },
+        "forbidden_operations": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1
+        },
+        "data_handling": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false
+    },
     "desired_output": {
       "type": "string",
       "minLength": 1

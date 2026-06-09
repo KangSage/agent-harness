@@ -17,6 +17,43 @@
     "Keep changes reviewable",
     "Preserve public-safe examples"
   ],
+  "workspace_strategy": {
+    "current_checkout": "read_only",
+    "worktree": {
+      "required": true,
+      "base_ref": "origin/main",
+      "branch_prefix": "codex/"
+    },
+    "write_scope": "Edit, test, commit, and push only inside the task-specific worktree.",
+    "forbidden_git_actions": [
+      "Do not reset, clean, checkout, or revert unrelated files in an existing checkout"
+    ]
+  },
+  "infrastructure_boundaries": {
+    "forbidden_direct_access": [
+      "production databases",
+      "production APIs",
+      "cloud consoles",
+      "secret stores",
+      "admin dashboards"
+    ],
+    "human_mediated_actions": [
+      "Ask the human operator to run external read-only diagnostics when required"
+    ],
+    "allowed_operations": [
+      "local validation commands",
+      "read-only repository inspection"
+    ],
+    "forbidden_operations": [
+      "production writes",
+      "secret retrieval",
+      "credential-bearing URL output"
+    ],
+    "data_handling": [
+      "Treat returned production data as sensitive",
+      "Quote only the minimum evidence needed"
+    ]
+  },
   "success_criteria": [
     "Validation fails on missing required scaffold files",
     "Validation passes on the checked-in scaffold"

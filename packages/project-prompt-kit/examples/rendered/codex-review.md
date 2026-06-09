@@ -23,6 +23,12 @@ Constraints:
 - Do not merge the PR
 - Avoid local-only framework coupling
 
+Workspace strategy:
+Not specified.
+
+Infrastructure boundaries:
+Not specified.
+
 Success criteria:
 - Findings are grounded in file evidence
 - Verdict is one of merge possible, needs changes, or rewrite recommended

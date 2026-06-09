@@ -22,6 +22,12 @@ Constraints:
 - Ask only when missing information changes scope or risk
 - Keep private paths and secrets out of shareable output
 
+Workspace strategy:
+Not specified.
+
+Infrastructure boundaries:
+Not specified.
+
 Success criteria:
 - Objective, scope, non-goals, and verification are explicit
 - The next agent can act without guessing
