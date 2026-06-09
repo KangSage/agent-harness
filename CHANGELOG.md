@@ -3,6 +3,8 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+
+## [0.1.5] - 2026-06-09
 ### Added
 - Workspace strategy guidance for Prompt Builder sessions that need isolated worker worktrees from remote base refs
 - Infrastructure boundary guidance for Prompt Builder sessions that must separate worker reasoning from production access
