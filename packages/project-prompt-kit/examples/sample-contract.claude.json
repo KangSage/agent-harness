@@ -20,7 +20,7 @@
   "workspace_strategy": {
     "current_checkout": "read_only",
     "worktree": {
-      "required": true,
+      "enabled": true,
       "base_ref": "origin/main",
       "branch_prefix": "codex/"
     },
@@ -51,7 +51,7 @@
     ],
     "data_handling": [
       "Treat returned production data as sensitive",
-      "Quote only the minimum evidence needed"
+      "quote only the minimum evidence needed"
     ]
   },
   "success_criteria": [

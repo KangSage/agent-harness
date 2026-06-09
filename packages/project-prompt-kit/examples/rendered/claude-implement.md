@@ -25,7 +25,7 @@ Constraints:
 
 Workspace strategy:
 - Current checkout: read_only
-- Worktree required: true
+- Worktree enabled: true
 - Base ref: origin/main
 - Branch prefix: codex/
 - Write scope: Edit, test, commit, and push only inside the task-specific worktree.

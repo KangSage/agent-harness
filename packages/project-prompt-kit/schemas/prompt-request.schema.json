@@ -81,10 +81,10 @@
         "worktree": {
           "type": "object",
           "required": [
-            "required"
+            "enabled"
           ],
           "properties": {
-            "required": {
+            "enabled": {
               "type": "boolean"
             },
             "base_ref": {

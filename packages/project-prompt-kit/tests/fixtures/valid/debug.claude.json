@@ -12,7 +12,7 @@
   "workspace_strategy": {
     "current_checkout": "read_only",
     "worktree": {
-      "required": true,
+      "enabled": true,
       "base_ref": "origin/develop",
       "branch_prefix": "codex/"
     },

@@ -42,9 +42,9 @@ codex、claude、generic のいずれか
 作業スペース方針:
 現在の checkout は他のセッションと共有されている可能性があり、無関係なローカル変更を含む可能性がある。
 worker は現在の checkout を read-only として扱う。
-編集前に remote を fetch し、origin/develop を基準に新しい worktree を作成する。
+編集前に remote を fetch し、指定された remote base ref を基準に新しい worktree を作成する。
 codex/<task-slug> のようなタスク専用 branch を使う。
-例: git worktree add ../<repo>-<task-slug> -b codex/<task-slug> origin/develop
+例: git worktree add ../<repo>-<task-slug> -b codex/<task-slug> origin/<base-branch>
 worker は新しい worktree の中だけで編集、テスト、commit、push を行う。
 worker は現在の checkout で reset、clean、checkout、revert を実行しない。
 
@@ -76,7 +76,7 @@ worker は結果を解釈し、次の read-only SQL を提案する。
 contract JSON と rendered prompt markdown。
 ```
 
-## Workspace Strategy
+## 作業スペース方針 (Workspace Strategy)
 
 現在の checkout が共有中、dirty 状態、または他のエージェントセッションで使用中の場合は、workspace strategy を使います。Prompt Builder はこの方針を rendered worker prompt に入れ、worker がどこで write 作業をしてよいかを明確にします。
 
@@ -94,7 +94,7 @@ worktree 作成前に git fetch origin を実行する。
 既存 checkout の無関係なファイルを reset、clean、checkout、revert しない。
 ```
 
-## Infrastructure Boundaries
+## インフラ境界 (Infrastructure Boundaries)
 
 作業が DB、本番 API、cloud console、secret store、admin dashboard などの外部システムに関係する場合は、infrastructure boundaries を使います。Prompt Builder は、アクセスルールを一般的な制約リストに埋め込まず、rendered worker prompt の中で独立した境界として明確に書きます。
 

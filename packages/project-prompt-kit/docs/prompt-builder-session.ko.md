@@ -42,9 +42,9 @@ codex, claude, generic 중 하나
 workspace strategy:
 현재 체크아웃은 다른 세션과 공유 중일 수 있고, 관련 없는 로컬 변경이 있을 수 있다.
 worker는 현재 체크아웃을 read-only로 취급한다.
-수정 작업 전에 remote를 fetch하고 origin/develop 기준의 새 worktree를 만든다.
+수정 작업 전에 remote를 fetch하고 요청된 remote base ref 기준의 새 worktree를 만든다.
 codex/<task-slug> 같은 작업별 branch를 사용한다.
-예: git worktree add ../<repo>-<task-slug> -b codex/<task-slug> origin/develop
+예: git worktree add ../<repo>-<task-slug> -b codex/<task-slug> origin/<base-branch>
 worker는 새 worktree 안에서만 수정, 테스트, 커밋, 푸시한다.
 worker는 현재 체크아웃에서 reset, clean, checkout, revert를 수행하지 않는다.
 
@@ -76,7 +76,7 @@ worker는 결과를 해석하고 다음 read-only SQL을 제안한다.
 contract JSON과 rendered prompt markdown.
 ```
 
-## Workspace Strategy
+## 작업공간 전략 (Workspace Strategy)
 
 현재 체크아웃이 공유 중이거나, dirty 상태이거나, 다른 에이전트 세션이 이미 사용 중이라면 workspace strategy를 사용합니다. Prompt Builder는 이 정책을 rendered worker prompt에 넣어 worker가 어디에서 write 작업을 해도 되는지 명확히 해야 합니다.
 
@@ -94,7 +94,7 @@ worktree 생성 전에 git fetch origin을 실행한다.
 기존 체크아웃의 관련 없는 파일을 reset, clean, checkout, revert하지 않는다.
 ```
 
-## Infrastructure Boundaries
+## 인프라 경계 (Infrastructure Boundaries)
 
 작업이 DB, 운영 API, cloud console, secret store, admin dashboard 같은 외부 시스템을 건드릴 수 있다면 infrastructure boundaries를 사용합니다. Prompt Builder는 접근 규칙을 일반 제약 목록에 묻어두지 말고 rendered worker prompt에 별도 경계로 명확히 적어야 합니다.
 

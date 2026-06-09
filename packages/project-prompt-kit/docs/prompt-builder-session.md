@@ -42,9 +42,9 @@ codex, claude, or generic
 workspace strategy:
 The current checkout may be shared with other sessions and may contain unrelated local changes.
 The worker must treat the current checkout as read-only.
-Before editing, the worker should fetch the remote and create a fresh worktree from origin/develop.
+Before editing, the worker should fetch the remote and create a fresh worktree from the requested remote base ref.
 Use a task-specific branch such as codex/<task-slug>.
-Example: git worktree add ../<repo>-<task-slug> -b codex/<task-slug> origin/develop
+Example: git worktree add ../<repo>-<task-slug> -b codex/<task-slug> origin/<base-branch>
 The worker must edit, test, commit, and push only inside the new worktree.
 The worker must not reset, clean, checkout, or revert files in the current checkout.
 

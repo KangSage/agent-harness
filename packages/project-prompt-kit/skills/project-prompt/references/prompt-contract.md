@@ -13,7 +13,7 @@ constraints:
 workspace_strategy:
   current_checkout:
   worktree:
-    required:
+    enabled:
     base_ref:
     branch_prefix:
   write_scope:

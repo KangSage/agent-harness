@@ -532,6 +532,50 @@ def validate_rendered_examples(errors: list[str]) -> None:
                 errors.append(f"Rendered example {rel(example)} source contract missing string field: {field}")
             elif value not in text:
                 errors.append(f"Rendered example {rel(example)} does not include contract field: {field}")
+
+        def check_rendered_value(label: str, value: Any) -> None:
+            if isinstance(value, bool):
+                rendered = str(value).lower()
+            elif isinstance(value, str):
+                rendered = value
+            else:
+                return
+            if rendered and rendered not in text:
+                errors.append(f"Rendered example {rel(example)} does not include {label}: {rendered}")
+
+        workspace_strategy = contract.get("workspace_strategy")
+        if isinstance(workspace_strategy, dict):
+            check_rendered_value("workspace_strategy.current_checkout", workspace_strategy.get("current_checkout"))
+            check_rendered_value("workspace_strategy.write_scope", workspace_strategy.get("write_scope"))
+            worktree = workspace_strategy.get("worktree")
+            if isinstance(worktree, dict):
+                for field in ["enabled", "base_ref", "branch_prefix"]:
+                    check_rendered_value(f"workspace_strategy.worktree.{field}", worktree.get(field))
+            forbidden_git_actions = workspace_strategy.get("forbidden_git_actions")
+            if isinstance(forbidden_git_actions, list):
+                for item in forbidden_git_actions:
+                    check_rendered_value("workspace_strategy.forbidden_git_actions[]", item)
+        else:
+            if "Workspace strategy:\nNot specified." not in text:
+                errors.append(f"Rendered example {rel(example)} missing empty workspace strategy marker")
+
+        infrastructure_boundaries = contract.get("infrastructure_boundaries")
+        if isinstance(infrastructure_boundaries, dict):
+            for field in [
+                "forbidden_direct_access",
+                "human_mediated_actions",
+                "allowed_operations",
+                "forbidden_operations",
+                "data_handling",
+            ]:
+                value = infrastructure_boundaries.get(field)
+                if isinstance(value, list):
+                    for item in value:
+                        check_rendered_value(f"infrastructure_boundaries.{field}[]", item)
+        else:
+            if "Infrastructure boundaries:\nNot specified." not in text:
+                errors.append(f"Rendered example {rel(example)} missing empty infrastructure boundaries marker")
+
         if "{{" in text or "}}" in text:
             errors.append(f"Rendered example {rel(example)} contains unresolved template placeholder")
 
