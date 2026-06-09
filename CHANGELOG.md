@@ -3,6 +3,8 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+
+## [0.1.6] - 2026-06-09
 ### Added
 - Optional `communication_policy` prompt contract and request field for user-language and agent-to-agent style boundaries
 
