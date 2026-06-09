@@ -16,6 +16,12 @@ Inputs:
 Constraints:
 `{{constraints}}`
 
+Workspace strategy:
+`{{workspace_strategy}}`
+
+Infrastructure boundaries:
+`{{infrastructure_boundaries}}`
+
 Success criteria:
 `{{success_criteria}}`
 

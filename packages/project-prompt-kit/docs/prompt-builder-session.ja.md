@@ -18,7 +18,9 @@ Prompt Builder セッションは、1つのエージェントセッションで 
 1. mode と target renderer を選ぶ、または確認する
 2. contract JSON を作成する
 3. rendered prompt markdown を作成する
-4. 必須情報が不足している場合だけ、短い質問を1つする
+4. workspace strategy が提供された場合は rendered prompt に反映する
+5. infrastructure boundaries が提供された場合は rendered prompt に反映する
+6. 必須情報が不足している場合だけ、短い質問を1つする
 
 プロジェクトルール:
 - AGENTS.md と下位の AGENTS.md に従う
@@ -37,13 +39,28 @@ mode: debug
 target renderer:
 codex、claude、generic のいずれか
 
+作業スペース方針:
+現在の checkout は他のセッションと共有されている可能性があり、無関係なローカル変更を含む可能性がある。
+worker は現在の checkout を read-only として扱う。
+編集前に remote を fetch し、指定された remote base ref を基準に新しい worktree を作成する。
+codex/<task-slug> のようなタスク専用 branch を使う。
+例: git worktree add ../<repo>-<task-slug> -b codex/<task-slug> origin/<base-branch>
+worker は新しい worktree の中だけで編集、テスト、commit、push を行う。
+worker は現在の checkout で reset、clean、checkout、revert を実行しない。
+
+インフラ境界:
+worker は本番 DB、本番 API、cloud console、secret store、admin dashboard に直接接続しない。
+本番データが必要な場合、worker は read-only SQL を段階的に作成する。
+私が本番 DB で各 SQL を実行し、その結果を返す。
+許可 SQL: read-only の SELECT/WITH query。
+禁止 SQL: UPDATE、DELETE、INSERT、ALTER、DROP、LOCK、transaction control statement。
+worker は secret、credential、token、environment 値を要求、出力、推測しない。
+worker は返された本番結果を sensitive data として扱い、必要な最小限の根拠だけ引用する。
+
 目標:
 本番環境のポイント移転トランザクションデータの整合性を調査する。
 
 進め方:
-worker は本番 DB に直接接続しない。
-worker は read-only SQL を段階的に作成する。
-私が本番 DB で各 SQL を実行し、その結果を返す。
 worker は結果を解釈し、次の read-only SQL を提案する。
 
 範囲:
@@ -53,12 +70,46 @@ worker は結果を解釈し、次の read-only SQL を提案する。
 - AGENTS.md に従う
 - .promptkitignore を守る
 - secret、env 値、local absolute path を出力しない
-- read-only の SELECT/WITH SQL のみ許可
-- UPDATE、DELETE、INSERT、ALTER、DROP、LOCK は禁止
 - 原因分析のみ行い、補正作業は実行しない
 
 出力:
 contract JSON と rendered prompt markdown。
+```
+
+## 作業スペース方針 (Workspace Strategy)
+
+現在の checkout が共有中、dirty 状態、または他のエージェントセッションで使用中の場合は、workspace strategy を使います。Prompt Builder はこの方針を rendered worker prompt に入れ、worker がどこで write 作業をしてよいかを明確にします。
+
+v0.1 では、optional contract schema field として扱います。すべての prompt で必須にはしません。read-only 作業やドキュメント作業では、worktree 分離が不要な場合があるためです。
+
+推奨 worker 方針:
+
+```text
+現在の checkout は read-only context として扱う。
+worktree 作成前に git fetch origin を実行する。
+指定された remote base ref からタスク専用 worktree を作成する。
+指定された branch prefix でタスク専用 branch を作成する。
+新しい worktree 内で AGENTS.md を再確認してから編集する。
+編集、テスト、commit、push は新しい worktree 内だけで行う。
+既存 checkout の無関係なファイルを reset、clean、checkout、revert しない。
+```
+
+## インフラ境界 (Infrastructure Boundaries)
+
+作業が DB、本番 API、cloud console、secret store、admin dashboard などの外部システムに関係する場合は、infrastructure boundaries を使います。Prompt Builder は、アクセスルールを一般的な制約リストに埋め込まず、rendered worker prompt の中で独立した境界として明確に書きます。
+
+v0.1 では、optional contract schema field として扱います。すべての prompt で必須にはしません。local-only prompt では外部インフラに触れない場合があるためです。
+
+推奨 worker 方針:
+
+```text
+worker は本番インフラに直接接続しない。
+worker は人間の運用者に、承認済みの read-only command または query の実行を依頼できる。
+本番 SQL は、prompt が明示的に追加許可しない限り read-only SELECT/WITH のみ使う。
+worker は各 query の目的を先に説明してから query を提示する。
+worker は人間が返した結果を受け取ってから、次の本番 query を提案する。
+worker は secret、token、credential、environment 値を要求、公開、推測しない。
+返された本番データは sensitive data として扱い、必要な最小限の根拠だけ引用する。
 ```
 
 ## ローカル成果物

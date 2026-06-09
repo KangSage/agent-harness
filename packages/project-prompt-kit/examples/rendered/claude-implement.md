@@ -23,6 +23,21 @@ Constraints:
 - Keep changes reviewable
 - Preserve public-safe examples
 
+Workspace strategy:
+- Current checkout: read_only
+- Worktree enabled: true
+- Base ref: origin/main
+- Branch prefix: codex/
+- Write scope: Edit, test, commit, and push only inside the task-specific worktree.
+- Forbidden git actions: Do not reset, clean, checkout, or revert unrelated files in an existing checkout
+
+Infrastructure boundaries:
+- Forbidden direct access: production databases; production APIs; cloud consoles; secret stores; admin dashboards
+- Human-mediated actions: Ask the human operator to run external read-only diagnostics when required
+- Allowed operations: local validation commands; read-only repository inspection
+- Forbidden operations: production writes; secret retrieval; credential-bearing URL output
+- Data handling: Treat returned production data as sensitive; quote only the minimum evidence needed
+
 Success criteria:
 - Validation fails on missing required scaffold files
 - Validation passes on the checked-in scaffold
