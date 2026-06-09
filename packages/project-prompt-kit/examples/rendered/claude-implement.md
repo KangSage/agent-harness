@@ -38,6 +38,12 @@ Infrastructure boundaries:
 - Forbidden operations: production writes; secret retrieval; credential-bearing URL output
 - Data handling: Treat returned production data as sensitive; quote only the minimum evidence needed
 
+Communication policy:
+- User-facing language: match the user's language
+- Agent-facing language: simple English
+- Agent-facing style: terse, direct, low-filler technical coordination
+- Preserve verbatim: code; commands; SQL; logs; errors; identifiers; file paths
+
 Success criteria:
 - Validation fails on missing required scaffold files
 - Validation passes on the checked-in scaffold

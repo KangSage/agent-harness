@@ -24,6 +24,11 @@ infrastructure_boundaries:
   allowed_operations:
   forbidden_operations:
   data_handling:
+communication_policy:
+  user_facing_language:
+  agent_facing_language:
+  agent_facing_style:
+  preserve_verbatim:
 success_criteria:
 risks:
 output_format:
@@ -31,7 +36,7 @@ evidence_required:
 stop_condition:
 ```
 
-`workspace_strategy` and `infrastructure_boundaries` are optional. Include them when the worker needs explicit write-location rules or external-system access rules.
+`workspace_strategy`, `infrastructure_boundaries`, and `communication_policy` are optional. Include them when the worker needs explicit write-location rules, external-system access rules, or language/style boundaries.
 
 Safety metadata travels with the envelope:
 

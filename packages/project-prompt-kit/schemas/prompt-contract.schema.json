@@ -180,6 +180,38 @@
       },
       "additionalProperties": false
     },
+    "communication_policy": {
+      "type": "object",
+      "required": [
+        "user_facing_language",
+        "agent_facing_language",
+        "agent_facing_style",
+        "preserve_verbatim"
+      ],
+      "properties": {
+        "user_facing_language": {
+          "type": "string",
+          "minLength": 1
+        },
+        "agent_facing_language": {
+          "type": "string",
+          "minLength": 1
+        },
+        "agent_facing_style": {
+          "type": "string",
+          "minLength": 1
+        },
+        "preserve_verbatim": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false
+    },
     "success_criteria": {
       "type": "array",
       "items": {

@@ -22,6 +22,9 @@ Workspace strategy:
 Infrastructure boundaries:
 `{{infrastructure_boundaries}}`
 
+Communication policy:
+`{{communication_policy}}`
+
 Success criteria:
 `{{success_criteria}}`
 

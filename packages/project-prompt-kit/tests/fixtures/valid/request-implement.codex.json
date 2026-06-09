@@ -7,6 +7,12 @@
   "request": "Create a structured implementation prompt for adding fixture validation.",
   "source_of_truth": ["design note", "current package scaffold"],
   "constraints": ["No CLI", "No renderer engine", "No network calls"],
+  "communication_policy": {
+    "user_facing_language": "match the user's language",
+    "agent_facing_language": "simple English",
+    "agent_facing_style": "terse and direct",
+    "preserve_verbatim": ["code", "commands", "errors", "file paths"]
+  },
   "desired_output": "A normalized prompt contract or a blocking gap list.",
   "safety": {
     "telemetry": "off",
