@@ -13,6 +13,22 @@
     "agent_facing_style": "terse and direct",
     "preserve_verbatim": ["code", "commands", "errors", "file paths"]
   },
+  "review_panel": {
+    "preset": "implementation_review",
+    "selection_policy": "Choose reviewers needed to harden an implementation prompt.",
+    "reviewers": [
+      {
+        "role": "CTO Reviewer",
+        "perspective": "decision quality and complexity control",
+        "output": "implementation readiness risks"
+      },
+      {
+        "role": "QA Engineer",
+        "perspective": "testability and acceptance criteria",
+        "output": "verification gaps"
+      }
+    ]
+  },
   "desired_output": "A normalized prompt contract or a blocking gap list.",
   "safety": {
     "telemetry": "off",

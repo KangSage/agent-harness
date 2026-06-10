@@ -32,6 +32,22 @@
     "agent_facing_style": "terse and direct",
     "preserve_verbatim": ["SQL", "logs", "errors", "file paths"]
   },
+  "review_panel": {
+    "preset": "production_incident",
+    "selection_policy": "Choose reviewers needed for production investigation readiness.",
+    "reviewers": [
+      {
+        "role": "CTO Reviewer",
+        "perspective": "technical decision quality and complexity control",
+        "output": "risks and readiness gaps"
+      },
+      {
+        "role": "Operations / CS Lead",
+        "perspective": "operator and customer support clarity",
+        "output": "support gaps and customer-facing risk"
+      }
+    ]
+  },
   "success_criteria": ["Root cause is identified and fixed"],
   "risks": ["Patching symptoms without proving the failing condition"],
   "output_format": "Root cause, patch summary, and rerun evidence.",

@@ -198,6 +198,57 @@
       },
       "additionalProperties": false
     },
+    "review_panel": {
+      "type": "object",
+      "required": [
+        "selection_policy",
+        "reviewers"
+      ],
+      "properties": {
+        "preset": {
+          "type": "string",
+          "enum": [
+            "implementation_review",
+            "production_incident",
+            "policy_or_customer_notice",
+            "new_feature_planning",
+            "docs_or_handoff"
+          ]
+        },
+        "selection_policy": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reviewers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "role",
+              "perspective",
+              "output"
+            ],
+            "properties": {
+              "role": {
+                "type": "string",
+                "minLength": 1
+              },
+              "perspective": {
+                "type": "string",
+                "minLength": 1
+              },
+              "output": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "additionalProperties": false
+          },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false
+    },
     "desired_output": {
       "type": "string",
       "minLength": 1

@@ -21,7 +21,8 @@ Prompt Builder セッションは、1つのエージェントセッションで 
 4. workspace strategy が提供された場合は rendered prompt に反映する
 5. infrastructure boundaries が提供された場合は rendered prompt に反映する
 6. communication policy が提供された場合は rendered prompt に反映する
-7. 必須情報が不足している場合だけ、短い質問を1つする
+7. role-specific review が worker prompt の品質を上げる場合は review panel を選ぶ
+8. 必須情報が不足している場合だけ、短い質問を1つする
 
 プロジェクトルール:
 - AGENTS.md と下位の AGENTS.md に従う
@@ -65,6 +66,15 @@ agent-to-agent English は短く、直接的で、余計な表現を減らす。
 code、command、SQL、log、error、identifier、file path は翻訳しない。
 SQL の目的と解釈はユーザーの言語で説明し、SQL 本文はそのまま維持する。
 本番 query の結果が必要な場合、ユーザーに一度に1つずつユーザーの言語で質問する。
+
+review panel:
+この作業に必要な役割だけを選ぶ。
+実装作業では CTO Reviewer、Software Architect、QA Engineer、Security / Privacy Reviewer を含める。
+本番障害や本番調査では CTO Reviewer、Software Architect、QA Engineer、Operations / CS Lead、Security / Privacy Reviewer を含める。
+policy、terms、customer notice では Legal / Compliance Advisor、Operations / CS Lead、Product / Information Architecture Reviewer、Growth / Marketing Reviewer を含める。
+新機能企画では CTO Reviewer、Product / Information Architecture Reviewer、UX / Product Designer、Growth / Marketing Reviewer、QA Engineer を含める。
+docs や handoff では Product / Information Architecture Reviewer、Operations / CS Lead、QA Engineer、CTO Reviewer を含める。
+Legal / Compliance Advisor は確定的な法律助言ではなく、risk identification と lawyer-review flags に限定する。
 
 目標:
 本番環境のポイント移転トランザクションデータの整合性を調査する。
@@ -136,6 +146,45 @@ agent-to-agent English は短く、直接的で、余計な表現を減らす。
 code、command、SQL、log、error、identifier、file path は翻訳しない。
 SQL の目的と解釈はユーザーの言語で説明し、SQL 本文はそのまま維持する。
 本番結果が必要な場合、user-facing question は一度に1つだけにする。
+```
+
+## レビューパネル (Review Panel)
+
+実装、リリース、policy 公開、customer-facing communication の前に、役割ごとの観点で確認したい場合は review panel を使います。Prompt Builder はすべての reviewer を常に有効にせず、作業に合う役割だけを選びます。
+
+v0.1 では、optional contract schema field として扱います。役割は host-specific subagent name ではなく portable text として維持します。
+
+推奨役割:
+
+- CTO Reviewer: product/technical decision の一貫性、実装準備度、複雑さの抑制。
+- Software Architect: domain boundary、data flow、state transition、system responsibility split、設計入力の不足。
+- QA Engineer: edge case、acceptance criteria、testability、本番前検証。
+- Security / Privacy Reviewer: auth、permission、personal data、log、masking、secret、abuse risk。
+- Legal / Compliance Advisor: terms、notice、liability、operational risk、lawyer-review flags。確定的な法律助言はしない。
+- Operations / CS Lead: customer support、incident handling、運用者視点の明確さ、policy explanation の一貫性。
+- Product / Information Architecture Reviewer: topic structure、decision、scope、next action、document scanability。
+- UX / Product Designer: user flow、copy、accessibility、error prevention、UI decision quality。
+- Growth / Marketing Reviewer: target user、positioning、conversion、launch message、pricing/package risk。
+- Data / Analytics Reviewer: event design、metric、funnel、experiment readiness。
+- Finance / Unit Economics Reviewer: cost、margin、pricing、refund、compensation risk。
+
+推奨 preset:
+
+```text
+implementation_review:
+CTO Reviewer, Software Architect, QA Engineer, Security / Privacy Reviewer
+
+production_incident:
+CTO Reviewer, Software Architect, QA Engineer, Operations / CS Lead, Security / Privacy Reviewer
+
+policy_or_customer_notice:
+Legal / Compliance Advisor, Operations / CS Lead, Product / Information Architecture Reviewer, Growth / Marketing Reviewer
+
+new_feature_planning:
+CTO Reviewer, Product / Information Architecture Reviewer, UX / Product Designer, Growth / Marketing Reviewer, QA Engineer
+
+docs_or_handoff:
+Product / Information Architecture Reviewer, Operations / CS Lead, QA Engineer, CTO Reviewer
 ```
 
 ## ローカル成果物

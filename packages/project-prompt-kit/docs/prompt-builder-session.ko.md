@@ -21,7 +21,8 @@ Prompt Builder 세션은 한 에이전트 세션이 project prompt만 만들고,
 4. 내가 workspace strategy를 제공하면 rendered prompt에 반영한다.
 5. 내가 infrastructure boundaries를 제공하면 rendered prompt에 반영한다.
 6. 내가 communication policy를 제공하면 rendered prompt에 반영한다.
-7. 필수 정보가 부족할 때만 짧은 질문 하나를 한다.
+7. 역할별 검토가 worker prompt 품질을 높인다면 review panel을 고른다.
+8. 필수 정보가 부족할 때만 짧은 질문 하나를 한다.
 
 프로젝트 규칙:
 - AGENTS.md와 하위 AGENTS.md를 지켜라.
@@ -65,6 +66,15 @@ agent-to-agent English는 짧고 직접적이며 불필요한 표현을 줄인�
 code, command, SQL, log, error, identifier, file path는 번역하지 않는다.
 SQL의 목적과 해석은 사용자의 언어로 설명하되 SQL 본문은 그대로 유지한다.
 운영 query 결과가 필요하면 사용자에게 한 번에 하나씩 사용자의 언어로 질문한다.
+
+review panel:
+이 작업에 필요한 역할만 고른다.
+구현 작업이면 CTO Reviewer, Software Architect, QA Engineer, Security / Privacy Reviewer를 포함한다.
+운영 장애나 운영 조사면 CTO Reviewer, Software Architect, QA Engineer, Operations / CS Lead, Security / Privacy Reviewer를 포함한다.
+정책, 약관, 고객 공지면 Legal / Compliance Advisor, Operations / CS Lead, Product / Information Architecture Reviewer, Growth / Marketing Reviewer를 포함한다.
+신규 기능 기획이면 CTO Reviewer, Product / Information Architecture Reviewer, UX / Product Designer, Growth / Marketing Reviewer, QA Engineer를 포함한다.
+문서나 handoff면 Product / Information Architecture Reviewer, Operations / CS Lead, QA Engineer, CTO Reviewer를 포함한다.
+Legal / Compliance Advisor는 확정 법률 자문이 아니라 리스크 식별과 변호사 검토 필요 지점 표시로 한정한다.
 
 목표:
 운영 환경 포인트 전송 트랜잭션 데이터 정합성을 조사한다.
@@ -136,6 +146,45 @@ agent-to-agent English는 짧고 직접적이며 불필요한 표현을 줄인�
 code, command, SQL, log, error, identifier, file path는 번역하지 않는다.
 SQL의 목적과 해석은 사용자의 언어로 설명하되 SQL 본문은 그대로 유지한다.
 운영 결과가 필요하면 사용자-facing 질문을 한 번에 하나씩 한다.
+```
+
+## 리뷰 패널 (Review Panel)
+
+작업을 구현, 릴리즈, 정책 공개, 고객-facing 커뮤니케이션으로 넘기기 전에 역할별 관점 검토가 필요하다면 review panel을 사용합니다. Prompt Builder는 모든 reviewer를 항상 켜지 말고 작업에 맞는 역할만 골라야 합니다.
+
+v0.1에서는 이 내용을 optional contract schema field로 둡니다. 역할은 host-specific subagent 이름이 아니라 portable text로 유지합니다.
+
+권장 역할:
+
+- CTO Reviewer: 제품/기술 의사결정의 일관성, 구현 준비도, 복잡도 통제.
+- Software Architect: 도메인 경계, 데이터 흐름, 상태 전이, 시스템 책임 분리, 설계 입력 누락.
+- QA Engineer: 예외 케이스, acceptance criteria, 테스트 가능성, 운영 전 검증.
+- Security / Privacy Reviewer: 인증, 권한, 개인정보, 로그, 마스킹, secret, abuse risk.
+- Legal / Compliance Advisor: 약관, 고지, 책임 범위, 운영 리스크, 변호사 검토 필요 지점. 확정 법률 자문은 하지 않음.
+- Operations / CS Lead: 고객 응대, 장애 대응, 운영자 관점 명확성, 정책 설명 일관성.
+- Product / Information Architecture Reviewer: 주제 구조, 결정 사항, 범위, 다음 액션, 문서 scanability.
+- UX / Product Designer: 사용자 흐름, 문구, 접근성, 실수 방지, UI 결정 품질.
+- Growth / Marketing Reviewer: 타깃 고객, 포지셔닝, 전환, 런칭 메시지, 가격/패키징 리스크.
+- Data / Analytics Reviewer: 이벤트 설계, 지표, funnel, 실험 준비도.
+- Finance / Unit Economics Reviewer: 비용, 마진, 가격, 환불, 보상 리스크.
+
+권장 preset:
+
+```text
+implementation_review:
+CTO Reviewer, Software Architect, QA Engineer, Security / Privacy Reviewer
+
+production_incident:
+CTO Reviewer, Software Architect, QA Engineer, Operations / CS Lead, Security / Privacy Reviewer
+
+policy_or_customer_notice:
+Legal / Compliance Advisor, Operations / CS Lead, Product / Information Architecture Reviewer, Growth / Marketing Reviewer
+
+new_feature_planning:
+CTO Reviewer, Product / Information Architecture Reviewer, UX / Product Designer, Growth / Marketing Reviewer, QA Engineer
+
+docs_or_handoff:
+Product / Information Architecture Reviewer, Operations / CS Lead, QA Engineer, CTO Reviewer
 ```
 
 ## 로컬 산출물

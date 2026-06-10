@@ -21,7 +21,8 @@ Given the goal, scope, background, and constraints I provide:
 4. include any workspace strategy I provide in the rendered prompt
 5. include any infrastructure boundaries I provide in the rendered prompt
 6. include any communication policy I provide in the rendered prompt
-7. ask one concise question only when required information is missing
+7. choose a review panel when role-specific review would improve the worker prompt
+8. ask one concise question only when required information is missing
 
 Project rules:
 - follow AGENTS.md and any nested AGENTS.md files
@@ -65,6 +66,15 @@ Agent-to-agent English should be terse, direct, and low-filler.
 Do not translate code, commands, SQL, logs, errors, identifiers, or file paths.
 Explain SQL purpose and interpretation in the user's language, but keep SQL text exact.
 When production query results are needed, ask one user-facing question at a time in the user's language.
+
+review panel:
+Choose only the roles needed for this task.
+For implementation work, include CTO Reviewer, Software Architect, QA Engineer, and Security / Privacy Reviewer.
+For production incidents, include CTO Reviewer, Software Architect, QA Engineer, Operations / CS Lead, and Security / Privacy Reviewer.
+For policy or customer notices, include Legal / Compliance Advisor, Operations / CS Lead, Product / Information Architecture Reviewer, and Growth / Marketing Reviewer.
+For new feature planning, include CTO Reviewer, Product / Information Architecture Reviewer, UX / Product Designer, Growth / Marketing Reviewer, and QA Engineer.
+For docs or handoff, include Product / Information Architecture Reviewer, Operations / CS Lead, QA Engineer, and CTO Reviewer.
+Use Legal / Compliance Advisor only for risk identification and lawyer-review flags, not final legal advice.
 
 goal:
 Investigate production point-transfer transaction consistency.
@@ -136,6 +146,45 @@ Agent-to-agent English should be terse, direct, and low-filler.
 Do not translate code, commands, SQL, logs, errors, identifiers, or file paths.
 Explain SQL purpose and interpretation in the user's language, but keep SQL text exact.
 When production results are needed, ask one user-facing question at a time.
+```
+
+## Review Panel
+
+Use a review panel when the worker prompt should ask role-specific reviewers to inspect the task before implementation, release, policy publication, or customer-facing communication. The Prompt Builder should choose only the roles that fit the task instead of always enabling every reviewer.
+
+For v0.1, this is an optional contract schema field. Keep roles as portable text, not host-specific subagent names.
+
+Suggested roles:
+
+- CTO Reviewer: product and technical decision consistency, implementation readiness, complexity control.
+- Software Architect: domain boundaries, data flow, state transitions, system responsibility splits, missing design inputs.
+- QA Engineer: edge cases, acceptance criteria, testability, pre-production verification.
+- Security / Privacy Reviewer: auth, permission, personal data, logs, masking, secrets, abuse risk.
+- Legal / Compliance Advisor: terms, notices, liability, operational risk, lawyer-review flags only.
+- Operations / CS Lead: customer support, incident handling, operator-facing clarity, policy explanation consistency.
+- Product / Information Architecture Reviewer: topic structure, decisions, scope, next actions, document scanability.
+- UX / Product Designer: user flow, copy, accessibility, error prevention, UI decision quality.
+- Growth / Marketing Reviewer: target user, positioning, conversion, launch message, pricing/package risk.
+- Data / Analytics Reviewer: event design, metrics, funnels, experiment readiness.
+- Finance / Unit Economics Reviewer: cost, margin, pricing, refund, compensation risk.
+
+Recommended presets:
+
+```text
+implementation_review:
+CTO Reviewer, Software Architect, QA Engineer, Security / Privacy Reviewer
+
+production_incident:
+CTO Reviewer, Software Architect, QA Engineer, Operations / CS Lead, Security / Privacy Reviewer
+
+policy_or_customer_notice:
+Legal / Compliance Advisor, Operations / CS Lead, Product / Information Architecture Reviewer, Growth / Marketing Reviewer
+
+new_feature_planning:
+CTO Reviewer, Product / Information Architecture Reviewer, UX / Product Designer, Growth / Marketing Reviewer, QA Engineer
+
+docs_or_handoff:
+Product / Information Architecture Reviewer, Operations / CS Lead, QA Engineer, CTO Reviewer
 ```
 
 ## Local Artifacts
