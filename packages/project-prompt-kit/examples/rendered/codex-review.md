@@ -32,6 +32,9 @@ Not specified.
 Communication policy:
 Not specified.
 
+Review panel:
+Not specified.
+
 Success criteria:
 - Findings are grounded in file evidence
 - Verdict is one of merge possible, needs changes, or rewrite recommended

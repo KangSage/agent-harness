@@ -68,6 +68,32 @@
       "file paths"
     ]
   },
+  "review_panel": {
+    "preset": "implementation_review",
+    "selection_policy": "Use only reviewers needed to improve implementation readiness.",
+    "reviewers": [
+      {
+        "role": "CTO Reviewer",
+        "perspective": "product and technical decision consistency, implementation readiness, complexity control",
+        "output": "decision risks, over-complexity flags, implementation readiness gaps"
+      },
+      {
+        "role": "Software Architect",
+        "perspective": "domain boundaries, data flow, state transitions, responsibility splits",
+        "output": "missing design inputs and architecture risks"
+      },
+      {
+        "role": "QA Engineer",
+        "perspective": "edge cases, acceptance criteria, testability, pre-production verification",
+        "output": "test scenarios, acceptance criteria gaps, verification requirements"
+      },
+      {
+        "role": "Security / Privacy Reviewer",
+        "perspective": "auth, permission, personal data, logs, masking, secrets, abuse risk",
+        "output": "security and privacy risks, missing controls, required checks"
+      }
+    ]
+  },
   "success_criteria": [
     "Validation fails on missing required scaffold files",
     "Validation passes on the checked-in scaffold"

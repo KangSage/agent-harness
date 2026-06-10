@@ -25,6 +25,9 @@ Infrastructure boundaries:
 Communication policy:
 `{{communication_policy}}`
 
+Review panel:
+`{{review_panel}}`
+
 Success criteria:
 `{{success_criteria}}`
 

@@ -44,6 +44,14 @@ Communication policy:
 - Agent-facing style: terse, direct, low-filler technical coordination
 - Preserve verbatim: code; commands; SQL; logs; errors; identifiers; file paths
 
+Review panel:
+- Preset: implementation_review
+- Selection policy: Use only reviewers needed to improve implementation readiness.
+- CTO Reviewer: product and technical decision consistency, implementation readiness, complexity control -> decision risks, over-complexity flags, implementation readiness gaps
+- Software Architect: domain boundaries, data flow, state transitions, responsibility splits -> missing design inputs and architecture risks
+- QA Engineer: edge cases, acceptance criteria, testability, pre-production verification -> test scenarios, acceptance criteria gaps, verification requirements
+- Security / Privacy Reviewer: auth, permission, personal data, logs, masking, secrets, abuse risk -> security and privacy risks, missing controls, required checks
+
 Success criteria:
 - Validation fails on missing required scaffold files
 - Validation passes on the checked-in scaffold

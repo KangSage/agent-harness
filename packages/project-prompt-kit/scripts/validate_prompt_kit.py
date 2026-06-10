@@ -426,6 +426,7 @@ def validate_templates(errors: list[str]) -> None:
             "{{workspace_strategy}}",
             "{{infrastructure_boundaries}}",
             "{{communication_policy}}",
+            "{{review_panel}}",
             "{{success_criteria}}",
             "{{evidence_required}}",
             "{{output_format}}",
@@ -522,6 +523,7 @@ def validate_rendered_examples(errors: list[str]) -> None:
             "Workspace strategy:",
             "Infrastructure boundaries:",
             "Communication policy:",
+            "Review panel:",
             PROMPT_INJECTION_BOUNDARY,
             "Preview before sharing.",
             "No network calls are required by default.",
@@ -590,6 +592,20 @@ def validate_rendered_examples(errors: list[str]) -> None:
             if "Communication policy:\nNot specified." not in text:
                 errors.append(f"Rendered example {rel(example)} missing empty communication policy marker")
 
+        review_panel = contract.get("review_panel")
+        if isinstance(review_panel, dict):
+            check_rendered_value("review_panel.preset", review_panel.get("preset"))
+            check_rendered_value("review_panel.selection_policy", review_panel.get("selection_policy"))
+            reviewers = review_panel.get("reviewers")
+            if isinstance(reviewers, list):
+                for reviewer in reviewers:
+                    if isinstance(reviewer, dict):
+                        for field in ["role", "perspective", "output"]:
+                            check_rendered_value(f"review_panel.reviewers[].{field}", reviewer.get(field))
+        else:
+            if "Review panel:\nNot specified." not in text:
+                errors.append(f"Rendered example {rel(example)} missing empty review panel marker")
+
         if "{{" in text or "}}" in text:
             errors.append(f"Rendered example {rel(example)} contains unresolved template placeholder")
 
@@ -647,6 +663,7 @@ def validate_fixture_files(schemas: dict[str, dict[str, Any]], errors: list[str]
         "invalid-communication-policy.contract.json",
         "invalid-workspace-strategy.contract.json",
         "invalid-mode.contract.json",
+        "invalid-review-panel.contract.json",
         "invalid-safety-object.contract.json",
         "invalid-target.contract.json",
         "invalid-type.contract.json",
