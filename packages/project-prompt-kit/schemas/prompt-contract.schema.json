@@ -221,7 +221,13 @@
       "properties": {
         "preset": {
           "type": "string",
-          "minLength": 1
+          "enum": [
+            "implementation_review",
+            "production_incident",
+            "policy_or_customer_notice",
+            "new_feature_planning",
+            "docs_or_handoff"
+          ]
         },
         "selection_policy": {
           "type": "string",

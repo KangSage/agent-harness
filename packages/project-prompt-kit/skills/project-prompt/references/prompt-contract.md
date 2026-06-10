@@ -30,7 +30,7 @@ communication_policy:
   agent_facing_style:
   preserve_verbatim:
 review_panel:
-  preset:
+  preset: implementation_review | production_incident | policy_or_customer_notice | new_feature_planning | docs_or_handoff
   selection_policy:
   reviewers:
     - role:

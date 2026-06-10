@@ -664,6 +664,7 @@ def validate_fixture_files(schemas: dict[str, dict[str, Any]], errors: list[str]
         "invalid-workspace-strategy.contract.json",
         "invalid-mode.contract.json",
         "invalid-review-panel.contract.json",
+        "invalid-review-panel-preset.contract.json",
         "invalid-safety-object.contract.json",
         "invalid-target.contract.json",
         "invalid-type.contract.json",
