@@ -3,6 +3,8 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+
+## [0.1.7] - 2026-06-10
 ### Added
 - Optional `review_panel` prompt contract and request field for task-specific role review perspectives
 
