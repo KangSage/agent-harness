@@ -60,10 +60,16 @@ Required process:
 - Inspect existing files before editing.
 - Keep changes scoped to the requested validation surface.
 - Add or update tests only where they prove the contract.
+- Use fixed reviewer instructions: role, target, allowed actions, forbidden actions, review perspective, expected output, and fact/inference boundary.
+- Combine reviewer results with: Role | Verdict | Key evidence | Decision impact | Residual risk
 - Verify before claiming completion.
 
 Output format:
-`Implementation summary with changed files, tests run, and known gaps.`
+`Implementation summary with changed files, tests run, known gaps, a Role | Verdict | Key evidence | Decision impact | Residual risk table, and a Fact / inference boundary section.`
+
+Fact / inference boundary:
+- Facts: inspected files, commands, contract values, and validation output.
+- Inference: reviewer judgment, implementation readiness, recommended changes, and residual risk.
 
 Evidence required:
 - Validation command output

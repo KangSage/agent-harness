@@ -477,6 +477,13 @@ def validate_sample_outputs(errors: list[str]) -> None:
         for phrase in ["Source of truth:", "Scope:", "Validation:", "Gap handling:"]:
             if phrase not in sample_text:
                 errors.append(f"Sample output {rel(sample_file)} missing {phrase}")
+        if sample == "review":
+            for phrase in [
+                "Role | Verdict | Key evidence | Decision impact | Residual risk",
+                "Fact / inference boundary:",
+            ]:
+                if phrase not in sample_text:
+                    errors.append(f"Sample output {rel(sample_file)} missing review behavior phrase: {phrase}")
 
 
 def validate_rendered_examples(errors: list[str]) -> None:
@@ -606,6 +613,14 @@ def validate_rendered_examples(errors: list[str]) -> None:
             if "Review panel:\nNot specified." not in text:
                 errors.append(f"Rendered example {rel(example)} missing empty review panel marker")
 
+        if isinstance(review_panel, dict):
+            for phrase in [
+                "Role | Verdict | Key evidence | Decision impact | Residual risk",
+                "Fact / inference boundary:",
+            ]:
+                if phrase not in text:
+                    errors.append(f"Rendered example {rel(example)} missing review behavior phrase: {phrase}")
+
         if "{{" in text or "}}" in text:
             errors.append(f"Rendered example {rel(example)} contains unresolved template placeholder")
 
@@ -622,6 +637,33 @@ def validate_language_docs(errors: list[str]) -> None:
         for label, target in PACKAGE_README_LANGUAGE_LINKS:
             if not has_markdown_link(text, label, target):
                 errors.append(f"Package README language navigation missing [{label}]({target}): {rel(path)}")
+
+    prompt_builder_requirements = {
+        "prompt-builder-session.md": [
+            "Review Behavior Pattern",
+            "Role | Verdict | Key evidence | Decision impact | Residual risk",
+            "TIMELINE.md",
+        ],
+        "prompt-builder-session.ko.md": [
+            "리뷰 행동 패턴",
+            "역할 | 판정 | 핵심 근거 | 판정 반영 | 남은 리스크",
+            "TIMELINE.md",
+        ],
+        "prompt-builder-session.ja.md": [
+            "レビュー行動パターン",
+            "役割 | 判定 | 主な根拠 | 判定への反映 | 残るリスク",
+            "TIMELINE.md",
+        ],
+    }
+    for filename, phrases in prompt_builder_requirements.items():
+        path = PKG / "docs" / filename
+        if not path.is_file():
+            errors.append(f"Missing Prompt Builder doc: {rel(path)}")
+            continue
+        text = read(path)
+        for phrase in phrases:
+            if phrase not in text:
+                errors.append(f"Prompt Builder doc {rel(path)} missing review behavior phrase: {phrase}")
 
 
 def validate_golden_outputs(errors: list[str]) -> None:
@@ -647,6 +689,13 @@ def validate_golden_outputs(errors: list[str]) -> None:
         ]:
             if phrase not in text:
                 errors.append(f"Fixture golden output {rel(golden_file)} missing {phrase}")
+        if mode == "review":
+            for phrase in [
+                "Role | Verdict | Key evidence | Decision impact | Residual risk",
+                "Fact / inference boundary:",
+            ]:
+                if phrase not in text:
+                    errors.append(f"Fixture golden output {rel(golden_file)} missing review behavior phrase: {phrase}")
 
 
 def validate_fixture_files(schemas: dict[str, dict[str, Any]], errors: list[str]) -> None:
