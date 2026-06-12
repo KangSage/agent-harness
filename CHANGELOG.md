@@ -3,6 +3,8 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+
+## [0.1.8] - 2026-06-13
 ### Added
 - Review panel behavior guidance for fixed reviewer instructions, integration result tables, and optional local `TIMELINE.md` evidence
 
