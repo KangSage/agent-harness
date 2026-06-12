@@ -33,7 +33,18 @@ Communication policy:
 Not specified.
 
 Review panel:
-Not specified.
+- Preset: implementation_review
+- Selection policy: Choose reviewers needed to judge merge readiness without adding host-specific subagent names.
+- Reviewers:
+  - CTO Reviewer
+    - Perspective: product and technical decision consistency, implementation readiness, and complexity control
+    - Output: merge-readiness verdict with blocking risks
+  - Software Architect
+    - Perspective: package boundaries, monorepo fit, schema scope, and portability
+    - Output: architecture risks and boundary corrections
+  - QA Engineer
+    - Perspective: validation coverage, fixture drift, and release confidence
+    - Output: test gaps and verification evidence
 
 Success criteria:
 - Findings are grounded in file evidence
@@ -43,10 +54,16 @@ Required process:
 - Inspect the artifact under review and the source of truth before forming a verdict.
 - Put findings first, ordered by severity.
 - Separate facts from opinions.
+- Use fixed reviewer instructions: role, target, allowed actions, forbidden actions, review perspective, expected output, and fact/inference boundary.
+- Combine reviewer results with: Role | Verdict | Key evidence | Decision impact | Residual risk
 - Do not edit files unless explicitly requested.
 
 Output format:
-`Findings first, then validation evidence and verdict.`
+`Findings first, then validation evidence, a Role | Verdict | Key evidence | Decision impact | Residual risk table, and verdict. Include a Fact / inference boundary section.`
+
+Fact / inference boundary:
+- Facts: inspected files, commands, contract values, and validation output.
+- Inference: reviewer judgment, merge readiness, recommended changes, and residual risk.
 
 Evidence required:
 - Commands run

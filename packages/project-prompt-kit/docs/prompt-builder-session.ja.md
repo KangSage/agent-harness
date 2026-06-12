@@ -187,6 +187,28 @@ docs_or_handoff:
 Product / Information Architecture Reviewer, Operations / CS Lead, QA Engineer, CTO Reviewer
 ```
 
+### レビュー行動パターン
+
+レビューパネル (review panel) を worker prompt にレンダリングするときは、各 reviewer への指示を固定した形で短く、繰り返し使えるように書きます。下の項目は新しい contract field ではなく、prompt 作成のガイドです。対象と許可/禁止する行動は task context、constraints、workspace strategy、infrastructure boundaries から取ります。
+
+```text
+役割:
+対象:
+許可する行動:
+禁止する行動:
+レビュー観点:
+成果物:
+fact / inference の区別:
+```
+
+worker には reviewer の結果を次の表にまとめさせます。
+
+```text
+役割 | 判定 | 主な根拠 | 判定への反映 | 残るリスク
+```
+
+`TIMELINE.md` は、同じ review pattern を複数の作業で繰り返したときの任意のローカル成果物 (optional local artifact) としてだけ使います。`.tools/project-prompt-kit/local/` または git から除外されたローカル作業パスに置き、必須の prompt contract field にはしません。
+
 ## ローカル成果物
 
 ローカル専用で使う場合、生成した prompt 成果物は vendored kit の下に置きます。

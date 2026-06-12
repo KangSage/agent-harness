@@ -187,6 +187,28 @@ docs_or_handoff:
 Product / Information Architecture Reviewer, Operations / CS Lead, QA Engineer, CTO Reviewer
 ```
 
+### 리뷰 행동 패턴
+
+review panel을 worker prompt로 렌더링할 때는 각 reviewer 지시를 고정된 형식으로 짧고 반복 가능하게 작성합니다. 아래 항목은 새 contract field가 아니라 prompt 작성 가이드입니다. 대상과 허용/금지 행동은 task context, constraints, workspace strategy, infrastructure boundaries에서 가져옵니다.
+
+```text
+역할:
+대상:
+허용 행동:
+금지 행동:
+검토 관점:
+산출물:
+fact / inference 구분:
+```
+
+worker에게 reviewer 결과를 아래 표로 통합하게 합니다.
+
+```text
+역할 | 판정 | 핵심 근거 | 판정 반영 | 남은 리스크
+```
+
+`TIMELINE.md`는 같은 review pattern을 여러 작업에서 반복했을 때 남기는 optional local artifact로만 사용합니다. `.tools/project-prompt-kit/local/` 또는 git에서 제외된 로컬 작업 경로 아래에 두고, 필수 prompt contract field로 만들지 않습니다.
+
 ## 로컬 산출물
 
 로컬 전용으로 사용할 때는 생성된 prompt 산출물을 vendored kit 아래에 둡니다.

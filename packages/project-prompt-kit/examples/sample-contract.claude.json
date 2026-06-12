@@ -102,7 +102,7 @@
     "Overbuilding beyond v0.1",
     "Validation relying on network or host-specific tools"
   ],
-  "output_format": "Implementation summary with changed files, tests run, and known gaps.",
+  "output_format": "Implementation summary with changed files, tests run, known gaps, a Role | Verdict | Key evidence | Decision impact | Residual risk table, and a Fact / inference boundary section.",
   "evidence_required": [
     "Validation command output",
     "Git diff summary"

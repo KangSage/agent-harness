@@ -17,6 +17,27 @@
     "Do not merge the PR",
     "Avoid local-only framework coupling"
   ],
+  "review_panel": {
+    "preset": "implementation_review",
+    "selection_policy": "Choose reviewers needed to judge merge readiness without adding host-specific subagent names.",
+    "reviewers": [
+      {
+        "role": "CTO Reviewer",
+        "perspective": "product and technical decision consistency, implementation readiness, and complexity control",
+        "output": "merge-readiness verdict with blocking risks"
+      },
+      {
+        "role": "Software Architect",
+        "perspective": "package boundaries, monorepo fit, schema scope, and portability",
+        "output": "architecture risks and boundary corrections"
+      },
+      {
+        "role": "QA Engineer",
+        "perspective": "validation coverage, fixture drift, and release confidence",
+        "output": "test gaps and verification evidence"
+      }
+    ]
+  },
   "success_criteria": [
     "Findings are grounded in file evidence",
     "Verdict is one of merge possible, needs changes, or rewrite recommended"
@@ -25,7 +46,7 @@
     "Package becomes handoff-only",
     "Examples leak private paths or account names"
   ],
-  "output_format": "Findings first, then validation evidence and verdict.",
+  "output_format": "Findings first, then validation evidence, a Role | Verdict | Key evidence | Decision impact | Residual risk table, and verdict. Include a Fact / inference boundary section.",
   "evidence_required": [
     "Commands run",
     "Files inspected",

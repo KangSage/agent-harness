@@ -187,6 +187,28 @@ docs_or_handoff:
 Product / Information Architecture Reviewer, Operations / CS Lead, QA Engineer, CTO Reviewer
 ```
 
+### Review Behavior Pattern
+
+When a review panel is rendered into a worker prompt, keep each reviewer instruction fixed and repeatable. These labels are prompt-writing guidance, not extra contract fields; derive target and action boundaries from the task context, constraints, workspace strategy, and infrastructure boundaries.
+
+```text
+Role:
+Target:
+Allowed actions:
+Forbidden actions:
+Review perspective:
+Expected output:
+Fact / inference boundary:
+```
+
+Ask the worker to combine reviewer results with this table:
+
+```text
+Role | Verdict | Key evidence | Decision impact | Residual risk
+```
+
+Use `TIMELINE.md` only as an optional local artifact when the same review pattern is repeated across tasks. Keep it under `.tools/project-prompt-kit/local/` or another ignored local workspace path. Do not make it a required prompt contract field.
+
 ## Local Artifacts
 
 For local-only usage, keep generated prompt artifacts under the vendored kit:
