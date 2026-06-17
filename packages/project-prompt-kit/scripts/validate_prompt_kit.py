@@ -893,18 +893,36 @@ def validate_language_docs(errors: list[str]) -> None:
 
     prompt_builder_requirements = {
         "prompt-builder-session.md": [
+            "Governance Selection",
+            "Use `governance.preset` for review strength.",
+            "Use `governance.scenario_template` for scenario checklist.",
+            "Omit `governance` when no governance layer is needed.",
+            "Do not add a `none` preset.",
+            "Do not create `governance.review_panel_preset`.",
             "Review Behavior Pattern",
             "Role | Verdict | Key evidence | Decision impact | Residual risk",
             "Legal / Compliance Risk Screener",
             "TIMELINE.md",
         ],
         "prompt-builder-session.ko.md": [
+            "거버넌스 선택",
+            "`governance.preset`은 검토 강도를 고를 때 사용합니다.",
+            "`governance.scenario_template`은 상황별 체크리스트를 추가할 때 사용합니다.",
+            "governance layer가 필요 없다면 `governance` block을 생략합니다.",
+            "`none` preset은 추가하지 않습니다.",
+            "`governance.review_panel_preset`은 만들지 않습니다.",
             "리뷰 행동 패턴",
             "역할 | 판정 | 핵심 근거 | 판정 반영 | 남은 리스크",
             "Legal / Compliance Risk Screener",
             "TIMELINE.md",
         ],
         "prompt-builder-session.ja.md": [
+            "ガバナンス選択",
+            "`governance.preset` はレビューの強さを選ぶために使います。",
+            "`governance.scenario_template` は状況別 checklist を追加するために使います。",
+            "governance layer が不要な場合は `governance` block を省略します。",
+            "`none` preset は追加しません。",
+            "`governance.review_panel_preset` は作りません。",
             "レビュー行動パターン",
             "役割 | 判定 | 主な根拠 | 判定への反映 | 残るリスク",
             "Legal / Compliance Risk Screener",
@@ -919,7 +937,7 @@ def validate_language_docs(errors: list[str]) -> None:
         text = read(path)
         for phrase in phrases:
             if phrase not in text:
-                errors.append(f"Prompt Builder doc {rel(path)} missing review behavior phrase: {phrase}")
+                errors.append(f"Prompt Builder doc {rel(path)} missing required phrase: {phrase}")
         if "Legal / Compliance Advisor" in text:
             errors.append(f"Prompt Builder doc {rel(path)} uses deprecated legal/compliance role label")
 

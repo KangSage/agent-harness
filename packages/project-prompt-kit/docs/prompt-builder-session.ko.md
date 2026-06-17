@@ -148,6 +148,42 @@ SQL의 목적과 해석은 사용자의 언어로 설명하되 SQL 본문은 그
 운영 결과가 필요하면 사용자-facing 질문을 한 번에 하나씩 한다.
 ```
 
+## 거버넌스 선택 (Governance Selection)
+
+worker prompt가 작업을 시작하기 전에 계획 검토, 리스크 gate, 상황별 checklist를 먼저 정리해야 한다면 governance selection을 사용합니다.
+
+v0.2에서는 이 내용을 optional contract guidance로 둡니다. 가볍게 유지하세요. 미해결 리스크가 보이도록 만드는 최소한의 governance layer만 고릅니다.
+
+`governance.preset`은 검토 강도를 고를 때 사용합니다.
+
+- `light`: 낮은 위험의 작업에서 scope, acceptance, validation만 빠르게 확인할 때.
+- `standard`: 일반 구현 계획에서 제품, 아키텍처, QA 검토가 필요할 때.
+- `high_risk`: 인증, 권한, 개인정보, 운영 데이터, 결제, 고객 영향, 법무/컴플라이언스 검토 트리거, 지원 운영, rollout, rollback에 영향을 줄 수 있을 때.
+
+`governance.scenario_template`은 상황별 체크리스트를 추가할 때 사용합니다.
+
+- `auth_migration`: session, token, permission, account recovery, audit log, authentication data flow가 바뀔 수 있을 때.
+- `production_incident`: 장애나 운영 데이터 정합성 문제를 조사, 완화, 설명, 후속 조치할 때.
+- `regulated_data_or_domain`: 보관, 삭제, 동의, 고지, 정책, 규제 데이터 처리, 변호사 검토 트리거가 관련될 수 있을 때.
+
+governance layer가 필요 없다면 `governance` block을 생략합니다.
+`none` preset은 추가하지 않습니다.
+`governance.review_panel_preset`은 만들지 않습니다.
+
+governance를 선택했다면 reviewer 지시는 기존 `review_panel` 구조로 풀어 씁니다. Legal / Compliance 역할은 자격 있는 사람이 검토해야 할 리스크 트리거를 식별하는 용도이며, 법률 자문이나 컴플라이언스 승인을 제공하지 않습니다.
+
+예시:
+
+```json
+{
+  "mode": "plan",
+  "governance": {
+    "preset": "high_risk",
+    "scenario_template": "auth_migration"
+  }
+}
+```
+
 ## 리뷰 패널 (Review Panel)
 
 작업을 구현, 릴리즈, 정책 공개, 고객-facing 커뮤니케이션으로 넘기기 전에 역할별 관점 검토가 필요하다면 review panel을 사용합니다. Prompt Builder는 모든 reviewer를 항상 켜지 말고 작업에 맞는 역할만 골라야 합니다.

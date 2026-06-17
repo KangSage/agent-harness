@@ -148,6 +148,42 @@ SQL の目的と解釈はユーザーの言語で説明し、SQL 本文はその
 本番結果が必要な場合、user-facing question は一度に1つだけにする。
 ```
 
+## ガバナンス選択 (Governance Selection)
+
+worker prompt が作業を始める前に、計画レビュー、risk gate、状況別 checklist を整理する必要がある場合は governance selection を使います。
+
+v0.2 では、optional contract guidance として扱います。重くしすぎず、未解決リスクを見えるようにする最小の governance layer だけを選びます。
+
+`governance.preset` はレビューの強さを選ぶために使います。
+
+- `light`: 低リスクの作業で、scope、acceptance、validation だけを素早く確認する場合。
+- `standard`: 通常の実装計画で、product、architecture、QA のレビューが必要な場合。
+- `high_risk`: auth、permission、privacy、本番データ、payment、customer impact、legal/compliance review trigger、support operations、rollout、rollback に影響する可能性がある場合。
+
+`governance.scenario_template` は状況別 checklist を追加するために使います。
+
+- `auth_migration`: session、token、permission、account recovery、audit log、authentication data flow が変わる可能性がある場合。
+- `production_incident`: incident や本番データ不整合を調査、緩和、説明、フォローアップする場合。
+- `regulated_data_or_domain`: retention、deletion、consent、notice、policy、regulated data handling、lawyer-review trigger が関係する可能性がある場合。
+
+governance layer が不要な場合は `governance` block を省略します。
+`none` preset は追加しません。
+`governance.review_panel_preset` は作りません。
+
+governance を選んだ場合、reviewer guidance は既存の `review_panel` 構造に展開します。Legal / Compliance の役割は、資格のある人が確認すべきリスク trigger を見つけるためのものです。法律助言や compliance approval は行いません。
+
+例:
+
+```json
+{
+  "mode": "plan",
+  "governance": {
+    "preset": "high_risk",
+    "scenario_template": "auth_migration"
+  }
+}
+```
+
 ## レビューパネル (Review Panel)
 
 実装、リリース、policy 公開、customer-facing communication の前に、役割ごとの観点で確認したい場合は review panel を使います。Prompt Builder はすべての reviewer を常に有効にせず、作業に合う役割だけを選びます。
