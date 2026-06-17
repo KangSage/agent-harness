@@ -48,7 +48,7 @@ stop_condition:
 
 `workspace_strategy`, `infrastructure_boundaries`, `communication_policy`, `review_panel`, and `governance` are optional. Include them when the worker needs explicit write-location rules, external-system access rules, language/style boundaries, role-specific review perspectives, or planning governance selection.
 
-Omit `governance` when no planning governance layer is needed. Do not use a `none` preset. In this scaffold, `governance` records the selected review strength and optional scenario template only; preset expansion, decision gates, and accepted-risk handling are defined by later governance work.
+Omit `governance` when no planning governance layer is needed. Do not use a `none` preset. In this scaffold, `governance` records the selected review strength and optional scenario template only. Preset expansion and decision-gate section labels are defined in `governance-presets.md`; gate object schemas and accepted-risk handling are defined by later governance work.
 
 Safety metadata travels with the envelope:
 
