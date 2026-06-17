@@ -46,6 +46,9 @@ Review panel:
     - Perspective: validation coverage, fixture drift, and release confidence
     - Output: test gaps and verification evidence
 
+Governance:
+Not specified.
+
 Success criteria:
 - Findings are grounded in file evidence
 - Verdict is one of merge possible, needs changes, or rewrite recommended

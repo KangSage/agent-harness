@@ -28,6 +28,12 @@ MODES = [
 ]
 
 TARGETS = ["codex", "claude", "generic"]
+GOVERNANCE_PRESETS = ["light", "standard", "high_risk"]
+GOVERNANCE_SCENARIO_TEMPLATES = [
+    "auth_migration",
+    "production_incident",
+    "regulated_data_or_domain",
+]
 
 CORE_FIELDS = [
     "mode",
@@ -428,6 +434,7 @@ def validate_templates(errors: list[str]) -> None:
             "{{infrastructure_boundaries}}",
             "{{communication_policy}}",
             "{{review_panel}}",
+            "{{governance}}",
             "{{success_criteria}}",
             "{{evidence_required}}",
             "{{output_format}}",
@@ -457,6 +464,34 @@ def validate_schema_contracts(schemas: dict[str, dict[str, Any]], errors: list[s
     ]:
         if field not in safety_required:
             errors.append(f"Contract schema safety missing required field: {field}")
+
+    for schema_name in ["contract", "request"]:
+        schema = schemas.get(schema_name, {})
+        schema_required = set(schema.get("required", []))
+        if "governance" in schema_required:
+            errors.append(f"{schema_name} schema must keep governance optional")
+
+        governance_schema = schema.get("properties", {}).get("governance")
+        if not isinstance(governance_schema, dict):
+            errors.append(f"{schema_name} schema missing optional governance field")
+            continue
+        if governance_schema.get("type") != "object":
+            errors.append(f"{schema_name} schema governance must be an object")
+        if governance_schema.get("required") != ["preset"]:
+            errors.append(f"{schema_name} schema governance must require only preset")
+        if governance_schema.get("additionalProperties") is not False:
+            errors.append(f"{schema_name} schema governance must reject extra properties")
+
+        governance_properties = governance_schema.get("properties", {})
+        preset_schema = governance_properties.get("preset", {}) if isinstance(governance_properties, dict) else {}
+        if preset_schema.get("enum") != GOVERNANCE_PRESETS:
+            errors.append(f"{schema_name} schema governance preset enum drift")
+
+        scenario_schema = (
+            governance_properties.get("scenario_template", {}) if isinstance(governance_properties, dict) else {}
+        )
+        if scenario_schema.get("enum") != GOVERNANCE_SCENARIO_TEMPLATES:
+            errors.append(f"{schema_name} schema governance scenario_template enum drift")
 
 
 def validate_sample_contracts(schemas: dict[str, dict[str, Any]], errors: list[str]) -> None:
@@ -532,6 +567,7 @@ def validate_rendered_examples(errors: list[str]) -> None:
             "Infrastructure boundaries:",
             "Communication policy:",
             "Review panel:",
+            "Governance:",
             PROMPT_INJECTION_BOUNDARY,
             "Preview before sharing.",
             "No network calls are required by default.",
@@ -621,6 +657,14 @@ def validate_rendered_examples(errors: list[str]) -> None:
             ]:
                 if phrase not in text:
                     errors.append(f"Rendered example {rel(example)} missing review behavior phrase: {phrase}")
+
+        governance = contract.get("governance")
+        if isinstance(governance, dict):
+            check_rendered_value("governance.preset", governance.get("preset"))
+            check_rendered_value("governance.scenario_template", governance.get("scenario_template"))
+        else:
+            if "Governance:\nNot specified." not in text:
+                errors.append(f"Rendered example {rel(example)} missing empty governance marker")
 
         if "{{" in text or "}}" in text:
             errors.append(f"Rendered example {rel(example)} contains unresolved template placeholder")
@@ -714,6 +758,9 @@ def validate_fixture_files(schemas: dict[str, dict[str, Any]], errors: list[str]
         "empty-string.contract.json",
         "extra-safety-field.contract.json",
         "extra-property.contract.json",
+        "invalid-governance-extra-property.contract.json",
+        "invalid-governance-preset.contract.json",
+        "invalid-governance-scenario.contract.json",
         "invalid-command.contract.json",
         "invalid-communication-policy.contract.json",
         "invalid-workspace-strategy.contract.json",
@@ -733,6 +780,9 @@ def validate_fixture_files(schemas: dict[str, dict[str, Any]], errors: list[str]
         "malformed-property-schema.schema.json",
         "malformed-required-schema.schema.json",
         "request-extra-property.json",
+        "request-invalid-governance-extra-property.json",
+        "request-invalid-governance-preset.json",
+        "request-invalid-governance-scenario.json",
         "unsafe-network.contract.json",
         "unsafe-telemetry.contract.json",
         "unsupported-keyword.schema.json",

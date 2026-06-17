@@ -264,6 +264,31 @@
       },
       "additionalProperties": false
     },
+    "governance": {
+      "type": "object",
+      "required": [
+        "preset"
+      ],
+      "properties": {
+        "preset": {
+          "type": "string",
+          "enum": [
+            "light",
+            "standard",
+            "high_risk"
+          ]
+        },
+        "scenario_template": {
+          "type": "string",
+          "enum": [
+            "auth_migration",
+            "production_incident",
+            "regulated_data_or_domain"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
     "success_criteria": {
       "type": "array",
       "items": {
