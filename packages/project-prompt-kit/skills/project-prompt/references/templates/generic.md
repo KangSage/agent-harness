@@ -28,6 +28,9 @@ Communication policy:
 Review panel:
 `{{review_panel}}`
 
+Governance:
+`{{governance}}`
+
 Success criteria:
 `{{success_criteria}}`
 

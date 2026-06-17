@@ -52,6 +52,9 @@ Review panel:
 - QA Engineer: edge cases, acceptance criteria, testability, pre-production verification -> test scenarios, acceptance criteria gaps, verification requirements
 - Security / Privacy Reviewer: auth, permission, personal data, logs, masking, secrets, abuse risk -> security and privacy risks, missing controls, required checks
 
+Governance:
+Not specified.
+
 Success criteria:
 - Validation fails on missing required scaffold files
 - Validation passes on the checked-in scaffold
