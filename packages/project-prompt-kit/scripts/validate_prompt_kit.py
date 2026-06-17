@@ -35,6 +35,42 @@ GOVERNANCE_SCENARIO_TEMPLATES = [
     "regulated_data_or_domain",
 ]
 
+PLAN_MODE_REQUIRED_FIELDS = [
+    "goal",
+    "non-goals",
+    "scope",
+    "assumptions",
+    "options",
+    "decisions",
+    "affected domains",
+    "validation strategy",
+    "open issues burn-down",
+    "review findings",
+    "decision gates",
+    "implementation boundary",
+    "rollback or fallback",
+    "operations readiness",
+    "human approval points",
+    "AI stop conditions",
+    "remaining risks",
+    "go/no-go verdict",
+]
+
+PLAN_GOLDEN_REQUIRED_PHRASES = [
+    "Open issues burn-down:",
+    "Issue | Type | Evidence | Evidence standard | Impact | Customer impact | Owner reviewer | Review trigger | Human decision required | Decision | Remaining risk",
+    "Review findings:",
+    "Decision gates:",
+    "Implementation boundary:",
+    "Rollback / fallback:",
+    "Operations readiness:",
+    "Human approval points:",
+    "AI stop conditions:",
+    "Remaining risks:",
+    "Go / no-go verdict:",
+    "Unresolved blockers must not be converted into implementation instructions.",
+]
+
 CORE_FIELDS = [
     "mode",
     "project",
@@ -414,10 +450,23 @@ def validate_mode_docs(schemas: dict[str, dict[str, Any]], errors: list[str]) ->
         for required in ["Purpose:", "Primary output:", "Required prompt fields:", "Guardrail:"]:
             if required not in mode_text:
                 errors.append(f"Mode file {rel(mode_file)} missing {required}")
+        mode_metadata = extract_mode_metadata(mode_file)
         if mode_schema:
             mode_errors: list[str] = []
-            validate_instance(extract_mode_metadata(mode_file), mode_schema, rel(mode_file), mode_errors)
+            validate_instance(mode_metadata, mode_schema, rel(mode_file), mode_errors)
             errors.extend(mode_errors)
+        if mode == "plan":
+            fields = mode_metadata["required_prompt_fields"]
+            for required_field in PLAN_MODE_REQUIRED_FIELDS:
+                if required_field not in fields:
+                    errors.append(f"Mode file {rel(mode_file)} missing plan field: {required_field}")
+            for phrase in [
+                "do not implement",
+                "planning blockers remain unresolved",
+                "human approval",
+            ]:
+                if phrase not in mode_text:
+                    errors.append(f"Mode file {rel(mode_file)} missing plan guardrail phrase: {phrase}")
 
 
 def validate_templates(errors: list[str]) -> None:
@@ -905,6 +954,10 @@ def validate_golden_outputs(errors: list[str]) -> None:
             ]:
                 if phrase not in text:
                     errors.append(f"Fixture golden output {rel(golden_file)} missing review behavior phrase: {phrase}")
+        if mode == "plan":
+            for phrase in PLAN_GOLDEN_REQUIRED_PHRASES:
+                if phrase not in text:
+                    errors.append(f"Fixture golden output {rel(golden_file)} missing plan output phrase: {phrase}")
 
 
 def validate_fixture_files(schemas: dict[str, dict[str, Any]], errors: list[str]) -> None:
