@@ -71,10 +71,10 @@ review panel:
 この作業に必要な役割だけを選ぶ。
 実装作業では CTO Reviewer、Software Architect、QA Engineer、Security / Privacy Reviewer を含める。
 本番障害や本番調査では CTO Reviewer、Software Architect、QA Engineer、Operations / CS Lead、Security / Privacy Reviewer を含める。
-policy、terms、customer notice では Legal / Compliance Advisor、Operations / CS Lead、Product / Information Architecture Reviewer、Growth / Marketing Reviewer を含める。
+policy、terms、customer notice では Legal / Compliance Risk Screener、Operations / CS Lead、Product / Information Architecture Reviewer、Growth / Marketing Reviewer を含める。
 新機能企画では CTO Reviewer、Product / Information Architecture Reviewer、UX / Product Designer、Growth / Marketing Reviewer、QA Engineer を含める。
 docs や handoff では Product / Information Architecture Reviewer、Operations / CS Lead、QA Engineer、CTO Reviewer を含める。
-Legal / Compliance Advisor は確定的な法律助言ではなく、risk identification と lawyer-review flags に限定する。
+Legal / Compliance Risk Screener は確定的な法律助言ではなく、法務・コンプライアンス上のリスク特定と、弁護士レビューが必要な箇所の明示に限定する。
 
 目標:
 本番環境のポイント移転トランザクションデータの整合性を調査する。
@@ -160,7 +160,7 @@ v0.1 では、optional contract schema field として扱います。役割は h
 - Software Architect: domain boundary、data flow、state transition、system responsibility split、設計入力の不足。
 - QA Engineer: edge case、acceptance criteria、testability、本番前検証。
 - Security / Privacy Reviewer: auth、permission、personal data、log、masking、secret、abuse risk。
-- Legal / Compliance Advisor: terms、notice、liability、operational risk、lawyer-review flags。確定的な法律助言はしない。
+- Legal / Compliance Risk Screener: terms、notice、liability、operational risk、法務・コンプライアンス上のリスク、弁護士レビューが必要な箇所。確定的な法律助言はしない。
 - Operations / CS Lead: customer support、incident handling、運用者視点の明確さ、policy explanation の一貫性。
 - Product / Information Architecture Reviewer: topic structure、decision、scope、next action、document scanability。
 - UX / Product Designer: user flow、copy、accessibility、error prevention、UI decision quality。
@@ -178,7 +178,7 @@ production_incident:
 CTO Reviewer, Software Architect, QA Engineer, Operations / CS Lead, Security / Privacy Reviewer
 
 policy_or_customer_notice:
-Legal / Compliance Advisor, Operations / CS Lead, Product / Information Architecture Reviewer, Growth / Marketing Reviewer
+Legal / Compliance Risk Screener, Operations / CS Lead, Product / Information Architecture Reviewer, Growth / Marketing Reviewer
 
 new_feature_planning:
 CTO Reviewer, Product / Information Architecture Reviewer, UX / Product Designer, Growth / Marketing Reviewer, QA Engineer

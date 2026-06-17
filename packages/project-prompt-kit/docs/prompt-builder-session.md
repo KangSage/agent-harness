@@ -71,10 +71,10 @@ review panel:
 Choose only the roles needed for this task.
 For implementation work, include CTO Reviewer, Software Architect, QA Engineer, and Security / Privacy Reviewer.
 For production incidents, include CTO Reviewer, Software Architect, QA Engineer, Operations / CS Lead, and Security / Privacy Reviewer.
-For policy or customer notices, include Legal / Compliance Advisor, Operations / CS Lead, Product / Information Architecture Reviewer, and Growth / Marketing Reviewer.
+For policy or customer notices, include Legal / Compliance Risk Screener, Operations / CS Lead, Product / Information Architecture Reviewer, and Growth / Marketing Reviewer.
 For new feature planning, include CTO Reviewer, Product / Information Architecture Reviewer, UX / Product Designer, Growth / Marketing Reviewer, and QA Engineer.
 For docs or handoff, include Product / Information Architecture Reviewer, Operations / CS Lead, QA Engineer, and CTO Reviewer.
-Use Legal / Compliance Advisor only for risk identification and lawyer-review flags, not final legal advice.
+Use Legal / Compliance Risk Screener only to identify legal/compliance risks and lawyer-review triggers, not to provide legal advice or compliance approval.
 
 goal:
 Investigate production point-transfer transaction consistency.
@@ -160,7 +160,7 @@ Suggested roles:
 - Software Architect: domain boundaries, data flow, state transitions, system responsibility splits, missing design inputs.
 - QA Engineer: edge cases, acceptance criteria, testability, pre-production verification.
 - Security / Privacy Reviewer: auth, permission, personal data, logs, masking, secrets, abuse risk.
-- Legal / Compliance Advisor: terms, notices, liability, operational risk, lawyer-review flags only.
+- Legal / Compliance Risk Screener: terms, notices, liability, operational risk, legal/compliance risks, and lawyer-review triggers only; no legal advice or compliance approval.
 - Operations / CS Lead: customer support, incident handling, operator-facing clarity, policy explanation consistency.
 - Product / Information Architecture Reviewer: topic structure, decisions, scope, next actions, document scanability.
 - UX / Product Designer: user flow, copy, accessibility, error prevention, UI decision quality.
@@ -178,7 +178,7 @@ production_incident:
 CTO Reviewer, Software Architect, QA Engineer, Operations / CS Lead, Security / Privacy Reviewer
 
 policy_or_customer_notice:
-Legal / Compliance Advisor, Operations / CS Lead, Product / Information Architecture Reviewer, Growth / Marketing Reviewer
+Legal / Compliance Risk Screener, Operations / CS Lead, Product / Information Architecture Reviewer, Growth / Marketing Reviewer
 
 new_feature_planning:
 CTO Reviewer, Product / Information Architecture Reviewer, UX / Product Designer, Growth / Marketing Reviewer, QA Engineer
