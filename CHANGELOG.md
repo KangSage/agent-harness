@@ -13,6 +13,7 @@ All notable changes to this project will be documented in this file.
 - Added synthetic governance scenario fixtures for production incident and regulated data/domain planning
 - Added invalid fixtures for missing synthetic governance markers and unsafe public marker detection
 - Added high-risk governance reviewer coverage validation for Security / Privacy, Legal / Compliance, and Operations / CS roles
+- Clarified required versus recommended reviewer coverage for high-risk governance presets
 
 ### Changed
 - Aligned Prompt Builder review-panel docs with the `Legal / Compliance Risk Screener` role label

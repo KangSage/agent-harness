@@ -32,6 +32,24 @@ Use `regulated_data_or_domain` when retention, deletion, consent, notice, policy
 | `standard` | CTO Reviewer; Product / Information Architecture Reviewer; Software Architect; QA Engineer | Goal; non-goals; scope; assumptions; options; decisions; affected domains; open issues burn-down; validation strategy; implementation boundary; rollback or fallback; remaining risks; go / no-go verdict | Stop if architecture boundary, testability, rollback/fallback, or implementation boundary is unclear. | Reviewed implementation plan with explicit decisions, blockers, and remaining risks. |
 | `high_risk` | CTO Reviewer; Product / Information Architecture Reviewer; Software Architect; QA Engineer; Security / Privacy Reviewer; Legal / Compliance Risk Screener; Operations / CS Lead | Goal; non-goals; scope; assumptions; options; decisions; affected domains; open issues burn-down; review findings; decision gates section; implementation boundary; rollback or fallback; operations readiness; support path; customer-facing comms owner; human approval points; AI stop conditions; remaining risks; go / no-go verdict | Stop if security/privacy impact, legal/compliance review trigger, customer impact, rollback/fallback, support path, customer-facing comms owner, production access boundary, or human approval point is unresolved. | High-risk planning brief with reviewer findings, decision-gate section labels, operations readiness, and explicit human-review triggers. |
 
+Minimum required high-risk reviewers:
+
+- Security / Privacy Reviewer
+- Legal / Compliance Risk Screener
+- Operations / CS Lead
+
+Recommended full high-risk panel:
+
+- CTO Reviewer
+- Product / Information Architecture Reviewer
+- Software Architect
+- QA Engineer
+- Security / Privacy Reviewer
+- Legal / Compliance Risk Screener
+- Operations / CS Lead
+
+Validation currently enforces the minimum required high-risk reviewers. Prompt authors should include the recommended full high-risk panel when the task needs product, architecture, or QA decision review in addition to the safety-critical reviewers.
+
 This is not legal advice. This identifies review triggers for qualified humans.
 
 `decision gates section` means the rendered plan must reserve a section for gates and their status. The gate object schema, accepted-risk rules, and executable gate semantics are later governance work.
