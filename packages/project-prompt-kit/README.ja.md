@@ -4,14 +4,14 @@
 
 言語: [English](README.md) | [한국어](README.ko.md) | [日本語](README.ja.md)
 
-`project-prompt-kit` は、コーディングエージェントやプロジェクトエージェントのための軽量な、ホスト非依存のプロンプトキット scaffold です。あいまいな依頼を、objective, context, scope, constraints, evidence requirements, output format, stop condition を持つ構造化された prompt contract に変換します。
+`project-prompt-kit` は、コーディングエージェントやプロジェクトエージェント向けの、軽量で実行環境に依存しないプロンプト用ツール群のひな形（host-neutral prompt kit scaffold）です。あいまいな依頼を、目的（`objective`）、文脈（`context`）、範囲（`scope`）、制約（`constraints`）、根拠要件（`evidence_required`）、出力形式（`output_format`）、停止条件（`stop_condition`）を持つ構造化されたプロンプト契約（prompt contract）に変換します。
 
 ## コマンド契約
 
 - 基本コマンド: `/prompt`
-- 標準エイリアス: `/project-prompt`
+- 正式エイリアス: `/project-prompt`
 
-v0.1 で対応する mode:
+v0.1 で対応するモード（mode）:
 
 - `choose`
 - `task`
@@ -26,58 +26,58 @@ v0.1 で対応する mode:
 
 ## スコープ
 
-この package が現在提供するもの:
+このパッケージ（package）が現在提供するもの:
 
-- command spec
-- skill scaffold
-- mode spec
-- prompt contract, prompt request, mode metadata schema
-- renderer template
-- safety default
-- example, fixture-backed golden output shape, validation script
+- コマンド仕様（command spec）
+- スキルのひな形（skill scaffold）
+- モード仕様（mode spec）
+- プロンプト契約（prompt contract）、プロンプト依頼（prompt request）、モードメタデータスキーマ（mode metadata schema）
+- 描画器テンプレート（renderer template）
+- 安全な既定値（safety default）
+- 例、固定データ（fixture）で裏付けた正解例の出力構造（golden output shape）、検証スクリプト（validation script）
 
-v0.1 では、意図的に full CLI は含めません。`handoff` は対応 mode の一つであり、default や唯一の用途ではありません。
+v0.1 では、意図的に完全なコマンドラインツール（full CLI）は含めません。`handoff` は対応モード（mode）の一つであり、既定用途（default）や唯一の用途ではありません。
 
 ## クイックスタート
 
-このキットは repo-distributed prompt scaffold として使います。
+このキットは、リポジトリ配布型のプロンプトひな形（repo-distributed prompt scaffold）として使います。
 
 1. `docs/quickstart.ja.md` を読みます。
-2. `skills/project-prompt/references/modes/` から mode を選びます。
-3. `skills/project-prompt/references/templates/` から target renderer を選びます。
+2. `skills/project-prompt/references/modes/` からモード（mode）を選びます。
+3. `skills/project-prompt/references/templates/` から対象描画器（target renderer）を選びます。
 4. `examples/sample-contract.*.json` から始めます。
 5. 実プロジェクトへ適用する前に `examples/rendered/` と比較します。
-6. prompt 作成だけを担当する専用セッションが必要な場合は `docs/prompt-builder-session.ja.md` を使います。
-7. 変更を共有する前に validation を実行します。
+6. プロンプト（prompt）作成だけを担当する専用セッションが必要な場合は `docs/prompt-builder-session.ja.md` を使います。
+7. 変更を共有する前に検証（validation）を実行します。
 
-この package は、repository を clone するか vendor すれば使えます。まだインストール型 CLI や registry package ではありません。
+このパッケージ（package）は、リポジトリ（repository）を複製（clone）するか、プロジェクトに取り込む（vendor）ことで使えます。まだインストール型 CLI やレジストリ配布パッケージ（registry package）ではありません。
 
 ## 安全なデフォルト
 
-- デフォルトで telemetry なし
-- デフォルトで network call なし
-- local-first の利用方針
-- 機密情報は redaction-first で扱う
+- デフォルトで利用情報送信（telemetry）なし
+- デフォルトでネットワーク呼び出し（network call）なし
+- ローカル優先（local-first）の利用方針
+- 機密情報を先に秘匿化する方針（redaction-first）
 - `.promptkitignore` 対応
-- host prompt と信頼できない project input の prompt injection boundary を明記
-- 共有前に preview
-- 公開例では relative path を使う
+- ホスト側プロンプト（host prompt）と信頼できないプロジェクト入力（project input）の、プロンプト注入境界（prompt injection boundary）を明記
+- 共有前に事前確認（preview）
+- 公開例では相対パス（relative path）を使う
 
-生成された prompt にはプロジェクト文脈が含まれる場合があります。外部へ共有する前に必ず確認してください。
+生成されたプロンプト（prompt）にはプロジェクト文脈が含まれる場合があります。外部へ共有する前に必ず確認してください。
 
 ## 構成
 
-- `commands/` — slash command 文書
+- `commands/` — スラッシュコマンド（slash command）の文書
 - `skills/project-prompt/` — skill 定義
-- `schemas/` — host-neutral contract
-- `examples/` — prompt payload の例
-- `examples/rendered/` — target-specific rendered prompt の例
-- `examples/sample-outputs/` — golden sample output shape
-- `docs/prompt-builder-session.ja.md` — prompt 作成専用セッションのパターン
-- `scripts/validate.sh` — 構造/契約 validation
-- `tests/fixtures/` — valid/invalid contract fixture
-- `tests/golden/` — static mode output shape の例
-- `tests/validate-fixtures.sh` — fixture validation entry point
+- `schemas/` — 実行環境に依存しないプロンプト契約（host-neutral contract）
+- `examples/` — プロンプト入力値（prompt payload）の例
+- `examples/rendered/` — 対象別に描画済みのプロンプト例（target-specific rendered prompt）
+- `examples/sample-outputs/` — 正解例のサンプル出力構造（golden sample output shape）
+- `docs/prompt-builder-session.ja.md` — プロンプト作成専用セッションのパターン
+- `scripts/validate.sh` — 構造/契約の検証（validation）
+- `tests/fixtures/` — 有効/無効な契約用固定データ（valid/invalid contract fixture）
+- `tests/golden/` — 静的なモード出力構造の例（static mode output shape）
+- `tests/validate-fixtures.sh` — 固定データ検証の入口（fixture validation entry point）
 
 ## 検証
 
@@ -85,7 +85,7 @@ v0.1 では、意図的に full CLI は含めません。`handoff` は対応 mod
 bash packages/project-prompt-kit/scripts/validate.sh
 ```
 
-fixture だけを検証する場合:
+固定データ（fixture）だけを検証する場合:
 
 ```bash
 bash packages/project-prompt-kit/tests/validate-fixtures.sh
