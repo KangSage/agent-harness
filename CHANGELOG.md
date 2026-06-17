@@ -7,6 +7,9 @@ All notable changes to this project will be documented in this file.
 - Documented the Korean v0.2 planning governance design note for high-risk prompt planning workflows
 - Added the `plan` mode skeleton for pre-implementation planning prompts
 
+### Changed
+- Aligned Prompt Builder review-panel docs with the `Legal / Compliance Risk Screener` role label
+
 ## [0.1.9] - 2026-06-17
 ### Changed
 - Improved Korean and Japanese README terminology readability by explaining technical terms before showing the original English

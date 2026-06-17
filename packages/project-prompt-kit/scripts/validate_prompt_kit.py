@@ -643,16 +643,19 @@ def validate_language_docs(errors: list[str]) -> None:
         "prompt-builder-session.md": [
             "Review Behavior Pattern",
             "Role | Verdict | Key evidence | Decision impact | Residual risk",
+            "Legal / Compliance Risk Screener",
             "TIMELINE.md",
         ],
         "prompt-builder-session.ko.md": [
             "리뷰 행동 패턴",
             "역할 | 판정 | 핵심 근거 | 판정 반영 | 남은 리스크",
+            "Legal / Compliance Risk Screener",
             "TIMELINE.md",
         ],
         "prompt-builder-session.ja.md": [
             "レビュー行動パターン",
             "役割 | 判定 | 主な根拠 | 判定への反映 | 残るリスク",
+            "Legal / Compliance Risk Screener",
             "TIMELINE.md",
         ],
     }
@@ -665,6 +668,8 @@ def validate_language_docs(errors: list[str]) -> None:
         for phrase in phrases:
             if phrase not in text:
                 errors.append(f"Prompt Builder doc {rel(path)} missing review behavior phrase: {phrase}")
+        if "Legal / Compliance Advisor" in text:
+            errors.append(f"Prompt Builder doc {rel(path)} uses deprecated legal/compliance role label")
 
 
 def validate_golden_outputs(errors: list[str]) -> None:

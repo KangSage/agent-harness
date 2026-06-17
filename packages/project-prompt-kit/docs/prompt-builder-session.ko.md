@@ -71,10 +71,10 @@ review panel:
 이 작업에 필요한 역할만 고른다.
 구현 작업이면 CTO Reviewer, Software Architect, QA Engineer, Security / Privacy Reviewer를 포함한다.
 운영 장애나 운영 조사면 CTO Reviewer, Software Architect, QA Engineer, Operations / CS Lead, Security / Privacy Reviewer를 포함한다.
-정책, 약관, 고객 공지면 Legal / Compliance Advisor, Operations / CS Lead, Product / Information Architecture Reviewer, Growth / Marketing Reviewer를 포함한다.
+정책, 약관, 고객 공지면 Legal / Compliance Risk Screener, Operations / CS Lead, Product / Information Architecture Reviewer, Growth / Marketing Reviewer를 포함한다.
 신규 기능 기획이면 CTO Reviewer, Product / Information Architecture Reviewer, UX / Product Designer, Growth / Marketing Reviewer, QA Engineer를 포함한다.
 문서나 handoff면 Product / Information Architecture Reviewer, Operations / CS Lead, QA Engineer, CTO Reviewer를 포함한다.
-Legal / Compliance Advisor는 확정 법률 자문이 아니라 리스크 식별과 변호사 검토 필요 지점 표시로 한정한다.
+Legal / Compliance Risk Screener는 법률/컴플라이언스 리스크 식별과 변호사 검토 필요 지점 표시로만 한정하며, 확정 법률 자문이나 컴플라이언스 승인은 하지 않는다.
 
 목표:
 운영 환경 포인트 전송 트랜잭션 데이터 정합성을 조사한다.
@@ -160,7 +160,7 @@ v0.1에서는 이 내용을 optional contract schema field로 둡니다. 역할�
 - Software Architect: 도메인 경계, 데이터 흐름, 상태 전이, 시스템 책임 분리, 설계 입력 누락.
 - QA Engineer: 예외 케이스, acceptance criteria, 테스트 가능성, 운영 전 검증.
 - Security / Privacy Reviewer: 인증, 권한, 개인정보, 로그, 마스킹, secret, abuse risk.
-- Legal / Compliance Advisor: 약관, 고지, 책임 범위, 운영 리스크, 변호사 검토 필요 지점. 확정 법률 자문은 하지 않음.
+- Legal / Compliance Risk Screener: 약관, 고지, 책임 범위, 운영 리스크, 법률/컴플라이언스 리스크, 변호사 검토 필요 지점. 확정 법률 자문이나 컴플라이언스 승인은 하지 않음.
 - Operations / CS Lead: 고객 응대, 장애 대응, 운영자 관점 명확성, 정책 설명 일관성.
 - Product / Information Architecture Reviewer: 주제 구조, 결정 사항, 범위, 다음 액션, 문서 scanability.
 - UX / Product Designer: 사용자 흐름, 문구, 접근성, 실수 방지, UI 결정 품질.
@@ -178,7 +178,7 @@ production_incident:
 CTO Reviewer, Software Architect, QA Engineer, Operations / CS Lead, Security / Privacy Reviewer
 
 policy_or_customer_notice:
-Legal / Compliance Advisor, Operations / CS Lead, Product / Information Architecture Reviewer, Growth / Marketing Reviewer
+Legal / Compliance Risk Screener, Operations / CS Lead, Product / Information Architecture Reviewer, Growth / Marketing Reviewer
 
 new_feature_planning:
 CTO Reviewer, Product / Information Architecture Reviewer, UX / Product Designer, Growth / Marketing Reviewer, QA Engineer
