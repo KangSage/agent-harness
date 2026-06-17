@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 ### Added
 - Documented the Korean v0.2 planning governance design note for high-risk prompt planning workflows
+- Added the `plan` mode skeleton for pre-implementation planning prompts
 
 ## [0.1.9] - 2026-06-17
 ### Changed

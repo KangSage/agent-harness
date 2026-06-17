@@ -22,7 +22,7 @@ bash scripts/validate.sh
 
 `skills/project-prompt/references/modes/`에서 mode 하나를 고릅니다.
 
-요청이 아직 모호하면 `choose`를 사용합니다. 다른 에이전트나 사람에게 맥락을 넘기는 것이 목표일 때만 `handoff`를 사용합니다.
+요청이 아직 모호하면 `choose`를 사용합니다. 수정 작업 전에 검토된 구현 계획이 필요하면 `plan`을 사용합니다. 다른 에이전트나 사람에게 맥락을 넘기는 것이 목표일 때만 `handoff`를 사용합니다.
 
 ## 3. Target Renderer 선택
 

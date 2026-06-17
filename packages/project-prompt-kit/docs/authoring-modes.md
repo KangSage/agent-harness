@@ -10,4 +10,4 @@ Each mode reference includes:
 
 Handoff is one mode among several. Do not treat it as the default mode for project prompts.
 
-v0.1 documents all planned modes and focuses golden examples on `choose`, `implement`, `review`, `debug`, `docs`, and `handoff`.
+The current scaffold documents every supported mode and keeps golden examples aligned with the full mode taxonomy.

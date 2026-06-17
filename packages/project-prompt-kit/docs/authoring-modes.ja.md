@@ -11,4 +11,4 @@ mode spec は、生成された prompt がエージェントに何を依頼す�
 
 `handoff` は複数ある mode の一つです。project prompt の default mode として扱わないでください。
 
-v0.1 は予定しているすべての mode を文書化し、golden example は `choose`, `implement`, `review`, `debug`, `docs`, `handoff` に集中します。
+現在のひな形（scaffold）は、対応するすべての mode を文書化し、golden example を mode taxonomy 全体とそろえて維持します。

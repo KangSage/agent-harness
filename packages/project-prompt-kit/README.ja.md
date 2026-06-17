@@ -11,10 +11,11 @@
 - 基本コマンド: `/prompt`
 - 正式エイリアス: `/project-prompt`
 
-v0.1 で対応するモード（mode）:
+対応するモード（mode）:
 
 - `choose`
 - `task`
+- `plan`
 - `implement`
 - `review`
 - `debug`
@@ -36,7 +37,7 @@ v0.1 で対応するモード（mode）:
 - 安全な既定値（safety default）
 - 例、固定データ（fixture）で裏付けた正解例の出力構造（golden output shape）、検証スクリプト（validation script）
 
-v0.1 では、意図的に完全なコマンドラインツール（full CLI）は含めません。`handoff` は対応モード（mode）の一つであり、既定用途（default）や唯一の用途ではありません。
+意図的に完全なコマンドラインツール（full CLI）はまだ含めません。`handoff` は対応モード（mode）の一つであり、既定用途（default）や唯一の用途ではありません。
 
 ## クイックスタート
 

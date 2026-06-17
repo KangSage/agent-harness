@@ -11,6 +11,7 @@ Primary command for project prompt generation.
 ## Modes
 - `choose` / `선택`
 - `task` / `작업`
+- `plan` / `계획`
 - `implement` / `구현`
 - `review` / `리뷰`
 - `debug` / `디버그`

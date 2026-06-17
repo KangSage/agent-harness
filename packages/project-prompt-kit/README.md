@@ -10,9 +10,10 @@ Languages: [English](README.md) | [한국어](README.ko.md) | [日本語](README
 - Primary command: `/prompt`
 - Canonical alias: `/project-prompt`
 
-Supported modes in v0.1:
+Supported modes:
 - `choose`
 - `task`
+- `plan`
 - `implement`
 - `review`
 - `debug`
@@ -32,7 +33,7 @@ This package currently provides:
 - safety defaults
 - examples, fixture-backed golden output shapes, and validation scripts
 
-It intentionally does **not** include a full CLI in v0.1. Handoff is one supported mode, not the default or only use case.
+It intentionally does **not** include a full CLI. Handoff is one supported mode, not the default or only use case.
 
 ## Quickstart
 Use the kit as a repo-distributed prompt scaffold:

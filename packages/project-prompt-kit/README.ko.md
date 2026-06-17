@@ -11,10 +11,11 @@
 - 기본 명령: `/prompt`
 - 정식 별칭: `/project-prompt`
 
-v0.1에서 지원하는 모드(mode):
+지원하는 모드(mode):
 
 - `choose`
 - `task`
+- `plan`
 - `implement`
 - `review`
 - `debug`
@@ -36,7 +37,7 @@ v0.1에서 지원하는 모드(mode):
 - 안전 기본값(safety defaults)
 - 예제, 고정 입력 예제(fixture)로 검증한 기준 출력 형태(golden output shape), 검증 스크립트(validation script)
 
-v0.1에서는 의도적으로 완전한 CLI(full CLI)를 제공하지 않습니다. `handoff`는 지원 모드(mode) 중 하나일 뿐이며, 기본값이나 유일한 사용 사례가 아닙니다.
+의도적으로 완전한 CLI(full CLI)는 아직 제공하지 않습니다. `handoff`는 지원 모드(mode) 중 하나일 뿐이며, 기본값이나 유일한 사용 사례가 아닙니다.
 
 ## 빠른 시작
 
