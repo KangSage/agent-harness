@@ -94,6 +94,7 @@ REQUIRED_FILES = [
     PKG / "tests" / "validate-fixtures.sh",
     PKG / "tests" / "README.md",
     PKG / "skills" / "project-prompt" / "SKILL.md",
+    PKG / "skills" / "project-prompt" / "references" / "governance-presets.md",
     PKG / "skills" / "project-prompt" / "references" / "prompt-contract.md",
 ]
 
@@ -446,6 +447,150 @@ def validate_templates(errors: list[str]) -> None:
             errors.append(f"Template {rel(template_file)} missing prompt injection boundary")
 
 
+def validate_governance_presets(errors: list[str]) -> None:
+    references_readme = PKG / "skills" / "project-prompt" / "references" / "README.md"
+    if references_readme.is_file() and "governance-presets.md" not in read(references_readme):
+        errors.append("References README must link governance-presets.md")
+
+    presets_file = PKG / "skills" / "project-prompt" / "references" / "governance-presets.md"
+    if not presets_file.is_file():
+        errors.append(f"Missing governance preset reference: {rel(presets_file)}")
+        return
+
+    text = read(presets_file)
+
+    def parse_table(header: str) -> tuple[list[str], dict[str, list[str]]]:
+        lines = text.splitlines()
+        for index, line in enumerate(lines):
+            cells = table_cells(line)
+            if cells == [cell.strip() for cell in header.split("|")]:
+                rows: dict[str, list[str]] = {}
+                for row in lines[index + 2 :]:
+                    row_cells = table_cells(row)
+                    if not row_cells:
+                        break
+                    rows[row_cells[0].strip("`")] = row_cells
+                return cells, rows
+        return [], {}
+
+    def table_cells(line: str) -> list[str]:
+        stripped = line.strip()
+        if not stripped.startswith("|") or not stripped.endswith("|"):
+            return []
+        return [cell.strip() for cell in stripped.strip("|").split("|")]
+
+    required_phrases = [
+        "# Governance Preset Expansion",
+        "## Contract",
+        "## Selection Guide",
+        "Use `light` when",
+        "Use `standard` when",
+        "Use `high_risk` when",
+        "Use `auth_migration` when",
+        "Use `production_incident` when",
+        "Use `regulated_data_or_domain` when",
+        "Omit `governance` when no governance layer is needed.",
+        "Do not add a `none` preset.",
+        "Do not create `governance.review_panel_preset`.",
+        "## Preset Expansion",
+        "Preset | Reviewer set | Required sections | Stop rules | Output requirement",
+        "| `light` |",
+        "| `standard` |",
+        "| `high_risk` |",
+        "CTO Reviewer",
+        "Product / Information Architecture Reviewer",
+        "Software Architect",
+        "QA Engineer",
+        "Security / Privacy Reviewer",
+        "Legal / Compliance Risk Screener",
+        "Operations / CS Lead",
+        "This is not legal advice. This identifies review triggers for qualified humans.",
+        "## Scenario Template Additions",
+        "Scenario template | Added checklist | Added stop rules",
+        "| `auth_migration` |",
+        "| `production_incident` |",
+        "| `regulated_data_or_domain` |",
+        "## Deferred",
+        "accepted-risk handling",
+        "automatic risk classifier",
+        "renderer engine",
+    ]
+    for phrase in required_phrases:
+        if phrase not in text:
+            errors.append(f"Governance preset reference missing phrase: {phrase}")
+
+    preset_columns, preset_rows = parse_table("Preset | Reviewer set | Required sections | Stop rules | Output requirement")
+    if preset_columns != ["Preset", "Reviewer set", "Required sections", "Stop rules", "Output requirement"]:
+        errors.append("Governance preset table has invalid columns")
+    if list(preset_rows) != GOVERNANCE_PRESETS:
+        errors.append("Governance preset table row order drift")
+
+    preset_requirements = {
+        "light": [
+            "Product / Information Architecture Reviewer",
+            "QA Engineer",
+            "open issues summary",
+            "go / no-go verdict",
+        ],
+        "standard": [
+            "CTO Reviewer",
+            "Product / Information Architecture Reviewer",
+            "Software Architect",
+            "QA Engineer",
+            "open issues burn-down",
+            "implementation boundary",
+            "rollback or fallback",
+        ],
+        "high_risk": [
+            "Security / Privacy Reviewer",
+            "Legal / Compliance Risk Screener",
+            "Operations / CS Lead",
+            "operations readiness",
+            "customer-facing comms owner",
+            "support path",
+            "AI stop conditions",
+            "human approval points",
+        ],
+    }
+    for preset, phrases in preset_requirements.items():
+        row_text = " | ".join(preset_rows.get(preset, []))
+        for phrase in phrases:
+            if phrase not in row_text:
+                errors.append(f"Governance preset `{preset}` row missing: {phrase}")
+
+    scenario_columns, scenario_rows = parse_table("Scenario template | Added checklist | Added stop rules")
+    if scenario_columns != ["Scenario template", "Added checklist", "Added stop rules"]:
+        errors.append("Governance scenario template table has invalid columns")
+    if list(scenario_rows) != GOVERNANCE_SCENARIO_TEMPLATES:
+        errors.append("Governance scenario template row order drift")
+
+    scenario_requirements = {
+        "auth_migration": [
+            "customer impact scope",
+            "customer-facing comms owner",
+            "support escalation path",
+            "rollback/fallback",
+        ],
+        "production_incident": [
+            "customer impact scope",
+            "comms owner",
+            "support path",
+            "rollback or containment",
+        ],
+        "regulated_data_or_domain": [
+            "customer impact scope",
+            "customer-facing comms owner",
+            "support path",
+            "rollback/fallback",
+        ],
+    }
+    for scenario, phrases in scenario_requirements.items():
+        row_text = " | ".join(scenario_rows.get(scenario, []))
+        for phrase in phrases:
+            if phrase not in row_text:
+                errors.append(f"Governance scenario `{scenario}` row missing: {phrase}")
+
+
 def validate_schema_contracts(schemas: dict[str, dict[str, Any]], errors: list[str]) -> None:
     contract_schema = schemas.get("contract", {})
     required = set(contract_schema.get("required", []))
@@ -534,6 +679,7 @@ def validate_rendered_examples(errors: list[str]) -> None:
     for name in extra:
         errors.append(f"Rendered example is not registered for validation: {rel(rendered_dir / name)}")
 
+    rendered_populated_governance = False
     for name, source_contract in expected.items():
         example = rendered_dir / name
         if not example.is_file():
@@ -660,14 +806,27 @@ def validate_rendered_examples(errors: list[str]) -> None:
 
         governance = contract.get("governance")
         if isinstance(governance, dict):
+            rendered_populated_governance = True
             check_rendered_value("governance.preset", governance.get("preset"))
             check_rendered_value("governance.scenario_template", governance.get("scenario_template"))
+            for phrase in [
+                "Governance expansion:",
+                "Reviewer set:",
+                "Required sections:",
+                "Stop rules:",
+                "Output requirement:",
+            ]:
+                if phrase not in text:
+                    errors.append(f"Rendered example {rel(example)} missing populated governance phrase: {phrase}")
         else:
             if "Governance:\nNot specified." not in text:
                 errors.append(f"Rendered example {rel(example)} missing empty governance marker")
 
         if "{{" in text or "}}" in text:
             errors.append(f"Rendered example {rel(example)} contains unresolved template placeholder")
+
+    if not rendered_populated_governance:
+        errors.append("Rendered examples must include at least one populated governance block")
 
 
 def validate_language_docs(errors: list[str]) -> None:
@@ -892,6 +1051,7 @@ def validate_scaffold(schemas: dict[str, dict[str, Any]], errors: list[str]) -> 
 
     validate_mode_docs(schemas, errors)
     validate_templates(errors)
+    validate_governance_presets(errors)
     validate_schema_contracts(schemas, errors)
     validate_sample_contracts(schemas, errors)
     validate_sample_outputs(errors)

@@ -94,6 +94,9 @@
       }
     ]
   },
+  "governance": {
+    "preset": "standard"
+  },
   "success_criteria": [
     "Validation fails on missing required scaffold files",
     "Validation passes on the checked-in scaffold"

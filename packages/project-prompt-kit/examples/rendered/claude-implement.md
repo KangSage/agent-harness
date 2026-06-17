@@ -53,7 +53,12 @@ Review panel:
 - Security / Privacy Reviewer: auth, permission, personal data, logs, masking, secrets, abuse risk -> security and privacy risks, missing controls, required checks
 
 Governance:
-Not specified.
+- Preset: standard
+- Governance expansion:
+  - Reviewer set: CTO Reviewer; Product / Information Architecture Reviewer; Software Architect; QA Engineer
+  - Required sections: Goal; non-goals; scope; assumptions; options; decisions; affected domains; open issues burn-down; validation strategy; implementation boundary; rollback or fallback; remaining risks; go / no-go verdict
+  - Stop rules: Stop if architecture boundary, testability, rollback/fallback, or implementation boundary is unclear.
+  - Output requirement: Reviewed implementation plan with explicit decisions, blockers, and remaining risks.
 
 Success criteria:
 - Validation fails on missing required scaffold files
