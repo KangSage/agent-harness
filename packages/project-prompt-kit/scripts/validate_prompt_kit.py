@@ -35,6 +35,17 @@ GOVERNANCE_SCENARIO_TEMPLATES = [
     "regulated_data_or_domain",
 ]
 
+UNSAFE_PUBLIC_FIXTURE_MARKERS = [
+    "/users/",
+    "bearer ",
+    "ghp_",
+    "sk_live",
+    "xoxb-",
+    "postgres://",
+    "mysql://",
+    "mongodb://",
+]
+
 PLAN_MODE_REQUIRED_FIELDS = [
     "goal",
     "non-goals",
@@ -1030,6 +1041,7 @@ def validate_fixture_files(schemas: dict[str, dict[str, Any]], errors: list[str]
 
     valid_contract_modes: set[str] = set()
     valid_contract_targets: set[str] = set()
+    valid_governance_scenarios: set[str] = set()
     valid_request_count = 0
 
     for fixture in valid_fixtures:
@@ -1057,6 +1069,17 @@ def validate_fixture_files(schemas: dict[str, dict[str, Any]], errors: list[str]
         if schema_name == "contract" and isinstance(data, dict):
             valid_contract_modes.add(str(data.get("mode")))
             valid_contract_targets.add(str(data.get("target")))
+            governance = data.get("governance")
+            if isinstance(governance, dict):
+                scenario_template = governance.get("scenario_template")
+                if isinstance(scenario_template, str):
+                    valid_governance_scenarios.add(scenario_template)
+                    fixture_text = json.dumps(data, ensure_ascii=False, sort_keys=True).lower()
+                    if "synthetic" not in fixture_text:
+                        errors.append(f"Governance scenario fixture must use synthetic data marker: {rel(fixture)}")
+                    for marker in UNSAFE_PUBLIC_FIXTURE_MARKERS:
+                        if marker in fixture_text:
+                            errors.append(f"Governance scenario fixture contains unsafe public marker `{marker}`: {rel(fixture)}")
         if schema_name == "request":
             valid_request_count += 1
 
@@ -1064,6 +1087,8 @@ def validate_fixture_files(schemas: dict[str, dict[str, Any]], errors: list[str]
         errors.append("Valid contract fixtures do not cover every mode")
     if valid_contract_targets != set(TARGETS):
         errors.append("Valid contract fixtures do not cover every target")
+    if valid_governance_scenarios != set(GOVERNANCE_SCENARIO_TEMPLATES):
+        errors.append("Valid governance contract fixtures do not cover every scenario template")
     if valid_request_count < 1:
         errors.append("Valid fixtures must include at least one prompt request fixture")
 
