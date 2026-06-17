@@ -13,6 +13,7 @@ project prompt 생성을 위한 기본 명령입니다.
 
 - `choose` / `선택`
 - `task` / `작업`
+- `plan` / `계획`
 - `implement` / `구현`
 - `review` / `리뷰`
 - `debug` / `디버그`

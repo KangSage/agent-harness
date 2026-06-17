@@ -22,7 +22,7 @@ Both commands should pass before you adapt the kit for another project.
 
 Choose one mode from `skills/project-prompt/references/modes/`.
 
-Use `choose` when the request is still ambiguous. Use `handoff` only when the goal is explicitly to transfer context to another agent or person.
+Use `choose` when the request is still ambiguous. Use `plan` when the task needs a reviewed implementation plan before edits begin. Use `handoff` only when the goal is explicitly to transfer context to another agent or person.
 
 ## 3. Pick a Target Renderer
 

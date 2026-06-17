@@ -22,7 +22,7 @@ bash scripts/validate.sh
 
 `skills/project-prompt/references/modes/` から mode を一つ選びます。
 
-依頼がまだあいまいなら `choose` を使います。別のエージェントや人へ文脈を渡すことが目的の場合だけ `handoff` を使います。
+依頼がまだあいまいなら `choose` を使います。編集を始める前にレビュー済みの実装計画が必要な場合は `plan` を使います。別のエージェントや人へ文脈を渡すことが目的の場合だけ `handoff` を使います。
 
 ## 3. Target Renderer を選ぶ
 

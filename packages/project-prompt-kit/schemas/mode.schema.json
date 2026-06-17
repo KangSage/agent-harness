@@ -17,6 +17,7 @@
       "enum": [
         "choose",
         "task",
+        "plan",
         "implement",
         "review",
         "debug",
