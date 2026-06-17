@@ -989,6 +989,27 @@ def validate_golden_outputs(errors: list[str]) -> None:
                     errors.append(f"Fixture golden output {rel(golden_file)} missing plan output phrase: {phrase}")
 
 
+def governance_scenario_fixture_policy_errors(data: dict[str, Any], fixture: Path) -> list[str]:
+    governance = data.get("governance")
+    if not isinstance(governance, dict):
+        return []
+
+    scenario_template = governance.get("scenario_template")
+    if not isinstance(scenario_template, str):
+        return []
+
+    policy_errors: list[str] = []
+    fixture_text = json.dumps(data, ensure_ascii=False, sort_keys=True).lower()
+    if "synthetic" not in fixture_text:
+        policy_errors.append(f"Governance scenario fixture must use synthetic data marker: {rel(fixture)}")
+    for marker in UNSAFE_PUBLIC_FIXTURE_MARKERS:
+        if marker in fixture_text:
+            policy_errors.append(
+                f"Governance scenario fixture contains unsafe public marker `{marker}`: {rel(fixture)}"
+            )
+    return policy_errors
+
+
 def validate_fixture_files(schemas: dict[str, dict[str, Any]], errors: list[str]) -> None:
     valid_dir = PKG / "tests" / "fixtures" / "valid"
     invalid_dir = PKG / "tests" / "fixtures" / "invalid"
@@ -1002,6 +1023,8 @@ def validate_fixture_files(schemas: dict[str, dict[str, Any]], errors: list[str]
         "invalid-governance-extra-property.contract.json",
         "invalid-governance-preset.contract.json",
         "invalid-governance-scenario.contract.json",
+        "invalid-governance-scenario-missing-synthetic.contract.json",
+        "invalid-governance-scenario-unsafe-marker.contract.json",
         "invalid-command.contract.json",
         "invalid-communication-policy.contract.json",
         "invalid-workspace-strategy.contract.json",
@@ -1074,12 +1097,7 @@ def validate_fixture_files(schemas: dict[str, dict[str, Any]], errors: list[str]
                 scenario_template = governance.get("scenario_template")
                 if isinstance(scenario_template, str):
                     valid_governance_scenarios.add(scenario_template)
-                    fixture_text = json.dumps(data, ensure_ascii=False, sort_keys=True).lower()
-                    if "synthetic" not in fixture_text:
-                        errors.append(f"Governance scenario fixture must use synthetic data marker: {rel(fixture)}")
-                    for marker in UNSAFE_PUBLIC_FIXTURE_MARKERS:
-                        if marker in fixture_text:
-                            errors.append(f"Governance scenario fixture contains unsafe public marker `{marker}`: {rel(fixture)}")
+                    errors.extend(governance_scenario_fixture_policy_errors(data, fixture))
         if schema_name == "request":
             valid_request_count += 1
 
@@ -1113,7 +1131,11 @@ def validate_fixture_files(schemas: dict[str, dict[str, Any]], errors: list[str]
         if not schema:
             continue
         fixture_errors = validate_json_file(fixture, schema)
-        if not fixture_errors:
+        policy_errors: list[str] = []
+        data, load_errors = load_json(fixture)
+        if not load_errors and schema_name == "contract" and isinstance(data, dict):
+            policy_errors = governance_scenario_fixture_policy_errors(data, fixture)
+        if not fixture_errors and not policy_errors:
             errors.append(f"Invalid fixture unexpectedly passed: {rel(fixture)}")
 
 
