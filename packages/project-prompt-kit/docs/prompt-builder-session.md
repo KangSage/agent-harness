@@ -148,6 +148,42 @@ Explain SQL purpose and interpretation in the user's language, but keep SQL text
 When production results are needed, ask one user-facing question at a time.
 ```
 
+## Governance Selection
+
+Use governance selection when a worker prompt needs planning review, risk gates, or scenario-specific checklists before work starts.
+
+For v0.2, this is optional contract guidance. Keep it lightweight: choose the smallest governance layer that makes unresolved risk visible.
+
+Use `governance.preset` for review strength.
+
+- `light`: low-risk work that needs a quick scope, acceptance, and validation check.
+- `standard`: normal implementation planning that needs product, architecture, and QA review.
+- `high_risk`: work that may affect auth, permissions, privacy, production data, payment, customer impact, legal/compliance review triggers, support operations, rollout, or rollback.
+
+Use `governance.scenario_template` for scenario checklist.
+
+- `auth_migration`: sessions, tokens, permissions, account recovery, audit logs, or authentication data flow may change.
+- `production_incident`: the work investigates, mitigates, explains, or follows up on an incident or production data inconsistency.
+- `regulated_data_or_domain`: retention, deletion, consent, notice, policy, regulated data handling, or lawyer-review triggers may be involved.
+
+Omit `governance` when no governance layer is needed.
+Do not add a `none` preset.
+Do not create `governance.review_panel_preset`.
+
+When governance is selected, expand reviewer guidance through the existing `review_panel` structure. The legal/compliance role identifies risk triggers for qualified humans; it does not provide legal advice or compliance approval.
+
+Example:
+
+```json
+{
+  "mode": "plan",
+  "governance": {
+    "preset": "high_risk",
+    "scenario_template": "auth_migration"
+  }
+}
+```
+
 ## Review Panel
 
 Use a review panel when the worker prompt should ask role-specific reviewers to inspect the task before implementation, release, policy publication, or customer-facing communication. The Prompt Builder should choose only the roles that fit the task instead of always enabling every reviewer.

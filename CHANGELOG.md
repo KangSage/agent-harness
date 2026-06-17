@@ -9,6 +9,7 @@ All notable changes to this project will be documented in this file.
 - Added the optional `governance` prompt contract/request block for selecting planning review strength and scenario templates
 - Added deterministic governance preset and scenario-template expansion reference guidance
 - Added validation for the `plan` mode output shape, including open-issue burn-down, decision-gate labels, operations readiness, human approval points, and AI stop conditions
+- Added Prompt Builder governance-selection guidance in English, Korean, and Japanese
 
 ### Changed
 - Aligned Prompt Builder review-panel docs with the `Legal / Compliance Risk Screener` role label
