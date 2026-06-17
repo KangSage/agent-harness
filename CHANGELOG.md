@@ -11,6 +11,7 @@ All notable changes to this project will be documented in this file.
 - Added validation for the `plan` mode output shape, including open-issue burn-down, decision-gate labels, operations readiness, human approval points, and AI stop conditions
 - Added Prompt Builder governance-selection guidance in English, Korean, and Japanese
 - Added synthetic governance scenario fixtures for production incident and regulated data/domain planning
+- Added invalid fixtures for missing synthetic governance markers and unsafe public marker detection
 
 ### Changed
 - Aligned Prompt Builder review-panel docs with the `Legal / Compliance Risk Screener` role label
