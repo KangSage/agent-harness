@@ -1043,10 +1043,18 @@ def high_risk_review_panel_policy_errors(data: dict[str, Any], fixture: Path) ->
     ]
 
 
+def accepted_risk_policy_errors(data: dict[str, Any], fixture: Path) -> list[str]:
+    fixture_text = json.dumps(data, ensure_ascii=False, sort_keys=True).lower()
+    if "accepted_risk" in fixture_text and "human_acceptor" not in fixture_text:
+        return [f"Fixture uses accepted_risk without human_acceptor marker: {rel(fixture)}"]
+    return []
+
+
 def governance_contract_policy_errors(data: dict[str, Any], fixture: Path) -> list[str]:
     return [
         *governance_scenario_fixture_policy_errors(data, fixture),
         *high_risk_review_panel_policy_errors(data, fixture),
+        *accepted_risk_policy_errors(data, fixture),
     ]
 
 
@@ -1066,6 +1074,7 @@ def validate_fixture_files(schemas: dict[str, dict[str, Any]], errors: list[str]
         "invalid-governance-scenario.contract.json",
         "invalid-governance-scenario-missing-synthetic.contract.json",
         "invalid-governance-scenario-unsafe-marker.contract.json",
+        "invalid-governance-accepted-risk-without-human.contract.json",
         "invalid-command.contract.json",
         "invalid-communication-policy.contract.json",
         "invalid-workspace-strategy.contract.json",
