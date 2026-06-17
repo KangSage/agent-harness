@@ -4,7 +4,7 @@
 
 言語: [English](README.md) | [한국어](README.ko.md) | [日本語](README.ja.md)
 
-`project-prompt-kit` は、コーディングエージェントやプロジェクトエージェント向けの、軽量で実行環境に依存しないプロンプト用ツール群のひな形（host-neutral prompt kit scaffold）です。あいまいな依頼を、目的（`objective`）、文脈（`context`）、範囲（`scope`）、制約（`constraints`）、根拠要件（`evidence_required`）、出力形式（`output_format`）、停止条件（`stop_condition`）を持つ構造化されたプロンプト契約（prompt contract）に変換します。
+`project-prompt-kit` は、コーディングエージェントやプロジェクトエージェント向けの、軽量で実行環境に依存しないプロンプト用ツール群のひな形（host-neutral prompt kit scaffold）です。あいまいな依頼を、目的（`objective`）、文脈（context）、範囲（scope）、制約（`constraints`）、根拠要件（`evidence_required`）、出力形式（`output_format`）、停止条件（`stop_condition`）を持つ構造化されたプロンプト契約（prompt contract）に変換します。
 
 ## コマンド契約
 

@@ -4,7 +4,7 @@
 
 언어: [English](README.md) | [한국어](README.ko.md) | [日本語](README.ja.md)
 
-`project-prompt-kit`은 코딩 에이전트와 프로젝트 에이전트의 작업 흐름(workflow)을 위한 가벼운 실행 환경에 종속되지 않는 프롬프트 묶음 기본 뼈대(host-neutral prompt kit scaffold)입니다. 느슨한 의도를 목표(`objective`), 맥락(`context`), 범위(`scope`), 제약(`constraints`), 증거 요구사항(`evidence_required`), 출력 형식(`output_format`), 중단 조건(`stop_condition`)을 갖춘 구조화된 프롬프트 명세(prompt contract)로 바꿉니다.
+`project-prompt-kit`은 코딩 에이전트와 프로젝트 에이전트의 작업 흐름(workflow)을 위한 가벼운 실행 환경에 종속되지 않는 프롬프트 묶음 기본 뼈대(host-neutral prompt kit scaffold)입니다. 느슨한 의도를 목표(`objective`), 맥락(context), 범위(scope), 제약(`constraints`), 증거 요구사항(`evidence_required`), 출력 형식(`output_format`), 중단 조건(`stop_condition`)을 갖춘 구조화된 프롬프트 명세(prompt contract)로 바꿉니다.
 
 ## 명령 계약
 
