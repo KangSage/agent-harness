@@ -34,6 +34,11 @@ GOVERNANCE_SCENARIO_TEMPLATES = [
     "production_incident",
     "regulated_data_or_domain",
 ]
+HIGH_RISK_REQUIRED_REVIEWERS = [
+    "Security / Privacy Reviewer",
+    "Legal / Compliance Risk Screener",
+    "Operations / CS Lead",
+]
 
 UNSAFE_PUBLIC_FIXTURE_MARKERS = [
     "/users/",
@@ -1010,6 +1015,38 @@ def governance_scenario_fixture_policy_errors(data: dict[str, Any], fixture: Pat
     return policy_errors
 
 
+def high_risk_review_panel_policy_errors(data: dict[str, Any], fixture: Path) -> list[str]:
+    governance = data.get("governance")
+    if not isinstance(governance, dict) or governance.get("preset") != "high_risk":
+        return []
+
+    review_panel = data.get("review_panel")
+    if not isinstance(review_panel, dict):
+        return [f"High-risk governance fixture must include review_panel: {rel(fixture)}"]
+
+    reviewers = review_panel.get("reviewers")
+    if not isinstance(reviewers, list):
+        return [f"High-risk governance fixture review_panel must include reviewers: {rel(fixture)}"]
+
+    roles = {
+        reviewer.get("role")
+        for reviewer in reviewers
+        if isinstance(reviewer, dict) and isinstance(reviewer.get("role"), str)
+    }
+    return [
+        f"High-risk governance fixture missing reviewer `{role}`: {rel(fixture)}"
+        for role in HIGH_RISK_REQUIRED_REVIEWERS
+        if role not in roles
+    ]
+
+
+def governance_contract_policy_errors(data: dict[str, Any], fixture: Path) -> list[str]:
+    return [
+        *governance_scenario_fixture_policy_errors(data, fixture),
+        *high_risk_review_panel_policy_errors(data, fixture),
+    ]
+
+
 def validate_fixture_files(schemas: dict[str, dict[str, Any]], errors: list[str]) -> None:
     valid_dir = PKG / "tests" / "fixtures" / "valid"
     invalid_dir = PKG / "tests" / "fixtures" / "invalid"
@@ -1022,6 +1059,7 @@ def validate_fixture_files(schemas: dict[str, dict[str, Any]], errors: list[str]
         "extra-property.contract.json",
         "invalid-governance-extra-property.contract.json",
         "invalid-governance-preset.contract.json",
+        "invalid-governance-high-risk-missing-reviewer.contract.json",
         "invalid-governance-scenario.contract.json",
         "invalid-governance-scenario-missing-synthetic.contract.json",
         "invalid-governance-scenario-unsafe-marker.contract.json",
@@ -1097,7 +1135,7 @@ def validate_fixture_files(schemas: dict[str, dict[str, Any]], errors: list[str]
                 scenario_template = governance.get("scenario_template")
                 if isinstance(scenario_template, str):
                     valid_governance_scenarios.add(scenario_template)
-                    errors.extend(governance_scenario_fixture_policy_errors(data, fixture))
+            errors.extend(governance_contract_policy_errors(data, fixture))
         if schema_name == "request":
             valid_request_count += 1
 
@@ -1134,7 +1172,7 @@ def validate_fixture_files(schemas: dict[str, dict[str, Any]], errors: list[str]
         policy_errors: list[str] = []
         data, load_errors = load_json(fixture)
         if not load_errors and schema_name == "contract" and isinstance(data, dict):
-            policy_errors = governance_scenario_fixture_policy_errors(data, fixture)
+            policy_errors = governance_contract_policy_errors(data, fixture)
         if not fixture_errors and not policy_errors:
             errors.append(f"Invalid fixture unexpectedly passed: {rel(fixture)}")
 
