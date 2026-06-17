@@ -21,6 +21,26 @@
     "preset": "high_risk",
     "scenario_template": "production_incident"
   },
+  "review_panel": {
+    "selection_policy": "Use high-risk reviewers required by the governance preset.",
+    "reviewers": [
+      {
+        "role": "Security / Privacy Reviewer",
+        "perspective": "incident evidence handling, data exposure, log masking, and access boundaries",
+        "output": "security and privacy gaps that block incident follow-up"
+      },
+      {
+        "role": "Legal / Compliance Risk Screener",
+        "perspective": "notice, liability, and legal/compliance review triggers only",
+        "output": "qualified-human review triggers and non-advice boundary"
+      },
+      {
+        "role": "Operations / CS Lead",
+        "perspective": "incident runbook, support path, customer communication owner, and rollback or containment",
+        "output": "operations blockers, support gaps, and human approval points"
+      }
+    ]
+  },
   "success_criteria": [
     "Incident scope and customer impact questions are explicit",
     "Rollback or containment choices are separated from implementation",
