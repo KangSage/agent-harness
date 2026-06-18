@@ -518,6 +518,16 @@ def expected_error_mismatches(
     ]
 
 
+def governance_preset_coverage_errors(observed_presets: set[str]) -> list[str]:
+    missing = [preset for preset in GOVERNANCE_PRESETS if preset not in observed_presets]
+    if not missing:
+        return []
+    return [
+        "Valid governance contract fixtures do not cover every governance preset: missing "
+        + ", ".join(missing)
+    ]
+
+
 def schema_mode_enum(schema: dict[str, Any]) -> list[Any]:
     return schema.get("properties", {}).get("mode", {}).get("enum", [])
 
@@ -1266,6 +1276,7 @@ def validate_fixture_files(schemas: dict[str, dict[str, Any]], errors: list[str]
 
     valid_contract_modes: set[str] = set()
     valid_contract_targets: set[str] = set()
+    valid_governance_presets: set[str] = set()
     valid_governance_scenarios: set[str] = set()
     valid_request_count = 0
 
@@ -1296,6 +1307,9 @@ def validate_fixture_files(schemas: dict[str, dict[str, Any]], errors: list[str]
             valid_contract_targets.add(str(data.get("target")))
             governance = data.get("governance")
             if isinstance(governance, dict):
+                preset = governance.get("preset")
+                if isinstance(preset, str):
+                    valid_governance_presets.add(preset)
                 scenario_template = governance.get("scenario_template")
                 if isinstance(scenario_template, str):
                     valid_governance_scenarios.add(scenario_template)
@@ -1307,6 +1321,7 @@ def validate_fixture_files(schemas: dict[str, dict[str, Any]], errors: list[str]
         errors.append("Valid contract fixtures do not cover every mode")
     if valid_contract_targets != set(TARGETS):
         errors.append("Valid contract fixtures do not cover every target")
+    errors.extend(governance_preset_coverage_errors(valid_governance_presets))
     if valid_governance_scenarios != set(GOVERNANCE_SCENARIO_TEMPLATES):
         errors.append("Valid governance contract fixtures do not cover every scenario template")
     if valid_request_count < 1:
