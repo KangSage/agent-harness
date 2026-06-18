@@ -1141,6 +1141,7 @@ def validate_fixture_files(schemas: dict[str, dict[str, Any]], errors: list[str]
         "invalid-governance-scenario.contract.json",
         "invalid-governance-scenario-missing-synthetic.contract.json",
         "invalid-governance-scenario-unsafe-marker.contract.json",
+        "invalid-governance-scenario-db-credential-url.contract.json",
         "invalid-governance-auth-migration-missing-rollback-boundary.contract.json",
         "invalid-governance-accepted-risk-without-human.contract.json",
         "invalid-governance-not-applicable-without-rationale.contract.json",

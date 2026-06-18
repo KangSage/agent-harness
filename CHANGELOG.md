@@ -16,6 +16,7 @@ All notable changes to this project will be documented in this file.
 - Clarified required versus recommended reviewer coverage for high-risk governance presets
 - Added fixture-level validation that `accepted_risk` requires an explicit `human_acceptor` marker
 - Added v0.2 release-readiness validation for auth-migration rollback/stop boundaries and `not_applicable` rationale markers
+- Added synthetic DB credential URL fixture coverage for unsafe governance examples
 
 ### Changed
 - Aligned Prompt Builder review-panel docs with the `Legal / Compliance Risk Screener` role label
