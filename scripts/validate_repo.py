@@ -51,15 +51,6 @@ SCAN_PATHS = [
     ROOT / "scripts",
 ]
 
-DECODED_JSON_SECRET_ALLOWLIST = {
-    (
-        "packages/project-prompt-kit/tests/fixtures/invalid/"
-        "invalid-governance-scenario-db-credential-url.contract.json",
-        "credential URL",
-        "postgresql://synthetic_user:synthetic_pass" + "@example.invalid/synthetic_db.",
-    ),
-}
-
 def read(path: Path) -> str:
     return read_text(path)
 
@@ -91,7 +82,7 @@ def main() -> int:
     if root_readme.is_file() and "personal monorepo" in read(root_readme).lower():
         errors.append("README.md must not describe the public repo as a personal monorepo")
 
-    errors.extend(scan_public_hygiene(text_files(), ROOT, DECODED_JSON_SECRET_ALLOWLIST))
+    errors.extend(scan_public_hygiene(text_files(), ROOT))
 
     if errors:
         for error in errors:

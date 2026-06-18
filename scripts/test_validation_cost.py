@@ -157,6 +157,90 @@ def test_validation_cost_guard_rejects_forbidden_python_submodule_imports() -> N
     assert_contains(errors, "Forbidden default validation Python import `requests.sessions`")
 
 
+def test_validation_cost_guard_rejects_dynamic_python_process_calls() -> None:
+    with tempfile.TemporaryDirectory() as directory:
+        root = Path(directory)
+        write_validation_scripts(root)
+        (root / "scripts" / "validate_repo.py").write_text(
+            "from __future__ import annotations\nimport os\nos.popen('curl https://example.invalid').read()\n",
+            encoding="utf-8",
+        )
+
+        errors = validation_cost.validation_script_cost_errors(root)
+
+    assert_contains(errors, "Forbidden default validation Python call `os.popen`")
+
+
+def test_validation_cost_guard_rejects_aliased_python_process_calls() -> None:
+    with tempfile.TemporaryDirectory() as directory:
+        root = Path(directory)
+        write_validation_scripts(root)
+        (root / "scripts" / "validate_repo.py").write_text(
+            "from __future__ import annotations\n"
+            + "import os as safe_os\n"
+            + "from os import system as run_shell\n"
+            + "safe_os.popen('curl https://example.invalid').read()\n"
+            + "run_shell('curl https://example.invalid')\n",
+            encoding="utf-8",
+        )
+
+        errors = validation_cost.validation_script_cost_errors(root)
+
+    assert_contains(errors, "Forbidden default validation Python call `os.popen`")
+    assert_contains(errors, "Forbidden default validation Python call `os.system`")
+
+
+def test_validation_cost_guard_rejects_process_star_imports() -> None:
+    with tempfile.TemporaryDirectory() as directory:
+        root = Path(directory)
+        write_validation_scripts(root)
+        (root / "scripts" / "validate_repo.py").write_text(
+            "from __future__ import annotations\n"
+            + "from os import *\n"
+            + "popen('curl https://example.invalid').read()\n",
+            encoding="utf-8",
+        )
+
+        errors = validation_cost.validation_script_cost_errors(root)
+
+    assert_contains(errors, "Forbidden default validation Python star import `os.*`")
+
+
+def test_validation_cost_guard_rejects_dynamic_python_imports() -> None:
+    with tempfile.TemporaryDirectory() as directory:
+        root = Path(directory)
+        write_validation_scripts(root)
+        (root / "scripts" / "validate_repo.py").write_text(
+            "from __future__ import annotations\n"
+            + "import importlib\n"
+            + "importlib.import_module('subprocess')\n"
+            + "__import__('subprocess').run(['curl', 'https://example.invalid'])\n",
+            encoding="utf-8",
+        )
+
+        errors = validation_cost.validation_script_cost_errors(root)
+
+    assert_contains(errors, "Forbidden default validation Python dynamic import `subprocess`")
+
+
+def test_validation_cost_guard_rejects_aliased_dynamic_python_imports() -> None:
+    with tempfile.TemporaryDirectory() as directory:
+        root = Path(directory)
+        write_validation_scripts(root)
+        (root / "scripts" / "validate_repo.py").write_text(
+            "from __future__ import annotations\n"
+            + "import importlib as il\n"
+            + "from importlib import import_module as load_module\n"
+            + "il.import_module('subprocess')\n"
+            + "load_module('subprocess')\n",
+            encoding="utf-8",
+        )
+
+        errors = validation_cost.validation_script_cost_errors(root)
+
+    assert_contains(errors, "Forbidden default validation Python dynamic import `subprocess`")
+
+
 def main() -> int:
     test_current_validation_entrypoints_stay_lightweight()
     test_validation_cost_guard_rejects_network_or_package_manager_commands()
@@ -166,6 +250,11 @@ def main() -> int:
     test_validation_cost_guard_rejects_assignment_command_substitution()
     test_validation_cost_guard_rejects_forbidden_python_imports()
     test_validation_cost_guard_rejects_forbidden_python_submodule_imports()
+    test_validation_cost_guard_rejects_dynamic_python_process_calls()
+    test_validation_cost_guard_rejects_aliased_python_process_calls()
+    test_validation_cost_guard_rejects_process_star_imports()
+    test_validation_cost_guard_rejects_dynamic_python_imports()
+    test_validation_cost_guard_rejects_aliased_dynamic_python_imports()
     print("Validation cost tests passed.")
     return 0
 

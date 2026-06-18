@@ -69,10 +69,38 @@ def test_expected_error_matching_reports_unexpected_observed_errors() -> None:
     )
 
 
+def test_governance_policy_flags_runtime_credential_url_without_public_fixture() -> None:
+    fixture = validate_prompt_kit.PKG / "tests/fixtures/invalid/runtime-only.contract.json"
+    credential_url = (
+        "postgres"
+        + "ql://"
+        + "synthetic_user"
+        + ":"
+        + "synthetic_pass"
+        + "@"
+        + "example.invalid/synthetic_db"
+    )
+    data = {
+        "governance": {"scenario_template": "regulated_data_or_domain"},
+        "current_state": "Synthetic note includes an unsafe marker: " + credential_url,
+    }
+
+    errors = validate_prompt_kit.governance_scenario_fixture_policy_errors(data, fixture)
+
+    assert_equal(
+        errors,
+        [
+            "Governance scenario fixture contains unsafe public marker `PostgreSQL credential URL`: "
+            "tests/fixtures/invalid/runtime-only.contract.json"
+        ],
+    )
+
+
 def main() -> int:
     test_expected_error_matching_accepts_observed_substrings()
     test_expected_error_matching_reports_missing_substrings()
     test_expected_error_matching_reports_unexpected_observed_errors()
+    test_governance_policy_flags_runtime_credential_url_without_public_fixture()
     print("Invalid fixture expectation tests passed.")
     return 0
 

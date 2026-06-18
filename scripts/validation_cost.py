@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import ast
 import re
 from pathlib import Path
 
@@ -90,11 +91,10 @@ FORBIDDEN_PYTHON_FROM_IMPORT_ROOTS = [
     "subprocess",
     "urllib",
 ]
-FORBIDDEN_PYTHON_CALL_PATTERNS = {
-    "os.system": re.compile(r"\bos\.system\s*\("),
-    "subprocess call": re.compile(r"\bsubprocess\.(run|Popen|call|check_call|check_output)\s*\("),
-    "urlopen": re.compile(r"\burlopen\s*\("),
-}
+FORBIDDEN_PYTHON_STAR_IMPORT_ROOTS = ["os"]
+DYNAMIC_IMPORT_FORBIDDEN_ROOTS = sorted(
+    set([*FORBIDDEN_PYTHON_IMPORTS, *FORBIDDEN_PYTHON_FROM_IMPORT_ROOTS, "os"])
+)
 
 
 def module_matches_forbidden(module: str, forbidden_roots: list[str]) -> bool:
@@ -155,45 +155,101 @@ def forbidden_command_errors(relative: str, text: str) -> list[str]:
     return errors
 
 
-def python_import_roots(import_targets: str) -> list[str]:
-    roots: list[str] = []
-    for target in import_targets.split(","):
-        module = target.strip().split(" as ", 1)[0].strip()
-        if module:
-            roots.append(module)
-    return roots
+def dotted_name(node: ast.AST) -> str:
+    if isinstance(node, ast.Name):
+        return node.id
+    if isinstance(node, ast.Attribute):
+        parent = dotted_name(node.value)
+        return f"{parent}.{node.attr}" if parent else node.attr
+    return ""
+
+
+def import_bindings(tree: ast.AST) -> tuple[dict[str, str], dict[str, str]]:
+    module_aliases: dict[str, str] = {}
+    symbol_aliases: dict[str, str] = {}
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                if alias.asname:
+                    module_aliases[alias.asname] = alias.name
+                else:
+                    root_name = alias.name.split(".", 1)[0]
+                    module_aliases[root_name] = root_name
+        elif isinstance(node, ast.ImportFrom):
+            module = node.module or ""
+            for alias in node.names:
+                if alias.name == "*":
+                    continue
+                bound_name = alias.asname or alias.name
+                symbol_aliases[bound_name] = f"{module}.{alias.name}" if module else alias.name
+    return module_aliases, symbol_aliases
+
+
+def resolve_call_name(call: str, module_aliases: dict[str, str], symbol_aliases: dict[str, str]) -> str:
+    if not call:
+        return ""
+    if call in symbol_aliases:
+        return symbol_aliases[call]
+    first, separator, remainder = call.partition(".")
+    if first in symbol_aliases:
+        return f"{symbol_aliases[first]}{separator}{remainder}" if separator else symbol_aliases[first]
+    if first in module_aliases:
+        return f"{module_aliases[first]}{separator}{remainder}" if separator else module_aliases[first]
+    return call
+
+
+def first_constant_string(node: ast.Call) -> str:
+    if not node.args:
+        return ""
+    first = node.args[0]
+    return first.value if isinstance(first, ast.Constant) and isinstance(first.value, str) else ""
 
 
 def forbidden_python_errors(relative: str, text: str) -> list[str]:
     errors: list[str] = []
-    for line_number, line in enumerate(text.splitlines(), start=1):
-        stripped = line.strip()
-        if not stripped or stripped.startswith("#"):
-            continue
+    try:
+        tree = ast.parse(text)
+    except SyntaxError as exc:
+        return [f"Default validation Python file has invalid syntax in {relative}: {exc}"]
 
-        import_match = re.match(r"import\s+(.+)$", stripped)
-        if import_match:
-            for module in python_import_roots(import_match.group(1)):
+    module_aliases, symbol_aliases = import_bindings(tree)
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                module = alias.name
                 if module_matches_forbidden(module, FORBIDDEN_PYTHON_IMPORTS):
                     errors.append(
-                        f"Forbidden default validation Python import `{module}` in {relative}:{line_number}"
+                        f"Forbidden default validation Python import `{module}` in {relative}:{node.lineno}"
                     )
-
-        from_match = re.match(r"from\s+([A-Za-z0-9_.]+)\s+import\s+", stripped)
-        if from_match:
-            module = from_match.group(1)
+        elif isinstance(node, ast.ImportFrom):
+            module = node.module or ""
             if module_matches_forbidden(module, FORBIDDEN_PYTHON_IMPORTS) or module_matches_forbidden(
                 module, FORBIDDEN_PYTHON_FROM_IMPORT_ROOTS
             ):
                 errors.append(
-                    f"Forbidden default validation Python import `{module}` in {relative}:{line_number}"
+                    f"Forbidden default validation Python import `{module}` in {relative}:{node.lineno}"
                 )
-
-        for label, pattern in FORBIDDEN_PYTHON_CALL_PATTERNS.items():
-            if pattern.search(stripped):
+            if any(alias.name == "*" for alias in node.names) and module_matches_forbidden(
+                module, FORBIDDEN_PYTHON_STAR_IMPORT_ROOTS
+            ):
                 errors.append(
-                    f"Forbidden default validation Python call `{label}` in {relative}:{line_number}"
+                    f"Forbidden default validation Python star import `{module}.*` in {relative}:{node.lineno}"
                 )
+        elif isinstance(node, ast.Call):
+            call = resolve_call_name(dotted_name(node.func), module_aliases, symbol_aliases)
+            if call in {"os.system", "os.popen", "urlopen"} or call.startswith("os.spawn"):
+                errors.append(f"Forbidden default validation Python call `{call}` in {relative}:{node.lineno}")
+            elif call.startswith("subprocess."):
+                errors.append(
+                    f"Forbidden default validation Python call `subprocess call` in {relative}:{node.lineno}"
+                )
+            elif call in {"__import__", "importlib.import_module"}:
+                module = first_constant_string(node)
+                if module and module_matches_forbidden(module, DYNAMIC_IMPORT_FORBIDDEN_ROOTS):
+                    errors.append(
+                        f"Forbidden default validation Python dynamic import `{module}` "
+                        f"in {relative}:{node.lineno}"
+                    )
     return errors
 
 

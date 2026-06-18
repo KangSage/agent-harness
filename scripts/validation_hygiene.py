@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections import Counter
 import json
 import re
 from pathlib import Path
@@ -7,14 +8,28 @@ from typing import Iterable
 
 
 TEXT_SUFFIXES = {".md", ".json", ".yml", ".yaml", ".sh", ".py", ".txt"}
-IGNORED_DIRS = {".git", ".omx", ".idea", ".claude", "__pycache__"}
+IGNORED_DIRS = {
+    ".git",
+    ".omx",
+    ".idea",
+    ".claude",
+    ".mypy_cache",
+    ".pytest_cache",
+    ".ruff_cache",
+    ".tox",
+    ".venv",
+    "__pycache__",
+    "build",
+    "coverage",
+    "dist",
+    "node_modules",
+    "venv",
+}
 
 FORBIDDEN_TERMS = [
     "vibe" + "-sunsang",
     "O" + "MX",
     "/U" + "sers/",
-    "Kang" + "Sage",
-    "github.com/" + "Kang" + "Sage",
     "START " + "COPILOT",
 ]
 
@@ -81,7 +96,7 @@ def scan_public_hygiene(
     decoded_json_secret_allowlist: DecodedJsonSecretAllowlist | None = None,
 ) -> list[str]:
     errors: list[str] = []
-    decoded_allowlist = decoded_json_secret_allowlist or set()
+    decoded_allowlist = Counter(decoded_json_secret_allowlist or set())
     for file_path in file_paths:
         content = read_text(file_path)
         relative = rel_path(file_path, root)
@@ -101,13 +116,19 @@ def scan_public_hygiene(
         if file_path.suffix == ".json":
             decoded = decoded_json_text(content)
             if decoded is not None:
+                for term in FORBIDDEN_TERMS:
+                    if term in decoded and term not in content:
+                        errors.append(f"Forbidden public reference `{term}` in decoded JSON {relative}")
+                for pattern in MODEL_NAME_PATTERNS:
+                    if pattern.search(decoded) and not pattern.search(content):
+                        errors.append(f"Hardcoded model name in decoded JSON {relative}")
                 for label, pattern in SECRET_PATTERN_RULES:
-                    unexpected_match = any(
-                        (label, match.group(0)) not in raw_secret_matches
-                        and
-                        (relative, label, match.group(0)) not in decoded_allowlist
-                        for match in pattern.finditer(decoded)
-                    )
-                    if unexpected_match:
+                    for match in pattern.finditer(decoded):
+                        key = (relative, label, match.group(0))
+                        if (label, match.group(0)) in raw_secret_matches:
+                            continue
+                        if decoded_allowlist[key] > 0:
+                            decoded_allowlist[key] -= 1
+                            continue
                         errors.append(f"Secret-like pattern `{label}` in decoded JSON {relative}")
     return errors
