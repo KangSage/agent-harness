@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:agent-harness:project-prompt-kit:mode:v0.1",
+  "$id": "urn:agent-harness:project-prompt-kit:mode:v0.2",
   "title": "Project Prompt Mode Metadata",
   "type": "object",
   "required": [
