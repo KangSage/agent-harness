@@ -28,4 +28,4 @@ Required prompt fields:
 
 Guardrail: do not implement, edit files, or claim readiness while planning blockers remain unresolved. If human approval is required, leave the plan blocked instead of converting it into implementation instructions.
 
-Decision gates are section labels only in this scaffold. Do not invent gate object schemas, accepted-risk rules, or executable gate semantics.
+Decision gates may be represented as structured planning metadata in `decision_gates[]`. Do not treat gate status as implementation approval, deployment approval, production-operation approval, legal/compliance approval, risk acceptance, or executable workflow semantics. Accepted-risk payload rules are later governance work.

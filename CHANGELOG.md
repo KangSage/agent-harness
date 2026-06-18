@@ -3,6 +3,8 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+### Added
+- Added optional `decision_gates[]` contract schema, validation, fixtures, and planning references for structured non-executable gate status
 
 ## [0.2.0] - 2026-06-19
 ### Added

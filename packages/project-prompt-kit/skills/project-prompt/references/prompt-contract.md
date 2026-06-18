@@ -39,6 +39,16 @@ review_panel:
 governance:
   preset: light | standard | high_risk
   scenario_template: auth_migration | production_incident | regulated_data_or_domain
+decision_gates:
+  - name:
+    owner:
+    required_evidence:
+    pass_condition:
+    status: pass | blocked | needs_human_decision | accepted_risk | not_applicable
+    evidence:
+    rationale:
+    blocking_reason:
+    human_decision_required:
 success_criteria:
 risks:
 output_format:
@@ -46,9 +56,11 @@ evidence_required:
 stop_condition:
 ```
 
-`workspace_strategy`, `infrastructure_boundaries`, `communication_policy`, `review_panel`, and `governance` are optional. Include them when the worker needs explicit write-location rules, external-system access rules, language/style boundaries, role-specific review perspectives, or planning governance selection.
+`workspace_strategy`, `infrastructure_boundaries`, `communication_policy`, `review_panel`, `governance`, and `decision_gates` are optional. Include them when the worker needs explicit write-location rules, external-system access rules, language/style boundaries, role-specific review perspectives, planning governance selection, or structured planning gate status.
 
-Omit `governance` when no planning governance layer is needed. Do not use a `none` preset. In this scaffold, `governance` records the selected review strength and optional scenario template only. Preset expansion and decision-gate section labels are defined in `governance-presets.md`; gate object schemas and accepted-risk handling are defined by later governance work.
+Omit `governance` when no planning governance layer is needed. Do not use a `none` preset. In this scaffold, `governance` records the selected review strength and optional scenario template only. Preset expansion and decision gate guidance are defined in `governance-presets.md`.
+
+`decision_gates` records structured planning metadata. It is not an execution engine, deployment approval, implementation approval, legal/compliance approval, or risk acceptance system. `accepted_risk` remains a status value only in this step; the accepted-risk payload and human-acceptance pairing are defined by later accepted-risk object schema work.
 
 Safety metadata travels with the envelope:
 

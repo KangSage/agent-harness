@@ -30,7 +30,7 @@ Use `regulated_data_or_domain` when retention, deletion, consent, notice, policy
 | --- | --- | --- | --- | --- |
 | `light` | Product / Information Architecture Reviewer; QA Engineer | Goal; scope; assumptions; open issues summary; validation notes; go / no-go verdict | Stop if scope, acceptance criteria, or validation evidence is missing. | Short planning check with open issues and a go / no-go verdict. |
 | `standard` | CTO Reviewer; Product / Information Architecture Reviewer; Software Architect; QA Engineer | Goal; non-goals; scope; assumptions; options; decisions; affected domains; open issues burn-down; validation strategy; implementation boundary; rollback or fallback; remaining risks; go / no-go verdict | Stop if architecture boundary, testability, rollback/fallback, or implementation boundary is unclear. | Reviewed implementation plan with explicit decisions, blockers, and remaining risks. |
-| `high_risk` | CTO Reviewer; Product / Information Architecture Reviewer; Software Architect; QA Engineer; Security / Privacy Reviewer; Legal / Compliance Risk Screener; Operations / CS Lead | Goal; non-goals; scope; assumptions; options; decisions; affected domains; open issues burn-down; review findings; decision gates section; implementation boundary; rollback or fallback; operations readiness; support path; customer-facing comms owner; human approval points; AI stop conditions; remaining risks; go / no-go verdict | Stop if security/privacy impact, legal/compliance review trigger, customer impact, rollback/fallback, support path, customer-facing comms owner, production access boundary, or human approval point is unresolved. | High-risk planning brief with reviewer findings, decision-gate section labels, operations readiness, and explicit human-review triggers. |
+| `high_risk` | CTO Reviewer; Product / Information Architecture Reviewer; Software Architect; QA Engineer; Security / Privacy Reviewer; Legal / Compliance Risk Screener; Operations / CS Lead | Goal; non-goals; scope; assumptions; options; decisions; affected domains; open issues burn-down; review findings; decision gates section; implementation boundary; rollback or fallback; operations readiness; support path; customer-facing comms owner; human approval points; AI stop conditions; remaining risks; go / no-go verdict | Stop if security/privacy impact, legal/compliance review trigger, customer impact, rollback/fallback, support path, customer-facing comms owner, production access boundary, or human approval point is unresolved. | High-risk planning brief with reviewer findings, decision gate status, operations readiness, and explicit human-review triggers. |
 
 Minimum required high-risk reviewers:
 
@@ -52,9 +52,21 @@ Validation currently enforces the minimum required high-risk reviewers. Prompt a
 
 This is not legal advice. This identifies review triggers for qualified humans.
 
-`decision gates section` means the rendered plan must reserve a section for gates and their status. The gate object schema, accepted-risk rules, and executable gate semantics are later governance work.
+Decision gates are structured planning metadata, not executable approval semantics.
 
-Current validation only enforces fixture-level `accepted_risk` and `human_acceptor` markers; structural pairing belongs to later accepted-risk object schema work.
+`decision_gates[]` is optional and belongs to normalized plan contracts, not prompt requests. Each gate records `name`, `owner`, `required_evidence`, `pass_condition`, `status`, `evidence`, `rationale`, `blocking_reason`, and `human_decision_required`.
+
+Allowed gate statuses:
+
+- `pass`
+- `blocked`
+- `needs_human_decision`
+- `accepted_risk`
+- `not_applicable`
+
+Gate status does not authorize implementation, deployment, production operations, customer communication, legal/compliance approval, or risk acceptance. `accepted_risk` remains a status value only here; the accepted-risk payload and human-acceptance pairing are later accepted-risk object schema work.
+
+Current validation enforces `decision_gates[]` shape and fixture-level `accepted_risk` / `human_acceptor` markers; structural accepted-risk pairing belongs to later accepted-risk object schema work.
 
 ## Scenario Template Additions
 
@@ -71,6 +83,7 @@ Scenario templates add checklist and stop-rule requirements to the selected pres
 The following are intentionally deferred from this reference:
 
 - accepted-risk handling
+- executable gate semantics
 - automatic risk classifier
 - renderer engine
 - standalone CLI

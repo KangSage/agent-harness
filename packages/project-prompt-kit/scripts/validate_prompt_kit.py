@@ -35,6 +35,24 @@ GOVERNANCE_SCENARIO_TEMPLATES = [
     "production_incident",
     "regulated_data_or_domain",
 ]
+DECISION_GATE_STATUSES = [
+    "pass",
+    "blocked",
+    "needs_human_decision",
+    "accepted_risk",
+    "not_applicable",
+]
+DECISION_GATE_REQUIRED_FIELDS = [
+    "name",
+    "owner",
+    "required_evidence",
+    "pass_condition",
+    "status",
+    "evidence",
+    "rationale",
+    "blocking_reason",
+    "human_decision_required",
+]
 HIGH_RISK_REQUIRED_REVIEWERS = [
     "Security / Privacy Reviewer",
     "Legal / Compliance Risk Screener",
@@ -75,6 +93,12 @@ EXPECTED_INVALID_FIXTURE_ERRORS = {
     "extra-safety-field.contract.json": ["$.safety.share_public is not allowed"],
     "invalid-command.contract.json": ["$.command expected const '/prompt'"],
     "invalid-communication-policy.contract.json": ["$.communication_policy.unexpected is not allowed"],
+    "invalid-decision-gate-empty-evidence.contract.json": [
+        "$.decision_gates[0].evidence must contain at least 1 item(s)"
+    ],
+    "invalid-decision-gate-extra-property.contract.json": [
+        "$.decision_gates[0].approval is not allowed"
+    ],
     "invalid-governance-accepted-risk-without-human.contract.json": [
         "accepted_risk without human_acceptor marker"
     ],
@@ -632,6 +656,7 @@ def validate_templates(errors: list[str]) -> None:
             "{{communication_policy}}",
             "{{review_panel}}",
             "{{governance}}",
+            "{{decision_gates}}",
             "{{success_criteria}}",
             "{{evidence_required}}",
             "{{output_format}}",
@@ -698,7 +723,8 @@ def validate_governance_presets(errors: list[str]) -> None:
         "Recommended full high-risk panel",
         "Validation currently enforces the minimum required high-risk reviewers",
         "This is not legal advice. This identifies review triggers for qualified humans.",
-        "Current validation only enforces fixture-level `accepted_risk` and `human_acceptor` markers; structural pairing belongs to later accepted-risk object schema work.",
+        "Decision gates are structured planning metadata, not executable approval semantics.",
+        "Current validation enforces `decision_gates[]` shape and fixture-level `accepted_risk` / `human_acceptor` markers; structural accepted-risk pairing belongs to later accepted-risk object schema work.",
         "## Scenario Template Additions",
         "Scenario template | Added checklist | Added stop rules",
         "| `auth_migration` |",
@@ -791,6 +817,8 @@ def validate_schema_contracts(schemas: dict[str, dict[str, Any]], errors: list[s
     for field in ["command", "alias", "target", *CORE_FIELDS, "safety"]:
         if field not in required:
             errors.append(f"Contract schema missing required field: {field}")
+    if "decision_gates" in required:
+        errors.append("Contract schema must keep decision_gates optional")
 
     safety_required = set(contract_schema.get("properties", {}).get("safety", {}).get("required", []))
     for field in [
@@ -831,6 +859,43 @@ def validate_schema_contracts(schemas: dict[str, dict[str, Any]], errors: list[s
         )
         if scenario_schema.get("enum") != GOVERNANCE_SCENARIO_TEMPLATES:
             errors.append(f"{schema_name} schema governance scenario_template enum drift")
+
+    contract_properties = contract_schema.get("properties", {})
+    decision_gates_schema = (
+        contract_properties.get("decision_gates", {}) if isinstance(contract_properties, dict) else {}
+    )
+    if not isinstance(decision_gates_schema, dict):
+        errors.append("Contract schema missing optional decision_gates field")
+    else:
+        if decision_gates_schema.get("type") != "array":
+            errors.append("Contract schema decision_gates must be an array")
+        if decision_gates_schema.get("minItems") != 1:
+            errors.append("Contract schema decision_gates must require at least one gate when present")
+        gate_schema = decision_gates_schema.get("items", {})
+        if not isinstance(gate_schema, dict):
+            errors.append("Contract schema decision_gates items must be an object schema")
+        else:
+            if gate_schema.get("type") != "object":
+                errors.append("Contract schema decision_gates items must be objects")
+            if gate_schema.get("required") != DECISION_GATE_REQUIRED_FIELDS:
+                errors.append("Contract schema decision_gates required fields drift")
+            if gate_schema.get("additionalProperties") is not False:
+                errors.append("Contract schema decision_gates must reject extra gate properties")
+            gate_properties = gate_schema.get("properties", {})
+            if not isinstance(gate_properties, dict):
+                errors.append("Contract schema decision_gates properties must be an object")
+            else:
+                status_schema = gate_properties.get("status", {})
+                if not isinstance(status_schema, dict) or status_schema.get("enum") != DECISION_GATE_STATUSES:
+                    errors.append("Contract schema decision_gates status enum drift")
+                evidence_schema = gate_properties.get("evidence", {})
+                if not isinstance(evidence_schema, dict) or evidence_schema.get("minItems") != 1:
+                    errors.append("Contract schema decision_gates evidence must require at least one item")
+
+    request_schema = schemas.get("request", {})
+    request_properties = request_schema.get("properties", {})
+    if isinstance(request_properties, dict) and "decision_gates" in request_properties:
+        errors.append("Request schema must not expose decision_gates; gates belong to normalized plan contracts")
 
 
 def validate_sample_contracts(schemas: dict[str, dict[str, Any]], errors: list[str]) -> None:
@@ -1221,6 +1286,8 @@ def validate_fixture_files(schemas: dict[str, dict[str, Any]], errors: list[str]
         "empty-string.contract.json",
         "extra-safety-field.contract.json",
         "extra-property.contract.json",
+        "invalid-decision-gate-empty-evidence.contract.json",
+        "invalid-decision-gate-extra-property.contract.json",
         "invalid-governance-extra-property.contract.json",
         "invalid-governance-preset.contract.json",
         "invalid-governance-high-risk-missing-reviewer.contract.json",
