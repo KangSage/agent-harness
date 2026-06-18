@@ -94,13 +94,15 @@ def scan_public_hygiene(
     file_paths: Iterable[Path],
     root: Path,
     decoded_json_secret_allowlist: DecodedJsonSecretAllowlist | None = None,
+    extra_forbidden_terms: Iterable[str] | None = None,
 ) -> list[str]:
     errors: list[str] = []
     decoded_allowlist = Counter(decoded_json_secret_allowlist or set())
+    forbidden_terms = [*FORBIDDEN_TERMS, *(extra_forbidden_terms or [])]
     for file_path in file_paths:
         content = read_text(file_path)
         relative = rel_path(file_path, root)
-        for term in FORBIDDEN_TERMS:
+        for term in forbidden_terms:
             if term in content:
                 errors.append(f"Forbidden public reference `{term}` in {relative}")
         for pattern in MODEL_NAME_PATTERNS:
@@ -116,7 +118,7 @@ def scan_public_hygiene(
         if file_path.suffix == ".json":
             decoded = decoded_json_text(content)
             if decoded is not None:
-                for term in FORBIDDEN_TERMS:
+                for term in forbidden_terms:
                     if term in decoded and term not in content:
                         errors.append(f"Forbidden public reference `{term}` in decoded JSON {relative}")
                 for pattern in MODEL_NAME_PATTERNS:

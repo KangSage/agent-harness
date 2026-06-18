@@ -7,9 +7,12 @@ from pathlib import Path
 
 sys.dont_write_bytecode = True
 
+import validate_repo
 from validation_hygiene import collect_text_files, scan_public_hygiene
 
 
+SYNTHETIC_OWNER = "synthetic" + "-owner"
+SYNTHETIC_REMOTE_OWNER = "remote" + "-owner"
 SYNTHETIC_CREDENTIAL_SCHEME = "postgres" + "ql://"
 SYNTHETIC_CREDENTIAL_USERINFO = "synthetic_user" + ":" + "synthetic_pass"
 SYNTHETIC_CREDENTIAL_HOST = "example.invalid/synthetic_db"
@@ -41,6 +44,118 @@ def write_json(root: Path, relative_path: str, json_text: str) -> Path:
 def assert_equal(actual: object, expected: object) -> None:
     if actual != expected:
         raise AssertionError(f"expected {expected!r}, got {actual!r}")
+
+
+def test_repo_owner_from_remote_url_parses_github_forms() -> None:
+    assert_equal(
+        validate_repo.repo_owner_from_remote_url(f"git@github.com:{SYNTHETIC_OWNER}/example.git"),
+        SYNTHETIC_OWNER,
+    )
+    assert_equal(
+        validate_repo.repo_owner_from_remote_url(f"https://github.com/{SYNTHETIC_OWNER}/example.git"),
+        SYNTHETIC_OWNER,
+    )
+    assert_equal(
+        validate_repo.repo_owner_from_remote_url(f"ssh://git@github.com/{SYNTHETIC_OWNER}/example.git"),
+        SYNTHETIC_OWNER,
+    )
+    assert_equal(validate_repo.repo_owner_from_remote_url("https://example.invalid/owner/example.git"), None)
+
+
+def test_public_hygiene_extra_terms_prefers_env_owner() -> None:
+    with tempfile.TemporaryDirectory() as directory:
+        root = Path(directory)
+        (root / ".git").mkdir()
+        (root / ".git" / "config").write_text(
+            f'[remote "origin"]\n\turl = git@github.com:{SYNTHETIC_REMOTE_OWNER}/example.git\n',
+            encoding="utf-8",
+        )
+
+        terms = validate_repo.public_hygiene_extra_forbidden_terms(
+            root,
+            {"PUBLIC_HYGIENE_REPO_OWNER": SYNTHETIC_OWNER},
+        )
+
+    assert_equal(
+        terms,
+        (
+            SYNTHETIC_OWNER,
+            f"github.com/{SYNTHETIC_OWNER}",
+            f"github.com:{SYNTHETIC_OWNER}",
+            f"@{SYNTHETIC_OWNER}",
+        ),
+    )
+
+
+def test_public_hygiene_extra_terms_reads_origin_git_config() -> None:
+    with tempfile.TemporaryDirectory() as directory:
+        root = Path(directory)
+        (root / ".git").mkdir()
+        (root / ".git" / "config").write_text(
+            f'[remote "origin"]\n\turl = https://github.com/{SYNTHETIC_OWNER}/example.git\n',
+            encoding="utf-8",
+        )
+
+        terms = validate_repo.public_hygiene_extra_forbidden_terms(root, {})
+
+    assert_equal(
+        terms,
+        (
+            SYNTHETIC_OWNER,
+            f"github.com/{SYNTHETIC_OWNER}",
+            f"github.com:{SYNTHETIC_OWNER}",
+            f"@{SYNTHETIC_OWNER}",
+        ),
+    )
+
+
+def test_public_hygiene_extra_terms_ignore_missing_or_non_github_remote() -> None:
+    with tempfile.TemporaryDirectory() as directory:
+        root = Path(directory)
+        assert_equal(validate_repo.public_hygiene_extra_forbidden_terms(root, {}), ())
+
+        (root / ".git").mkdir()
+        (root / ".git" / "config").write_text(
+            '[remote "origin"]\n\turl = https://example.invalid/owner/example.git\n',
+            encoding="utf-8",
+        )
+
+        assert_equal(validate_repo.public_hygiene_extra_forbidden_terms(root, {}), ())
+
+
+def test_scan_public_hygiene_flags_dynamic_owner_terms() -> None:
+    with tempfile.TemporaryDirectory() as directory:
+        root = Path(directory)
+        readme = root / "README.md"
+        readme.write_text(
+            f"Maintainer {SYNTHETIC_OWNER}. "
+            f"See https://github.com/{SYNTHETIC_OWNER}/example, "
+            f"git@github.com:{SYNTHETIC_OWNER}/example.git, and @{SYNTHETIC_OWNER}.",
+            encoding="utf-8",
+        )
+        fixture = write_json(
+            root,
+            "example.json",
+            '{"url":"https:\\/\\/github.com\\/synthetic\\u002downer\\/example"}',
+        )
+
+        errors = scan_public_hygiene(
+            [readme, fixture],
+            root,
+            extra_forbidden_terms=validate_repo.repo_owner_forbidden_terms(SYNTHETIC_OWNER),
+        )
+
+    assert_equal(
+        errors,
+        [
+            f"Forbidden public reference `{SYNTHETIC_OWNER}` in README.md",
+            f"Forbidden public reference `github.com/{SYNTHETIC_OWNER}` in README.md",
+            f"Forbidden public reference `github.com:{SYNTHETIC_OWNER}` in README.md",
+            f"Forbidden public reference `@{SYNTHETIC_OWNER}` in README.md",
+            f"Forbidden public reference `{SYNTHETIC_OWNER}` in decoded JSON example.json",
+            f"Forbidden public reference `github.com/{SYNTHETIC_OWNER}` in decoded JSON example.json",
+        ],
+    )
 
 
 def test_decoded_json_scan_flags_escaped_credential_url() -> None:
@@ -255,6 +370,11 @@ def test_raw_json_secret_does_not_hide_distinct_decoded_secret() -> None:
 
 
 def main() -> int:
+    test_repo_owner_from_remote_url_parses_github_forms()
+    test_public_hygiene_extra_terms_prefers_env_owner()
+    test_public_hygiene_extra_terms_reads_origin_git_config()
+    test_public_hygiene_extra_terms_ignore_missing_or_non_github_remote()
+    test_scan_public_hygiene_flags_dynamic_owner_terms()
     test_decoded_json_scan_flags_escaped_credential_url()
     test_collect_text_files_ignores_generated_dependency_dirs()
     test_decoded_json_scan_flags_escaped_forbidden_terms_and_models()
