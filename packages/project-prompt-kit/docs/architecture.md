@@ -12,4 +12,4 @@ host adapters: Codex command, Claude slash command, plain Markdown
 
 Core mode specs are agent-neutral. Host-specific wording belongs in renderer templates or command adapters only.
 
-v0.1 ships the contract, references, examples, and validation. It does not ship a standalone CLI or agent runner.
+v0.2 ships the portable prompt contract plus the planning-governance scaffold: `plan` mode, optional `governance` fields, preset/scenario references, examples, and validation. It still does not ship a standalone CLI, renderer engine, agent runner, or automatic risk classifier.

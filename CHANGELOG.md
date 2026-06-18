@@ -3,6 +3,8 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+
+## [0.2.0] - 2026-06-19
 ### Added
 - Documented the Korean v0.2 planning governance design note for high-risk prompt planning workflows
 - Added the `plan` mode skeleton for pre-implementation planning prompts
@@ -23,6 +25,7 @@ All notable changes to this project will be documented in this file.
 - Added a default validation step allowlist with local/offline command and import checks
 
 ### Changed
+- Bumped `project-prompt-kit` plugin metadata and schema identifiers for the v0.2.0 planning-governance release
 - Aligned Prompt Builder review-panel docs with the `Legal / Compliance Risk Screener` role label
 - Hardened governance fixture hygiene and plan golden validation to reduce brittle false positives
 
