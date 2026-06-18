@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
 from typing import Any
@@ -40,15 +41,30 @@ HIGH_RISK_REQUIRED_REVIEWERS = [
     "Operations / CS Lead",
 ]
 
-UNSAFE_PUBLIC_FIXTURE_MARKERS = [
-    "/users/",
-    "bearer ",
-    "ghp_",
-    "sk_live",
-    "xoxb-",
-    "postgres://",
-    "mysql://",
-    "mongodb://",
+UNSAFE_PUBLIC_FIXTURE_PATTERNS = [
+    ("local user path", re.compile(r"/users/[a-z0-9._-]+/", re.IGNORECASE)),
+    (
+        "bearer credential",
+        re.compile(r"\bbearer\s+(?=[-a-z0-9._~+/=]*[0-9._~+/=])[-a-z0-9._~+/=]{16,}\b", re.IGNORECASE),
+    ),
+    ("GitHub token", re.compile(r"\bghp_[a-z0-9_]{8,}\b", re.IGNORECASE)),
+    ("live secret key", re.compile(r"\bsk_live_[a-z0-9_]{8,}\b", re.IGNORECASE)),
+    ("Slack bot token", re.compile(r"\bxoxb-[a-z0-9-]{8,}\b", re.IGNORECASE)),
+    ("PostgreSQL credential URL", re.compile(r"\bpostgres(?:ql)?://[^:\s/@]+:[^@\s]+@", re.IGNORECASE)),
+    ("MySQL credential URL", re.compile(r"\bmysql://[^:\s/@]+:[^@\s]+@", re.IGNORECASE)),
+    ("MongoDB credential URL", re.compile(r"\bmongodb(?:\+srv)?://[^:\s/@]+:[^@\s]+@", re.IGNORECASE)),
+]
+
+AUTH_MIGRATION_BOUNDARY_MARKERS = [
+    "rollback",
+    "fallback",
+    "cutover stop",
+]
+
+NOT_APPLICABLE_RATIONALE_MARKERS = [
+    "rationale",
+    "reason",
+    "basis",
 ]
 
 PLAN_MODE_REQUIRED_FIELDS = [
@@ -74,7 +90,6 @@ PLAN_MODE_REQUIRED_FIELDS = [
 
 PLAN_GOLDEN_REQUIRED_PHRASES = [
     "Open issues burn-down:",
-    "Issue | Type | Evidence | Evidence standard | Impact | Customer impact | Owner reviewer | Review trigger | Human decision required | Decision | Remaining risk",
     "Review findings:",
     "Decision gates:",
     "Implementation boundary:",
@@ -85,6 +100,20 @@ PLAN_GOLDEN_REQUIRED_PHRASES = [
     "Remaining risks:",
     "Go / no-go verdict:",
     "Unresolved blockers must not be converted into implementation instructions.",
+]
+
+PLAN_BURN_DOWN_HEADER = [
+    "Issue",
+    "Type",
+    "Evidence",
+    "Evidence standard",
+    "Impact",
+    "Customer impact",
+    "Owner reviewer",
+    "Review trigger",
+    "Human decision required",
+    "Decision",
+    "Remaining risk",
 ]
 
 CORE_FIELDS = [
@@ -196,6 +225,22 @@ def rel(path: Path) -> str:
 
 def has_markdown_link(text: str, label: str, target: str) -> bool:
     return f"[{label}]({target})" in text or f"[{label}](./{target})" in text
+
+
+def table_cells(line: str) -> list[str]:
+    stripped = line.strip()
+    if "|" not in stripped:
+        return []
+    if stripped.startswith("|"):
+        stripped = stripped[1:]
+    if stripped.endswith("|"):
+        stripped = stripped[:-1]
+    cells = [cell.strip() for cell in stripped.split("|")]
+    return cells if len(cells) > 1 else []
+
+
+def has_table_header(text: str, expected_cells: list[str]) -> bool:
+    return any(table_cells(line) == expected_cells for line in text.splitlines())
 
 
 def load_json(path: Path) -> tuple[Any | None, list[str]]:
@@ -538,12 +583,6 @@ def validate_governance_presets(errors: list[str]) -> None:
                 return cells, rows
         return [], {}
 
-    def table_cells(line: str) -> list[str]:
-        stripped = line.strip()
-        if not stripped.startswith("|") or not stripped.endswith("|"):
-            return []
-        return [cell.strip() for cell in stripped.strip("|").split("|")]
-
     required_phrases = [
         "# Governance Preset Expansion",
         "## Contract",
@@ -573,6 +612,7 @@ def validate_governance_presets(errors: list[str]) -> None:
         "Recommended full high-risk panel",
         "Validation currently enforces the minimum required high-risk reviewers",
         "This is not legal advice. This identifies review triggers for qualified humans.",
+        "Current validation only enforces fixture-level `accepted_risk` and `human_acceptor` markers; structural pairing belongs to later accepted-risk object schema work.",
         "## Scenario Template Additions",
         "Scenario template | Added checklist | Added stop rules",
         "| `auth_migration` |",
@@ -913,6 +953,7 @@ def validate_language_docs(errors: list[str]) -> None:
     prompt_builder_requirements = {
         "prompt-builder-session.md": [
             "Governance Selection",
+            "Detailed expansion rules live in `governance-presets.md`; this session guide only helps choose the governance layer.",
             "Use `governance.preset` for review strength.",
             "Use `governance.scenario_template` for scenario checklist.",
             "Omit `governance` when no governance layer is needed.",
@@ -925,6 +966,7 @@ def validate_language_docs(errors: list[str]) -> None:
         ],
         "prompt-builder-session.ko.md": [
             "거버넌스 선택",
+            "세부 확장 규칙의 기준은 `governance-presets.md`입니다.",
             "`governance.preset`은 검토 강도를 고를 때 사용합니다.",
             "`governance.scenario_template`은 상황별 체크리스트를 추가할 때 사용합니다.",
             "governance layer가 필요 없다면 `governance` block을 생략합니다.",
@@ -937,6 +979,7 @@ def validate_language_docs(errors: list[str]) -> None:
         ],
         "prompt-builder-session.ja.md": [
             "ガバナンス選択",
+            "詳細な展開ルールの基準は `governance-presets.md` です。",
             "`governance.preset` はレビューの強さを選ぶために使います。",
             "`governance.scenario_template` は状況別 checklist を追加するために使います。",
             "governance layer が不要な場合は `governance` block を省略します。",
@@ -995,6 +1038,8 @@ def validate_golden_outputs(errors: list[str]) -> None:
             for phrase in PLAN_GOLDEN_REQUIRED_PHRASES:
                 if phrase not in text:
                     errors.append(f"Fixture golden output {rel(golden_file)} missing plan output phrase: {phrase}")
+            if not has_table_header(text, PLAN_BURN_DOWN_HEADER):
+                errors.append(f"Fixture golden output {rel(golden_file)} missing plan burn-down table header")
 
 
 def governance_scenario_fixture_policy_errors(data: dict[str, Any], fixture: Path) -> list[str]:
@@ -1010,12 +1055,23 @@ def governance_scenario_fixture_policy_errors(data: dict[str, Any], fixture: Pat
     fixture_text = json.dumps(data, ensure_ascii=False, sort_keys=True).lower()
     if "synthetic" not in fixture_text:
         policy_errors.append(f"Governance scenario fixture must use synthetic data marker: {rel(fixture)}")
-    for marker in UNSAFE_PUBLIC_FIXTURE_MARKERS:
-        if marker in fixture_text:
+    for label, pattern in UNSAFE_PUBLIC_FIXTURE_PATTERNS:
+        if pattern.search(fixture_text):
             policy_errors.append(
-                f"Governance scenario fixture contains unsafe public marker `{marker}`: {rel(fixture)}"
+                f"Governance scenario fixture contains unsafe public marker `{label}`: {rel(fixture)}"
             )
     return policy_errors
+
+
+def auth_migration_boundary_policy_errors(data: dict[str, Any], fixture: Path) -> list[str]:
+    governance = data.get("governance")
+    if not isinstance(governance, dict) or governance.get("scenario_template") != "auth_migration":
+        return []
+
+    fixture_text = json.dumps(data, ensure_ascii=False, sort_keys=True).lower()
+    if not any(marker in fixture_text for marker in AUTH_MIGRATION_BOUNDARY_MARKERS):
+        return [f"Auth migration governance fixture missing rollback/fallback or cutover stop boundary: {rel(fixture)}"]
+    return []
 
 
 def high_risk_review_panel_policy_errors(data: dict[str, Any], fixture: Path) -> list[str]:
@@ -1050,11 +1106,22 @@ def accepted_risk_policy_errors(data: dict[str, Any], fixture: Path) -> list[str
     return []
 
 
+def not_applicable_policy_errors(data: dict[str, Any], fixture: Path) -> list[str]:
+    fixture_text = json.dumps(data, ensure_ascii=False, sort_keys=True).lower()
+    if "not_applicable" in fixture_text and not any(
+        marker in fixture_text for marker in NOT_APPLICABLE_RATIONALE_MARKERS
+    ):
+        return [f"Fixture uses not_applicable without rationale marker: {rel(fixture)}"]
+    return []
+
+
 def governance_contract_policy_errors(data: dict[str, Any], fixture: Path) -> list[str]:
     return [
         *governance_scenario_fixture_policy_errors(data, fixture),
+        *auth_migration_boundary_policy_errors(data, fixture),
         *high_risk_review_panel_policy_errors(data, fixture),
         *accepted_risk_policy_errors(data, fixture),
+        *not_applicable_policy_errors(data, fixture),
     ]
 
 
@@ -1074,7 +1141,9 @@ def validate_fixture_files(schemas: dict[str, dict[str, Any]], errors: list[str]
         "invalid-governance-scenario.contract.json",
         "invalid-governance-scenario-missing-synthetic.contract.json",
         "invalid-governance-scenario-unsafe-marker.contract.json",
+        "invalid-governance-auth-migration-missing-rollback-boundary.contract.json",
         "invalid-governance-accepted-risk-without-human.contract.json",
+        "invalid-governance-not-applicable-without-rationale.contract.json",
         "invalid-command.contract.json",
         "invalid-communication-policy.contract.json",
         "invalid-workspace-strategy.contract.json",

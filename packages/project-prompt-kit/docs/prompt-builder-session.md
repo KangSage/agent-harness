@@ -154,6 +154,8 @@ Use governance selection when a worker prompt needs planning review, risk gates,
 
 For v0.2, this is optional contract guidance. Keep it lightweight: choose the smallest governance layer that makes unresolved risk visible.
 
+Detailed expansion rules live in `governance-presets.md`; this session guide only helps choose the governance layer.
+
 Use `governance.preset` for review strength.
 
 - `light`: low-risk work that needs a quick scope, acceptance, and validation check.

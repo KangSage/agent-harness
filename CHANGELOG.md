@@ -15,9 +15,11 @@ All notable changes to this project will be documented in this file.
 - Added high-risk governance reviewer coverage validation for Security / Privacy, Legal / Compliance, and Operations / CS roles
 - Clarified required versus recommended reviewer coverage for high-risk governance presets
 - Added fixture-level validation that `accepted_risk` requires an explicit `human_acceptor` marker
+- Added v0.2 release-readiness validation for auth-migration rollback/stop boundaries and `not_applicable` rationale markers
 
 ### Changed
 - Aligned Prompt Builder review-panel docs with the `Legal / Compliance Risk Screener` role label
+- Hardened governance fixture hygiene and plan golden validation to reduce brittle false positives
 
 ## [0.1.9] - 2026-06-17
 ### Changed
