@@ -511,11 +511,17 @@ def fixture_schema_name(path: Path) -> str:
 def expected_error_mismatches(
     fixture_label: str, observed_errors: list[str], expected_substrings: list[str]
 ) -> list[str]:
-    return [
+    missing_errors = [
         f"Invalid fixture {fixture_label} did not produce expected error substring: {expected!r}"
         for expected in expected_substrings
         if not any(expected in observed for observed in observed_errors)
     ]
+    unexpected_errors = [
+        f"Invalid fixture {fixture_label} produced unexpected error: {observed!r}"
+        for observed in observed_errors
+        if not any(expected in observed for expected in expected_substrings)
+    ]
+    return [*missing_errors, *unexpected_errors]
 
 
 def governance_preset_coverage_errors(observed_presets: set[str]) -> list[str]:

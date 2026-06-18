@@ -10,7 +10,7 @@
   "inputs": ["synthetic design note"],
   "constraints": ["Do not implement"],
   "governance": {
-    "preset": "high_risk",
+    "preset": "standard",
     "scenario_template": "billing_cutover"
   },
   "success_criteria": ["Governance selection is explicit"],

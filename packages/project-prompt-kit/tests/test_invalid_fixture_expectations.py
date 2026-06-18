@@ -44,7 +44,27 @@ def test_expected_error_matching_reports_missing_substrings() -> None:
         errors,
         [
             "Invalid fixture fixtures/invalid/example.contract.json did not produce expected error substring: "
-            "'not_applicable without rationale marker'"
+            "'not_applicable without rationale marker'",
+            "Invalid fixture fixtures/invalid/example.contract.json produced unexpected error: "
+            "\"fixtures/invalid/example.contract.json: $.mode value 'broken' not in enum\"",
+        ],
+    )
+
+
+def test_expected_error_matching_reports_unexpected_observed_errors() -> None:
+    errors = validate_prompt_kit.expected_error_mismatches(
+        "fixtures/invalid/example.contract.json",
+        [
+            "fixtures/invalid/example.contract.json: $.mode value 'broken' not in enum",
+            "fixtures/invalid/example.contract.json: $.target value 'browser' not in enum",
+        ],
+        ["$.mode value 'broken' not in enum"],
+    )
+    assert_equal(
+        errors,
+        [
+            "Invalid fixture fixtures/invalid/example.contract.json produced unexpected error: "
+            "\"fixtures/invalid/example.contract.json: $.target value 'browser' not in enum\""
         ],
     )
 
@@ -52,6 +72,7 @@ def test_expected_error_matching_reports_missing_substrings() -> None:
 def main() -> int:
     test_expected_error_matching_accepts_observed_substrings()
     test_expected_error_matching_reports_missing_substrings()
+    test_expected_error_matching_reports_unexpected_observed_errors()
     print("Invalid fixture expectation tests passed.")
     return 0
 

@@ -17,7 +17,7 @@
     "Do not propose write queries or data correction without human approval"
   ],
   "governance": {
-    "preset": "high_risk",
+    "preset": "standard",
     "scenario_template": "production_incident"
   },
   "success_criteria": [
