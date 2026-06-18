@@ -67,6 +67,69 @@ NOT_APPLICABLE_RATIONALE_MARKERS = [
     "basis",
 ]
 
+EXPECTED_INVALID_FIXTURE_ERRORS = {
+    "empty-array-item.contract.json": ["$.inputs[0] length must be at least 1"],
+    "empty-array.contract.json": ["$.inputs must contain at least 1 item(s)"],
+    "empty-string.contract.json": ["$.project length must be at least 1"],
+    "extra-property.contract.json": ["$.notes is not allowed"],
+    "extra-safety-field.contract.json": ["$.safety.share_public is not allowed"],
+    "invalid-command.contract.json": ["$.command expected const '/prompt'"],
+    "invalid-communication-policy.contract.json": ["$.communication_policy.unexpected is not allowed"],
+    "invalid-governance-accepted-risk-without-human.contract.json": [
+        "accepted_risk without human_acceptor marker"
+    ],
+    "invalid-governance-auth-migration-missing-rollback-boundary.contract.json": [
+        "missing rollback/fallback or cutover stop boundary"
+    ],
+    "invalid-governance-extra-property.contract.json": ["$.governance.approval is not allowed"],
+    "invalid-governance-high-risk-missing-reviewer.contract.json": [
+        "missing reviewer `Operations / CS Lead`"
+    ],
+    "invalid-governance-not-applicable-without-rationale.contract.json": [
+        "not_applicable without rationale marker"
+    ],
+    "invalid-governance-preset.contract.json": ["$.governance.preset value 'none' not in enum"],
+    "invalid-governance-scenario-db-credential-url.contract.json": [
+        "unsafe public marker `PostgreSQL credential URL`"
+    ],
+    "invalid-governance-scenario-missing-synthetic.contract.json": [
+        "must use synthetic data marker"
+    ],
+    "invalid-governance-scenario-unsafe-marker.contract.json": [
+        "unsafe public marker `bearer credential`"
+    ],
+    "invalid-governance-scenario.contract.json": [
+        "$.governance.scenario_template value 'billing_cutover' not in enum"
+    ],
+    "invalid-mode.contract.json": ["$.mode value 'audit' not in enum"],
+    "invalid-review-panel-preset.contract.json": [
+        "$.review_panel.preset value 'implementaiton_review' not in enum"
+    ],
+    "invalid-review-panel.contract.json": ["$.review_panel.reviewers[0].unexpected is not allowed"],
+    "invalid-safety-object.contract.json": ["$.safety expected object, got string"],
+    "invalid-target.contract.json": ["$.target value 'browser' not in enum"],
+    "invalid-type.contract.json": ["$.inputs expected array, got string"],
+    "invalid-workspace-strategy.contract.json": ["$.workspace_strategy.unexpected is not allowed"],
+    "malformed-enum-schema.schema.json": ["enum at $ must be an array"],
+    "malformed-items-schema.schema.json": ["items at $ must be an object schema"],
+    "malformed-minitems-schema.schema.json": ["minItems at $ must be an integer"],
+    "malformed-minlength-schema.schema.json": ["minLength at $ must be an integer"],
+    "malformed-properties-schema.schema.json": ["properties at $ must be an object"],
+    "malformed-property-schema.schema.json": ["at $.properties.name must be an object"],
+    "malformed-required-schema.schema.json": ["required at $ must be an array of strings"],
+    "missing-required-field.contract.json": ["$.objective is required"],
+    "missing-safety-field.contract.json": ["$.safety.preview_before_share is required"],
+    "request-extra-property.json": ["$.notes is not allowed"],
+    "request-invalid-governance-extra-property.json": ["$.governance.approval is not allowed"],
+    "request-invalid-governance-preset.json": ["$.governance.preset value 'none' not in enum"],
+    "request-invalid-governance-scenario.json": [
+        "$.governance.scenario_template value 'billing_cutover' not in enum"
+    ],
+    "unsafe-network.contract.json": ["$.safety.no_network expected const True"],
+    "unsafe-telemetry.contract.json": ["$.safety.telemetry expected const 'off'"],
+    "unsupported-keyword.schema.json": ["uses unsupported keyword `pattern`"],
+}
+
 PLAN_MODE_REQUIRED_FIELDS = [
     "goal",
     "non-goals",
@@ -443,6 +506,16 @@ def fixture_schema_name(path: Path) -> str:
     if path.name.startswith("mode-"):
         return "mode"
     return "contract"
+
+
+def expected_error_mismatches(
+    fixture_label: str, observed_errors: list[str], expected_substrings: list[str]
+) -> list[str]:
+    return [
+        f"Invalid fixture {fixture_label} did not produce expected error substring: {expected!r}"
+        for expected in expected_substrings
+        if not any(expected in observed for observed in observed_errors)
+    ]
 
 
 def schema_mode_enum(schema: dict[str, Any]) -> list[Any]:
@@ -1174,6 +1247,8 @@ def validate_fixture_files(schemas: dict[str, dict[str, Any]], errors: list[str]
     for name in required_invalid:
         if not (invalid_dir / name).is_file():
             errors.append(f"Missing invalid fixture: {rel(invalid_dir / name)}")
+        if name not in EXPECTED_INVALID_FIXTURE_ERRORS:
+            errors.append(f"Missing expected invalid fixture error mapping: {name}")
 
     valid_fixtures = sorted(valid_dir.glob("*.json"))
     invalid_fixtures = sorted(invalid_dir.glob("*.json"))
@@ -1181,6 +1256,13 @@ def validate_fixture_files(schemas: dict[str, dict[str, Any]], errors: list[str]
         errors.append("No valid fixtures found")
     if not invalid_fixtures:
         errors.append("No invalid fixtures found")
+
+    invalid_fixture_names = {fixture.name for fixture in invalid_fixtures}
+    for name in sorted(set(EXPECTED_INVALID_FIXTURE_ERRORS) - invalid_fixture_names):
+        errors.append(f"Expected invalid fixture error mapping references missing fixture: {name}")
+    for fixture in invalid_fixtures:
+        if fixture.name not in EXPECTED_INVALID_FIXTURE_ERRORS:
+            errors.append(f"Invalid fixture missing expected error mapping: {rel(fixture)}")
 
     valid_contract_modes: set[str] = set()
     valid_contract_targets: set[str] = set()
@@ -1232,19 +1314,30 @@ def validate_fixture_files(schemas: dict[str, dict[str, Any]], errors: list[str]
 
     for fixture in invalid_fixtures:
         schema_name = fixture_schema_name(fixture)
+        expected_errors = EXPECTED_INVALID_FIXTURE_ERRORS.get(fixture.name, [])
         if schema_name == "schema":
+            observed_errors: list[str] = []
             schema_data, load_errors = load_json(fixture)
             if load_errors:
+                observed_errors.extend(load_errors)
+                errors.extend(expected_error_mismatches(rel(fixture), observed_errors, expected_errors))
                 continue
             keyword_errors: list[str] = []
             check_schema_keywords(schema_data, fixture, keyword_errors)
+            observed_errors.extend(keyword_errors)
             if isinstance(schema_data, dict):
                 probe_errors: list[str] = []
                 validate_instance(schema_probe_data(schema_data), schema_data, rel(fixture), probe_errors)
                 if fixture.name.startswith("malformed-") and not probe_errors:
-                    errors.append(f"Malformed schema fixture did not exercise instance validation: {rel(fixture)}")
-            if not keyword_errors:
+                    schema_exercise_error = (
+                        f"Malformed schema fixture did not exercise instance validation: {rel(fixture)}"
+                    )
+                    observed_errors.append(schema_exercise_error)
+                    errors.append(schema_exercise_error)
+            if not observed_errors:
                 errors.append(f"Invalid fixture unexpectedly passed: {rel(fixture)}")
+            else:
+                errors.extend(expected_error_mismatches(rel(fixture), observed_errors, expected_errors))
             continue
 
         schema = schemas.get(schema_name)
@@ -1255,8 +1348,11 @@ def validate_fixture_files(schemas: dict[str, dict[str, Any]], errors: list[str]
         data, load_errors = load_json(fixture)
         if not load_errors and schema_name == "contract" and isinstance(data, dict):
             policy_errors = governance_contract_policy_errors(data, fixture)
-        if not fixture_errors and not policy_errors:
+        observed_errors = [*fixture_errors, *policy_errors]
+        if not observed_errors:
             errors.append(f"Invalid fixture unexpectedly passed: {rel(fixture)}")
+        else:
+            errors.extend(expected_error_mismatches(rel(fixture), observed_errors, expected_errors))
 
 
 def validate_ignore_defaults(errors: list[str]) -> None:
