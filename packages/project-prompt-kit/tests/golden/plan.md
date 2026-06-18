@@ -10,7 +10,7 @@ Gap handling: keep open questions as blockers instead of converting assumptions 
 
 Open issues burn-down:
 
-Issue | Type | Evidence | Evidence standard | Impact | Customer impact | Owner reviewer | Review trigger | Human decision required | Decision | Remaining risk
+| Issue  | Type | Evidence | Evidence standard | Impact | Customer impact | Owner reviewer | Review trigger | Human decision required | Decision | Remaining risk |
 
 Review findings: summarize role-based reviewer conclusions before implementation planning.
 

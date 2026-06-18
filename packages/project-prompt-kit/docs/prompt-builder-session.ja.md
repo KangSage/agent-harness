@@ -154,6 +154,8 @@ worker prompt が作業を始める前に、計画レビュー、risk gate、状
 
 v0.2 では、optional contract guidance として扱います。重くしすぎず、未解決リスクを見えるようにする最小の governance layer だけを選びます。
 
+詳細な展開ルールの基準は `governance-presets.md` です。この session guide は、どの governance layer を選ぶかだけを助けます。
+
 `governance.preset` はレビューの強さを選ぶために使います。
 
 - `light`: 低リスクの作業で、scope、acceptance、validation だけを素早く確認する場合。

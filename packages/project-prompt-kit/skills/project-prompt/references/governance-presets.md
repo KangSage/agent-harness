@@ -54,6 +54,8 @@ This is not legal advice. This identifies review triggers for qualified humans.
 
 `decision gates section` means the rendered plan must reserve a section for gates and their status. The gate object schema, accepted-risk rules, and executable gate semantics are later governance work.
 
+Current validation only enforces fixture-level `accepted_risk` and `human_acceptor` markers; structural pairing belongs to later accepted-risk object schema work.
+
 ## Scenario Template Additions
 
 | Scenario template | Added checklist | Added stop rules |

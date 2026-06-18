@@ -154,6 +154,8 @@ worker prompt가 작업을 시작하기 전에 계획 검토, 리스크 gate, �
 
 v0.2에서는 이 내용을 optional contract guidance로 둡니다. 가볍게 유지하세요. 미해결 리스크가 보이도록 만드는 최소한의 governance layer만 고릅니다.
 
+세부 확장 규칙의 기준은 `governance-presets.md`입니다. 이 세션 가이드는 어떤 governance layer를 고를지만 돕습니다.
+
 `governance.preset`은 검토 강도를 고를 때 사용합니다.
 
 - `light`: 낮은 위험의 작업에서 scope, acceptance, validation만 빠르게 확인할 때.
