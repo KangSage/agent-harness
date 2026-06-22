@@ -81,6 +81,7 @@ FORBIDDEN_HUMAN_ACCEPTOR_MARKERS = [
     "ticket status",
     "silence",
     "no response",
+    "non-response",
     "inference",
 ]
 HIGH_RISK_REQUIRED_REVIEWERS = [
@@ -115,6 +116,15 @@ NOT_APPLICABLE_RATIONALE_MARKERS = [
     "basis",
 ]
 PLACEHOLDER_RATIONALES = {"", "-", "n/a", "na", "not applicable", "none", "tbd", "todo", "unknown"}
+PLACEHOLDER_BOUNDARIES = PLACEHOLDER_RATIONALES | {
+    "no expiry",
+    "no revisit",
+    "no revisit condition",
+    "not set",
+    "open ended",
+    "open-ended",
+    "unbounded",
+}
 
 EXPECTED_INVALID_FIXTURE_ERRORS = {
     "empty-array-item.contract.json": ["$.inputs[0] length must be at least 1"],
@@ -125,7 +135,10 @@ EXPECTED_INVALID_FIXTURE_ERRORS = {
     "invalid-command.contract.json": ["$.command expected const '/prompt'"],
     "invalid-communication-policy.contract.json": ["$.communication_policy.unexpected is not allowed"],
     "invalid-accepted-risk-ai-acceptor.contract.json": [
-        "decision_gates[0].accepted_risk human_acceptor cannot be AI, validator, reviewer summary, ticket status, silence, or inference"
+        "decision_gates[0].accepted_risk human_acceptor cannot be AI, validator, reviewer summary, ticket status, silence, non-response, or inference"
+    ],
+    "invalid-accepted-risk-human-flag.contract.json": [
+        "decision_gates[0] accepted_risk requires human_decision_required true"
     ],
     "invalid-accepted-risk-impact-false.contract.json": [
         "decision_gates[0].accepted_risk requires customer_or_support_impact_acknowledged true"
@@ -134,7 +147,13 @@ EXPECTED_INVALID_FIXTURE_ERRORS = {
         "decision_gates[0] accepted_risk requires accepted_risk payload"
     ],
     "invalid-accepted-risk-missing-revisit.contract.json": [
-        "decision_gates[0].accepted_risk requires expiry or revisit_condition"
+        "decision_gates[0].accepted_risk requires concrete expiry or revisit_condition"
+    ],
+    "invalid-accepted-risk-no-reply.contract.json": [
+        "decision_gates[0].accepted_risk human_acceptor cannot be AI, validator, reviewer summary, ticket status, silence, non-response, or inference"
+    ],
+    "invalid-accepted-risk-tbd-boundary.contract.json": [
+        "decision_gates[0].accepted_risk requires concrete expiry or revisit_condition"
     ],
     "invalid-accepted-risk-status-mismatch.contract.json": [
         "decision_gates[0] accepted_risk payload requires status accepted_risk"
@@ -1431,6 +1450,10 @@ def decision_gate_policy_errors(data: dict[str, Any], fixture: Path) -> list[str
             )
         accepted_risk = gate.get("accepted_risk")
         if status == "accepted_risk":
+            if gate.get("human_decision_required") is not True:
+                policy_errors.append(
+                    f"decision_gates[{index}] accepted_risk requires human_decision_required true: {rel(fixture)}"
+                )
             if not isinstance(accepted_risk, dict):
                 policy_errors.append(
                     f"decision_gates[{index}] accepted_risk requires accepted_risk payload: {rel(fixture)}"
@@ -1455,33 +1478,29 @@ def has_forbidden_human_acceptor_marker(value: str) -> bool:
     return False
 
 
+def has_concrete_accepted_risk_boundary(value: Any) -> bool:
+    if not isinstance(value, str):
+        return False
+    normalized = value.strip().lower()
+    return bool(normalized) and normalized not in PLACEHOLDER_BOUNDARIES
+
+
 def accepted_risk_payload_policy_errors(payload: dict[str, Any], gate_index: int, fixture: Path) -> list[str]:
     policy_errors: list[str] = []
-    marker_text_parts = [
-        payload.get("human_acceptor"),
-        payload.get("human_acceptor_role"),
-        payload.get("approval_evidence"),
-        payload.get("basis"),
-    ]
-    marker_text = " ".join(part for part in marker_text_parts if isinstance(part, str))
-    if has_forbidden_human_acceptor_marker(marker_text):
+    human_acceptor = payload.get("human_acceptor")
+    if isinstance(human_acceptor, str) and has_forbidden_human_acceptor_marker(human_acceptor):
         policy_errors.append(
             "decision_gates["
             f"{gate_index}"
             "].accepted_risk human_acceptor cannot be AI, validator, reviewer summary, ticket status, "
-            f"silence, or inference: {rel(fixture)}"
+            f"silence, non-response, or inference: {rel(fixture)}"
         )
 
     expiry = payload.get("expiry")
     revisit_condition = payload.get("revisit_condition")
-    if not (
-        isinstance(expiry, str)
-        and expiry.strip()
-        or isinstance(revisit_condition, str)
-        and revisit_condition.strip()
-    ):
+    if not (has_concrete_accepted_risk_boundary(expiry) or has_concrete_accepted_risk_boundary(revisit_condition)):
         policy_errors.append(
-            f"decision_gates[{gate_index}].accepted_risk requires expiry or revisit_condition: {rel(fixture)}"
+            f"decision_gates[{gate_index}].accepted_risk requires concrete expiry or revisit_condition: {rel(fixture)}"
         )
 
     if payload.get("customer_or_support_impact_acknowledged") is not True:
@@ -1516,10 +1535,13 @@ def validate_fixture_files(schemas: dict[str, dict[str, Any]], errors: list[str]
         "extra-safety-field.contract.json",
         "extra-property.contract.json",
         "invalid-accepted-risk-ai-acceptor.contract.json",
+        "invalid-accepted-risk-human-flag.contract.json",
         "invalid-accepted-risk-impact-false.contract.json",
         "invalid-accepted-risk-missing-payload.contract.json",
         "invalid-accepted-risk-missing-revisit.contract.json",
+        "invalid-accepted-risk-no-reply.contract.json",
         "invalid-accepted-risk-status-mismatch.contract.json",
+        "invalid-accepted-risk-tbd-boundary.contract.json",
         "invalid-decision-gate-empty-evidence.contract.json",
         "invalid-decision-gate-extra-property.contract.json",
         "invalid-decision-gate-human-decision-flag.contract.json",
@@ -1559,6 +1581,13 @@ def validate_fixture_files(schemas: dict[str, dict[str, Any]], errors: list[str]
         "unsafe-telemetry.contract.json",
         "unsupported-keyword.schema.json",
     ]
+    required_valid = [
+        "accepted-risk.plan.codex.json",
+        "accepted-risk-ai-domain-human.plan.codex.json",
+    ]
+    for name in required_valid:
+        if not (valid_dir / name).is_file():
+            errors.append(f"Missing valid fixture: {rel(valid_dir / name)}")
     for name in required_invalid:
         if not (invalid_dir / name).is_file():
             errors.append(f"Missing invalid fixture: {rel(invalid_dir / name)}")
