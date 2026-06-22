@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 ### Added
+- Added structured `accepted_risk` payload validation for decision gates, including human acceptor, evidence, owner, and revisit-boundary checks
 - Added optional `decision_gates[]` contract schema, validation, fixtures, rendered examples, and planning references for structured non-executable gate status
 
 ## [0.2.0] - 2026-06-19

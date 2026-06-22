@@ -49,6 +49,20 @@ decision_gates:
     rationale:
     blocking_reason:
     human_decision_required:
+    accepted_risk:
+      risk_summary:
+      basis:
+      remaining_risk:
+      human_acceptor:
+      human_acceptor_role:
+      approval_evidence:
+      accepted_at:
+      expiry:
+      revisit_condition:
+      customer_or_support_impact_acknowledged:
+      support_owner:
+      comms_owner:
+      rollback_or_containment_owner:
 success_criteria:
 risks:
 output_format:
@@ -60,7 +74,9 @@ stop_condition:
 
 Omit `governance` when no planning governance layer is needed. Do not use a `none` preset. In this scaffold, `governance` records the selected review strength and optional scenario template only. Preset expansion and decision gate guidance are defined in `governance-presets.md`.
 
-`decision_gates` records structured planning metadata. It is not an execution engine, deployment approval, implementation approval, legal/compliance approval, or risk acceptance system. `accepted_risk` remains a status value only in this step; the accepted-risk payload and human-acceptance pairing are defined by later accepted-risk object schema work.
+`decision_gates` records structured planning metadata. It is not an execution engine, deployment approval, implementation approval, legal/compliance approval, or automatic risk-acceptance system. When `status` is `accepted_risk`, include an `accepted_risk` payload with a qualified human acceptor, evidence, support/comms/rollback owners, and either `expiry` or `revisit_condition`. AI output, validator output, reviewer summaries, ticket status, silence, non-response, and inference do not count as `human_acceptor`.
+
+The JSON Schema is a shape contract only. Run the project-prompt-kit policy validator (`bash scripts/validate.sh` or `python3 packages/project-prompt-kit/scripts/validate_prompt_kit.py`) to enforce accepted-risk status linkage, non-human acceptor rejection, impact acknowledgement, and expiry/revisit boundaries.
 
 Safety metadata travels with the envelope:
 
