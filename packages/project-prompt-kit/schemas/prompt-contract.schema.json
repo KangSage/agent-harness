@@ -2,6 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:agent-harness:project-prompt-kit:prompt-contract:v0.2",
   "title": "Project Prompt Contract",
+  "description": "Shape-only schema. Run the project-prompt-kit policy validator for accepted-risk status linkage, human-acceptor, impact acknowledgement, and expiry/revisit invariants.",
   "type": "object",
   "required": [
     "command",
@@ -349,6 +350,77 @@
           },
           "human_decision_required": {
             "type": "boolean"
+          },
+          "accepted_risk": {
+            "type": "object",
+            "description": "Shape-only payload schema. Policy validation must reject non-human acceptors, missing expiry/revisit boundaries, false impact acknowledgement, missing payloads for accepted_risk status, and payloads on non-accepted_risk statuses.",
+            "required": [
+              "risk_summary",
+              "basis",
+              "remaining_risk",
+              "human_acceptor",
+              "human_acceptor_role",
+              "approval_evidence",
+              "accepted_at",
+              "customer_or_support_impact_acknowledged",
+              "support_owner",
+              "comms_owner",
+              "rollback_or_containment_owner"
+            ],
+            "properties": {
+              "risk_summary": {
+                "type": "string",
+                "minLength": 1
+              },
+              "basis": {
+                "type": "string",
+                "minLength": 1
+              },
+              "remaining_risk": {
+                "type": "string",
+                "minLength": 1
+              },
+              "human_acceptor": {
+                "type": "string",
+                "minLength": 1
+              },
+              "human_acceptor_role": {
+                "type": "string",
+                "minLength": 1
+              },
+              "approval_evidence": {
+                "type": "string",
+                "minLength": 1
+              },
+              "accepted_at": {
+                "type": "string",
+                "minLength": 1
+              },
+              "expiry": {
+                "type": "string",
+                "minLength": 1
+              },
+              "revisit_condition": {
+                "type": "string",
+                "minLength": 1
+              },
+              "customer_or_support_impact_acknowledged": {
+                "type": "boolean"
+              },
+              "support_owner": {
+                "type": "string",
+                "minLength": 1
+              },
+              "comms_owner": {
+                "type": "string",
+                "minLength": 1
+              },
+              "rollback_or_containment_owner": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "additionalProperties": false
           }
         },
         "additionalProperties": false

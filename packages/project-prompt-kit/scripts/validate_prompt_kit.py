@@ -53,6 +53,37 @@ DECISION_GATE_REQUIRED_FIELDS = [
     "blocking_reason",
     "human_decision_required",
 ]
+ACCEPTED_RISK_REQUIRED_FIELDS = [
+    "risk_summary",
+    "basis",
+    "remaining_risk",
+    "human_acceptor",
+    "human_acceptor_role",
+    "approval_evidence",
+    "accepted_at",
+    "customer_or_support_impact_acknowledged",
+    "support_owner",
+    "comms_owner",
+    "rollback_or_containment_owner",
+]
+ACCEPTED_RISK_FIELDS = [
+    *ACCEPTED_RISK_REQUIRED_FIELDS,
+    "expiry",
+    "revisit_condition",
+]
+FORBIDDEN_HUMAN_ACCEPTOR_MARKERS = [
+    "ai",
+    "codex",
+    "claude",
+    "validator",
+    "reviewer summary",
+    "generated plan",
+    "ticket status",
+    "silence",
+    "no response",
+    "non-response",
+    "inference",
+]
 HIGH_RISK_REQUIRED_REVIEWERS = [
     "Security / Privacy Reviewer",
     "Legal / Compliance Risk Screener",
@@ -85,6 +116,15 @@ NOT_APPLICABLE_RATIONALE_MARKERS = [
     "basis",
 ]
 PLACEHOLDER_RATIONALES = {"", "-", "n/a", "na", "not applicable", "none", "tbd", "todo", "unknown"}
+PLACEHOLDER_BOUNDARIES = PLACEHOLDER_RATIONALES | {
+    "no expiry",
+    "no revisit",
+    "no revisit condition",
+    "not set",
+    "open ended",
+    "open-ended",
+    "unbounded",
+}
 
 EXPECTED_INVALID_FIXTURE_ERRORS = {
     "empty-array-item.contract.json": ["$.inputs[0] length must be at least 1"],
@@ -94,6 +134,30 @@ EXPECTED_INVALID_FIXTURE_ERRORS = {
     "extra-safety-field.contract.json": ["$.safety.share_public is not allowed"],
     "invalid-command.contract.json": ["$.command expected const '/prompt'"],
     "invalid-communication-policy.contract.json": ["$.communication_policy.unexpected is not allowed"],
+    "invalid-accepted-risk-ai-acceptor.contract.json": [
+        "decision_gates[0].accepted_risk human_acceptor cannot be AI, validator, reviewer summary, ticket status, silence, non-response, or inference"
+    ],
+    "invalid-accepted-risk-human-flag.contract.json": [
+        "decision_gates[0] accepted_risk requires human_decision_required true"
+    ],
+    "invalid-accepted-risk-impact-false.contract.json": [
+        "decision_gates[0].accepted_risk requires customer_or_support_impact_acknowledged true"
+    ],
+    "invalid-accepted-risk-missing-payload.contract.json": [
+        "decision_gates[0] accepted_risk requires accepted_risk payload"
+    ],
+    "invalid-accepted-risk-missing-revisit.contract.json": [
+        "decision_gates[0].accepted_risk requires concrete expiry or revisit_condition"
+    ],
+    "invalid-accepted-risk-no-reply.contract.json": [
+        "decision_gates[0].accepted_risk human_acceptor cannot be AI, validator, reviewer summary, ticket status, silence, non-response, or inference"
+    ],
+    "invalid-accepted-risk-tbd-boundary.contract.json": [
+        "decision_gates[0].accepted_risk requires concrete expiry or revisit_condition"
+    ],
+    "invalid-accepted-risk-status-mismatch.contract.json": [
+        "decision_gates[0] accepted_risk payload requires status accepted_risk"
+    ],
     "invalid-decision-gate-empty-evidence.contract.json": [
         "$.decision_gates[0].evidence must contain at least 1 item(s)"
     ],
@@ -731,14 +795,15 @@ def validate_governance_presets(errors: list[str]) -> None:
         "Validation currently enforces the minimum required high-risk reviewers",
         "This is not legal advice. This identifies review triggers for qualified humans.",
         "Decision gates are structured planning metadata, not executable approval semantics.",
-        "Current validation enforces `decision_gates[]` shape and fixture-level `accepted_risk` / `human_acceptor` markers; structural accepted-risk pairing belongs to later accepted-risk object schema work.",
+        "When a gate uses `status: \"accepted_risk\"`, it must include a structured `accepted_risk` payload.",
+        "Current validation enforces `decision_gates[]` shape, accepted-risk payload shape, gate-local accepted-risk pairing, rejected non-human acceptors, and expiry/revisit boundaries.",
+        "The JSON Schema is a shape contract only. Use the project-prompt-kit policy validator as the required validation path for accepted-risk semantics.",
         "## Scenario Template Additions",
         "Scenario template | Added checklist | Added stop rules",
         "| `auth_migration` |",
         "| `production_incident` |",
         "| `regulated_data_or_domain` |",
         "## Deferred",
-        "accepted-risk handling",
         "automatic risk classifier",
         "renderer engine",
     ]
@@ -820,6 +885,18 @@ def validate_governance_presets(errors: list[str]) -> None:
 
 def validate_schema_contracts(schemas: dict[str, dict[str, Any]], errors: list[str]) -> None:
     contract_schema = schemas.get("contract", {})
+    contract_description = contract_schema.get("description")
+    if not isinstance(contract_description, str) or "Shape-only schema" not in contract_description:
+        errors.append("Contract schema must document shape-only policy validation boundary")
+    for phrase in [
+        "accepted-risk status linkage",
+        "human-acceptor",
+        "impact acknowledgement",
+        "expiry/revisit invariants",
+    ]:
+        if not isinstance(contract_description, str) or phrase not in contract_description:
+            errors.append(f"Contract schema policy validation boundary missing: {phrase}")
+
     required = set(contract_schema.get("required", []))
     for field in ["command", "alias", "target", *CORE_FIELDS, "safety"]:
         if field not in required:
@@ -898,6 +975,45 @@ def validate_schema_contracts(schemas: dict[str, dict[str, Any]], errors: list[s
                 evidence_schema = gate_properties.get("evidence", {})
                 if not isinstance(evidence_schema, dict) or evidence_schema.get("minItems") != 1:
                     errors.append("Contract schema decision_gates evidence must require at least one item")
+                accepted_risk_schema = gate_properties.get("accepted_risk", {})
+                if not isinstance(accepted_risk_schema, dict):
+                    errors.append("Contract schema decision_gates accepted_risk payload missing")
+                else:
+                    accepted_risk_description = accepted_risk_schema.get("description")
+                    if (
+                        not isinstance(accepted_risk_description, str)
+                        or "Shape-only payload schema" not in accepted_risk_description
+                    ):
+                        errors.append("Contract schema accepted_risk must document shape-only payload boundary")
+                    if accepted_risk_schema.get("type") != "object":
+                        errors.append("Contract schema decision_gates accepted_risk must be an object")
+                    if accepted_risk_schema.get("required") != ACCEPTED_RISK_REQUIRED_FIELDS:
+                        errors.append("Contract schema decision_gates accepted_risk required fields drift")
+                    if accepted_risk_schema.get("additionalProperties") is not False:
+                        errors.append("Contract schema decision_gates accepted_risk must reject extra properties")
+                    accepted_risk_properties = accepted_risk_schema.get("properties", {})
+                    if not isinstance(accepted_risk_properties, dict):
+                        errors.append("Contract schema decision_gates accepted_risk properties must be an object")
+                    else:
+                        if sorted(accepted_risk_properties) != sorted(ACCEPTED_RISK_FIELDS):
+                            errors.append("Contract schema decision_gates accepted_risk properties drift")
+                        impact_schema = accepted_risk_properties.get("customer_or_support_impact_acknowledged", {})
+                        if not isinstance(impact_schema, dict) or impact_schema.get("type") != "boolean":
+                            errors.append(
+                                "Contract schema decision_gates accepted_risk customer/support impact must be boolean"
+                            )
+                        for field in ACCEPTED_RISK_FIELDS:
+                            if field == "customer_or_support_impact_acknowledged":
+                                continue
+                            field_schema = accepted_risk_properties.get(field, {})
+                            if (
+                                not isinstance(field_schema, dict)
+                                or field_schema.get("type") != "string"
+                                or field_schema.get("minLength") != 1
+                            ):
+                                errors.append(
+                                    f"Contract schema decision_gates accepted_risk `{field}` must be non-empty string"
+                                )
 
     request_schema = schemas.get("request", {})
     request_properties = request_schema.get("properties", {})
@@ -936,6 +1052,7 @@ def validate_sample_outputs(errors: list[str]) -> None:
 def validate_rendered_examples(errors: list[str]) -> None:
     expected = {
         "codex-review.md": "examples/sample-contract.codex.json",
+        "codex-plan-accepted-risk.md": "examples/sample-contract.accepted-risk.codex.json",
         "codex-plan-decision-gates.md": "examples/sample-contract.decision-gates.codex.json",
         "claude-implement.md": "examples/sample-contract.claude.json",
         "generic-task.md": "examples/sample-contract.generic.json",
@@ -948,6 +1065,7 @@ def validate_rendered_examples(errors: list[str]) -> None:
 
     rendered_populated_governance = False
     rendered_populated_decision_gates = False
+    rendered_populated_accepted_risk = False
     for name, source_contract in expected.items():
         example = rendered_dir / name
         if not example.is_file():
@@ -1111,6 +1229,11 @@ def validate_rendered_examples(errors: list[str]) -> None:
                     if isinstance(evidence, list):
                         for item in evidence:
                             check_rendered_value("decision_gates[].evidence[]", item)
+                    accepted_risk = gate.get("accepted_risk")
+                    if isinstance(accepted_risk, dict):
+                        rendered_populated_accepted_risk = True
+                        for field in ACCEPTED_RISK_FIELDS:
+                            check_rendered_value(f"decision_gates[].accepted_risk.{field}", accepted_risk.get(field))
         else:
             if "Decision gates:\nNot specified." not in text:
                 errors.append(f"Rendered example {rel(example)} missing empty decision gates marker")
@@ -1122,6 +1245,8 @@ def validate_rendered_examples(errors: list[str]) -> None:
         errors.append("Rendered examples must include at least one populated governance block")
     if not rendered_populated_decision_gates:
         errors.append("Rendered examples must include at least one populated decision_gates block")
+    if not rendered_populated_accepted_risk:
+        errors.append("Rendered examples must include at least one populated accepted_risk block")
 
 
 def validate_language_docs(errors: list[str]) -> None:
@@ -1323,6 +1448,68 @@ def decision_gate_policy_errors(data: dict[str, Any], fixture: Path) -> list[str
             policy_errors.append(
                 f"decision_gates[{index}] needs_human_decision requires human_decision_required true: {rel(fixture)}"
             )
+        accepted_risk = gate.get("accepted_risk")
+        if status == "accepted_risk":
+            if gate.get("human_decision_required") is not True:
+                policy_errors.append(
+                    f"decision_gates[{index}] accepted_risk requires human_decision_required true: {rel(fixture)}"
+                )
+            if not isinstance(accepted_risk, dict):
+                policy_errors.append(
+                    f"decision_gates[{index}] accepted_risk requires accepted_risk payload: {rel(fixture)}"
+                )
+                continue
+            policy_errors.extend(accepted_risk_payload_policy_errors(accepted_risk, index, fixture))
+        elif accepted_risk is not None:
+            policy_errors.append(
+                f"decision_gates[{index}] accepted_risk payload requires status accepted_risk: {rel(fixture)}"
+            )
+    return policy_errors
+
+
+def has_forbidden_human_acceptor_marker(value: str) -> bool:
+    normalized = value.lower()
+    for marker in FORBIDDEN_HUMAN_ACCEPTOR_MARKERS:
+        if marker in {"ai", "codex", "claude", "validator"}:
+            if re.search(rf"\b{re.escape(marker)}\b", normalized):
+                return True
+        elif marker in normalized:
+            return True
+    return False
+
+
+def has_concrete_accepted_risk_boundary(value: Any) -> bool:
+    if not isinstance(value, str):
+        return False
+    normalized = value.strip().lower()
+    return bool(normalized) and normalized not in PLACEHOLDER_BOUNDARIES
+
+
+def accepted_risk_payload_policy_errors(payload: dict[str, Any], gate_index: int, fixture: Path) -> list[str]:
+    policy_errors: list[str] = []
+    human_acceptor = payload.get("human_acceptor")
+    if isinstance(human_acceptor, str) and has_forbidden_human_acceptor_marker(human_acceptor):
+        policy_errors.append(
+            "decision_gates["
+            f"{gate_index}"
+            "].accepted_risk human_acceptor cannot be AI, validator, reviewer summary, ticket status, "
+            f"silence, non-response, or inference: {rel(fixture)}"
+        )
+
+    expiry = payload.get("expiry")
+    revisit_condition = payload.get("revisit_condition")
+    if not (has_concrete_accepted_risk_boundary(expiry) or has_concrete_accepted_risk_boundary(revisit_condition)):
+        policy_errors.append(
+            f"decision_gates[{gate_index}].accepted_risk requires concrete expiry or revisit_condition: {rel(fixture)}"
+        )
+
+    if payload.get("customer_or_support_impact_acknowledged") is not True:
+        policy_errors.append(
+            "decision_gates["
+            f"{gate_index}"
+            "].accepted_risk requires customer_or_support_impact_acknowledged true: "
+            f"{rel(fixture)}"
+        )
     return policy_errors
 
 
@@ -1347,6 +1534,14 @@ def validate_fixture_files(schemas: dict[str, dict[str, Any]], errors: list[str]
         "empty-string.contract.json",
         "extra-safety-field.contract.json",
         "extra-property.contract.json",
+        "invalid-accepted-risk-ai-acceptor.contract.json",
+        "invalid-accepted-risk-human-flag.contract.json",
+        "invalid-accepted-risk-impact-false.contract.json",
+        "invalid-accepted-risk-missing-payload.contract.json",
+        "invalid-accepted-risk-missing-revisit.contract.json",
+        "invalid-accepted-risk-no-reply.contract.json",
+        "invalid-accepted-risk-status-mismatch.contract.json",
+        "invalid-accepted-risk-tbd-boundary.contract.json",
         "invalid-decision-gate-empty-evidence.contract.json",
         "invalid-decision-gate-extra-property.contract.json",
         "invalid-decision-gate-human-decision-flag.contract.json",
@@ -1386,6 +1581,13 @@ def validate_fixture_files(schemas: dict[str, dict[str, Any]], errors: list[str]
         "unsafe-telemetry.contract.json",
         "unsupported-keyword.schema.json",
     ]
+    required_valid = [
+        "accepted-risk.plan.codex.json",
+        "accepted-risk-ai-domain-human.plan.codex.json",
+    ]
+    for name in required_valid:
+        if not (valid_dir / name).is_file():
+            errors.append(f"Missing valid fixture: {rel(valid_dir / name)}")
     for name in required_invalid:
         if not (invalid_dir / name).is_file():
             errors.append(f"Missing invalid fixture: {rel(invalid_dir / name)}")

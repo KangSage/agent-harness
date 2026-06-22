@@ -64,9 +64,13 @@ Allowed gate statuses:
 - `accepted_risk`
 - `not_applicable`
 
-Gate status does not authorize implementation, deployment, production operations, customer communication, legal/compliance approval, or risk acceptance. `accepted_risk` remains a status value only here; the accepted-risk payload and human-acceptance pairing are later accepted-risk object schema work.
+Gate status does not authorize implementation, deployment, production operations, customer communication, legal/compliance approval, or automatic risk acceptance.
 
-Current validation enforces `decision_gates[]` shape and fixture-level `accepted_risk` / `human_acceptor` markers; structural accepted-risk pairing belongs to later accepted-risk object schema work.
+When a gate uses `status: "accepted_risk"`, it must include a structured `accepted_risk` payload. The payload records `risk_summary`, `basis`, `remaining_risk`, `human_acceptor`, `human_acceptor_role`, `approval_evidence`, `accepted_at`, `customer_or_support_impact_acknowledged`, `support_owner`, `comms_owner`, and `rollback_or_containment_owner`, plus either `expiry` or `revisit_condition`.
+
+Current validation enforces `decision_gates[]` shape, accepted-risk payload shape, gate-local accepted-risk pairing, rejected non-human acceptors, and expiry/revisit boundaries. AI output, validator output, reviewer summaries, ticket status, silence, non-response, and inference do not count as `human_acceptor`.
+
+The JSON Schema is a shape contract only. Use the project-prompt-kit policy validator as the required validation path for accepted-risk semantics.
 
 ## Scenario Template Additions
 
@@ -82,7 +86,6 @@ Scenario templates add checklist and stop-rule requirements to the selected pres
 
 The following are intentionally deferred from this reference:
 
-- accepted-risk handling
 - executable gate semantics
 - automatic risk classifier
 - renderer engine
