@@ -84,6 +84,7 @@ NOT_APPLICABLE_RATIONALE_MARKERS = [
     "reason",
     "basis",
 ]
+PLACEHOLDER_RATIONALES = {"", "-", "n/a", "na", "not applicable", "none", "tbd", "todo", "unknown"}
 
 EXPECTED_INVALID_FIXTURE_ERRORS = {
     "empty-array-item.contract.json": ["$.inputs[0] length must be at least 1"],
@@ -98,6 +99,12 @@ EXPECTED_INVALID_FIXTURE_ERRORS = {
     ],
     "invalid-decision-gate-extra-property.contract.json": [
         "$.decision_gates[0].approval is not allowed"
+    ],
+    "invalid-decision-gate-human-decision-flag.contract.json": [
+        "decision_gates[0] needs_human_decision requires human_decision_required true"
+    ],
+    "invalid-decision-gate-not-applicable-placeholder.contract.json": [
+        "decision_gates[0] not_applicable requires concrete rationale"
     ],
     "invalid-governance-accepted-risk-without-human.contract.json": [
         "accepted_risk without human_acceptor marker"
@@ -929,6 +936,7 @@ def validate_sample_outputs(errors: list[str]) -> None:
 def validate_rendered_examples(errors: list[str]) -> None:
     expected = {
         "codex-review.md": "examples/sample-contract.codex.json",
+        "codex-plan-decision-gates.md": "examples/sample-contract.decision-gates.codex.json",
         "claude-implement.md": "examples/sample-contract.claude.json",
         "generic-task.md": "examples/sample-contract.generic.json",
     }
@@ -939,6 +947,7 @@ def validate_rendered_examples(errors: list[str]) -> None:
         errors.append(f"Rendered example is not registered for validation: {rel(rendered_dir / name)}")
 
     rendered_populated_governance = False
+    rendered_populated_decision_gates = False
     for name, source_contract in expected.items():
         example = rendered_dir / name
         if not example.is_file():
@@ -973,6 +982,7 @@ def validate_rendered_examples(errors: list[str]) -> None:
             "Communication policy:",
             "Review panel:",
             "Governance:",
+            "Decision gates:",
             PROMPT_INJECTION_BOUNDARY,
             "Preview before sharing.",
             "No network calls are required by default.",
@@ -1081,11 +1091,37 @@ def validate_rendered_examples(errors: list[str]) -> None:
             if "Governance:\nNot specified." not in text:
                 errors.append(f"Rendered example {rel(example)} missing empty governance marker")
 
+        decision_gates = contract.get("decision_gates")
+        if isinstance(decision_gates, list):
+            rendered_populated_decision_gates = True
+            for gate in decision_gates:
+                if isinstance(gate, dict):
+                    for field in [
+                        "name",
+                        "owner",
+                        "required_evidence",
+                        "pass_condition",
+                        "status",
+                        "rationale",
+                        "blocking_reason",
+                        "human_decision_required",
+                    ]:
+                        check_rendered_value(f"decision_gates[].{field}", gate.get(field))
+                    evidence = gate.get("evidence")
+                    if isinstance(evidence, list):
+                        for item in evidence:
+                            check_rendered_value("decision_gates[].evidence[]", item)
+        else:
+            if "Decision gates:\nNot specified." not in text:
+                errors.append(f"Rendered example {rel(example)} missing empty decision gates marker")
+
         if "{{" in text or "}}" in text:
             errors.append(f"Rendered example {rel(example)} contains unresolved template placeholder")
 
     if not rendered_populated_governance:
         errors.append("Rendered examples must include at least one populated governance block")
+    if not rendered_populated_decision_gates:
+        errors.append("Rendered examples must include at least one populated decision_gates block")
 
 
 def validate_language_docs(errors: list[str]) -> None:
@@ -1266,6 +1302,30 @@ def not_applicable_policy_errors(data: dict[str, Any], fixture: Path) -> list[st
     return []
 
 
+def decision_gate_policy_errors(data: dict[str, Any], fixture: Path) -> list[str]:
+    decision_gates = data.get("decision_gates")
+    if not isinstance(decision_gates, list):
+        return []
+
+    policy_errors: list[str] = []
+    for index, gate in enumerate(decision_gates):
+        if not isinstance(gate, dict):
+            continue
+        status = gate.get("status")
+        if status == "not_applicable":
+            rationale = gate.get("rationale")
+            normalized = rationale.strip().lower() if isinstance(rationale, str) else ""
+            if normalized in PLACEHOLDER_RATIONALES:
+                policy_errors.append(
+                    f"decision_gates[{index}] not_applicable requires concrete rationale: {rel(fixture)}"
+                )
+        if status == "needs_human_decision" and gate.get("human_decision_required") is not True:
+            policy_errors.append(
+                f"decision_gates[{index}] needs_human_decision requires human_decision_required true: {rel(fixture)}"
+            )
+    return policy_errors
+
+
 def governance_contract_policy_errors(data: dict[str, Any], fixture: Path) -> list[str]:
     return [
         *governance_scenario_fixture_policy_errors(data, fixture),
@@ -1273,6 +1333,7 @@ def governance_contract_policy_errors(data: dict[str, Any], fixture: Path) -> li
         *high_risk_review_panel_policy_errors(data, fixture),
         *accepted_risk_policy_errors(data, fixture),
         *not_applicable_policy_errors(data, fixture),
+        *decision_gate_policy_errors(data, fixture),
     ]
 
 
@@ -1288,6 +1349,8 @@ def validate_fixture_files(schemas: dict[str, dict[str, Any]], errors: list[str]
         "extra-property.contract.json",
         "invalid-decision-gate-empty-evidence.contract.json",
         "invalid-decision-gate-extra-property.contract.json",
+        "invalid-decision-gate-human-decision-flag.contract.json",
+        "invalid-decision-gate-not-applicable-placeholder.contract.json",
         "invalid-governance-extra-property.contract.json",
         "invalid-governance-preset.contract.json",
         "invalid-governance-high-risk-missing-reviewer.contract.json",

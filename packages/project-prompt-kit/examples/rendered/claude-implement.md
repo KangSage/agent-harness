@@ -60,6 +60,9 @@ Governance:
   - Stop rules: Stop if architecture boundary, testability, rollback/fallback, or implementation boundary is unclear.
   - Output requirement: Reviewed implementation plan with explicit decisions, blockers, and remaining risks.
 
+Decision gates:
+Not specified.
+
 Success criteria:
 - Validation fails on missing required scaffold files
 - Validation passes on the checked-in scaffold
