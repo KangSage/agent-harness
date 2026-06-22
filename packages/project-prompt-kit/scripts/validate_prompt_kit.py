@@ -35,6 +35,24 @@ GOVERNANCE_SCENARIO_TEMPLATES = [
     "production_incident",
     "regulated_data_or_domain",
 ]
+DECISION_GATE_STATUSES = [
+    "pass",
+    "blocked",
+    "needs_human_decision",
+    "accepted_risk",
+    "not_applicable",
+]
+DECISION_GATE_REQUIRED_FIELDS = [
+    "name",
+    "owner",
+    "required_evidence",
+    "pass_condition",
+    "status",
+    "evidence",
+    "rationale",
+    "blocking_reason",
+    "human_decision_required",
+]
 HIGH_RISK_REQUIRED_REVIEWERS = [
     "Security / Privacy Reviewer",
     "Legal / Compliance Risk Screener",
@@ -66,6 +84,7 @@ NOT_APPLICABLE_RATIONALE_MARKERS = [
     "reason",
     "basis",
 ]
+PLACEHOLDER_RATIONALES = {"", "-", "n/a", "na", "not applicable", "none", "tbd", "todo", "unknown"}
 
 EXPECTED_INVALID_FIXTURE_ERRORS = {
     "empty-array-item.contract.json": ["$.inputs[0] length must be at least 1"],
@@ -75,6 +94,18 @@ EXPECTED_INVALID_FIXTURE_ERRORS = {
     "extra-safety-field.contract.json": ["$.safety.share_public is not allowed"],
     "invalid-command.contract.json": ["$.command expected const '/prompt'"],
     "invalid-communication-policy.contract.json": ["$.communication_policy.unexpected is not allowed"],
+    "invalid-decision-gate-empty-evidence.contract.json": [
+        "$.decision_gates[0].evidence must contain at least 1 item(s)"
+    ],
+    "invalid-decision-gate-extra-property.contract.json": [
+        "$.decision_gates[0].approval is not allowed"
+    ],
+    "invalid-decision-gate-human-decision-flag.contract.json": [
+        "decision_gates[0] needs_human_decision requires human_decision_required true"
+    ],
+    "invalid-decision-gate-not-applicable-placeholder.contract.json": [
+        "decision_gates[0] not_applicable requires concrete rationale"
+    ],
     "invalid-governance-accepted-risk-without-human.contract.json": [
         "accepted_risk without human_acceptor marker"
     ],
@@ -632,6 +663,7 @@ def validate_templates(errors: list[str]) -> None:
             "{{communication_policy}}",
             "{{review_panel}}",
             "{{governance}}",
+            "{{decision_gates}}",
             "{{success_criteria}}",
             "{{evidence_required}}",
             "{{output_format}}",
@@ -698,7 +730,8 @@ def validate_governance_presets(errors: list[str]) -> None:
         "Recommended full high-risk panel",
         "Validation currently enforces the minimum required high-risk reviewers",
         "This is not legal advice. This identifies review triggers for qualified humans.",
-        "Current validation only enforces fixture-level `accepted_risk` and `human_acceptor` markers; structural pairing belongs to later accepted-risk object schema work.",
+        "Decision gates are structured planning metadata, not executable approval semantics.",
+        "Current validation enforces `decision_gates[]` shape and fixture-level `accepted_risk` / `human_acceptor` markers; structural accepted-risk pairing belongs to later accepted-risk object schema work.",
         "## Scenario Template Additions",
         "Scenario template | Added checklist | Added stop rules",
         "| `auth_migration` |",
@@ -791,6 +824,8 @@ def validate_schema_contracts(schemas: dict[str, dict[str, Any]], errors: list[s
     for field in ["command", "alias", "target", *CORE_FIELDS, "safety"]:
         if field not in required:
             errors.append(f"Contract schema missing required field: {field}")
+    if "decision_gates" in required:
+        errors.append("Contract schema must keep decision_gates optional")
 
     safety_required = set(contract_schema.get("properties", {}).get("safety", {}).get("required", []))
     for field in [
@@ -832,6 +867,43 @@ def validate_schema_contracts(schemas: dict[str, dict[str, Any]], errors: list[s
         if scenario_schema.get("enum") != GOVERNANCE_SCENARIO_TEMPLATES:
             errors.append(f"{schema_name} schema governance scenario_template enum drift")
 
+    contract_properties = contract_schema.get("properties", {})
+    decision_gates_schema = (
+        contract_properties.get("decision_gates", {}) if isinstance(contract_properties, dict) else {}
+    )
+    if not isinstance(decision_gates_schema, dict):
+        errors.append("Contract schema missing optional decision_gates field")
+    else:
+        if decision_gates_schema.get("type") != "array":
+            errors.append("Contract schema decision_gates must be an array")
+        if decision_gates_schema.get("minItems") != 1:
+            errors.append("Contract schema decision_gates must require at least one gate when present")
+        gate_schema = decision_gates_schema.get("items", {})
+        if not isinstance(gate_schema, dict):
+            errors.append("Contract schema decision_gates items must be an object schema")
+        else:
+            if gate_schema.get("type") != "object":
+                errors.append("Contract schema decision_gates items must be objects")
+            if gate_schema.get("required") != DECISION_GATE_REQUIRED_FIELDS:
+                errors.append("Contract schema decision_gates required fields drift")
+            if gate_schema.get("additionalProperties") is not False:
+                errors.append("Contract schema decision_gates must reject extra gate properties")
+            gate_properties = gate_schema.get("properties", {})
+            if not isinstance(gate_properties, dict):
+                errors.append("Contract schema decision_gates properties must be an object")
+            else:
+                status_schema = gate_properties.get("status", {})
+                if not isinstance(status_schema, dict) or status_schema.get("enum") != DECISION_GATE_STATUSES:
+                    errors.append("Contract schema decision_gates status enum drift")
+                evidence_schema = gate_properties.get("evidence", {})
+                if not isinstance(evidence_schema, dict) or evidence_schema.get("minItems") != 1:
+                    errors.append("Contract schema decision_gates evidence must require at least one item")
+
+    request_schema = schemas.get("request", {})
+    request_properties = request_schema.get("properties", {})
+    if isinstance(request_properties, dict) and "decision_gates" in request_properties:
+        errors.append("Request schema must not expose decision_gates; gates belong to normalized plan contracts")
+
 
 def validate_sample_contracts(schemas: dict[str, dict[str, Any]], errors: list[str]) -> None:
     contract_schema = schemas.get("contract")
@@ -864,6 +936,7 @@ def validate_sample_outputs(errors: list[str]) -> None:
 def validate_rendered_examples(errors: list[str]) -> None:
     expected = {
         "codex-review.md": "examples/sample-contract.codex.json",
+        "codex-plan-decision-gates.md": "examples/sample-contract.decision-gates.codex.json",
         "claude-implement.md": "examples/sample-contract.claude.json",
         "generic-task.md": "examples/sample-contract.generic.json",
     }
@@ -874,6 +947,7 @@ def validate_rendered_examples(errors: list[str]) -> None:
         errors.append(f"Rendered example is not registered for validation: {rel(rendered_dir / name)}")
 
     rendered_populated_governance = False
+    rendered_populated_decision_gates = False
     for name, source_contract in expected.items():
         example = rendered_dir / name
         if not example.is_file():
@@ -908,6 +982,7 @@ def validate_rendered_examples(errors: list[str]) -> None:
             "Communication policy:",
             "Review panel:",
             "Governance:",
+            "Decision gates:",
             PROMPT_INJECTION_BOUNDARY,
             "Preview before sharing.",
             "No network calls are required by default.",
@@ -1016,11 +1091,37 @@ def validate_rendered_examples(errors: list[str]) -> None:
             if "Governance:\nNot specified." not in text:
                 errors.append(f"Rendered example {rel(example)} missing empty governance marker")
 
+        decision_gates = contract.get("decision_gates")
+        if isinstance(decision_gates, list):
+            rendered_populated_decision_gates = True
+            for gate in decision_gates:
+                if isinstance(gate, dict):
+                    for field in [
+                        "name",
+                        "owner",
+                        "required_evidence",
+                        "pass_condition",
+                        "status",
+                        "rationale",
+                        "blocking_reason",
+                        "human_decision_required",
+                    ]:
+                        check_rendered_value(f"decision_gates[].{field}", gate.get(field))
+                    evidence = gate.get("evidence")
+                    if isinstance(evidence, list):
+                        for item in evidence:
+                            check_rendered_value("decision_gates[].evidence[]", item)
+        else:
+            if "Decision gates:\nNot specified." not in text:
+                errors.append(f"Rendered example {rel(example)} missing empty decision gates marker")
+
         if "{{" in text or "}}" in text:
             errors.append(f"Rendered example {rel(example)} contains unresolved template placeholder")
 
     if not rendered_populated_governance:
         errors.append("Rendered examples must include at least one populated governance block")
+    if not rendered_populated_decision_gates:
+        errors.append("Rendered examples must include at least one populated decision_gates block")
 
 
 def validate_language_docs(errors: list[str]) -> None:
@@ -1201,6 +1302,30 @@ def not_applicable_policy_errors(data: dict[str, Any], fixture: Path) -> list[st
     return []
 
 
+def decision_gate_policy_errors(data: dict[str, Any], fixture: Path) -> list[str]:
+    decision_gates = data.get("decision_gates")
+    if not isinstance(decision_gates, list):
+        return []
+
+    policy_errors: list[str] = []
+    for index, gate in enumerate(decision_gates):
+        if not isinstance(gate, dict):
+            continue
+        status = gate.get("status")
+        if status == "not_applicable":
+            rationale = gate.get("rationale")
+            normalized = rationale.strip().lower() if isinstance(rationale, str) else ""
+            if normalized in PLACEHOLDER_RATIONALES:
+                policy_errors.append(
+                    f"decision_gates[{index}] not_applicable requires concrete rationale: {rel(fixture)}"
+                )
+        if status == "needs_human_decision" and gate.get("human_decision_required") is not True:
+            policy_errors.append(
+                f"decision_gates[{index}] needs_human_decision requires human_decision_required true: {rel(fixture)}"
+            )
+    return policy_errors
+
+
 def governance_contract_policy_errors(data: dict[str, Any], fixture: Path) -> list[str]:
     return [
         *governance_scenario_fixture_policy_errors(data, fixture),
@@ -1208,6 +1333,7 @@ def governance_contract_policy_errors(data: dict[str, Any], fixture: Path) -> li
         *high_risk_review_panel_policy_errors(data, fixture),
         *accepted_risk_policy_errors(data, fixture),
         *not_applicable_policy_errors(data, fixture),
+        *decision_gate_policy_errors(data, fixture),
     ]
 
 
@@ -1221,6 +1347,10 @@ def validate_fixture_files(schemas: dict[str, dict[str, Any]], errors: list[str]
         "empty-string.contract.json",
         "extra-safety-field.contract.json",
         "extra-property.contract.json",
+        "invalid-decision-gate-empty-evidence.contract.json",
+        "invalid-decision-gate-extra-property.contract.json",
+        "invalid-decision-gate-human-decision-flag.contract.json",
+        "invalid-decision-gate-not-applicable-placeholder.contract.json",
         "invalid-governance-extra-property.contract.json",
         "invalid-governance-preset.contract.json",
         "invalid-governance-high-risk-missing-reviewer.contract.json",

@@ -37,6 +37,9 @@ Not specified.
 Governance:
 Not specified.
 
+Decision gates:
+Not specified.
+
 Success criteria:
 - Objective, scope, non-goals, and verification are explicit
 - The next agent can act without guessing

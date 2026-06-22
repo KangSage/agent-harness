@@ -14,7 +14,7 @@ Open issues burn-down:
 
 Review findings: summarize role-based reviewer conclusions before implementation planning.
 
-Decision gates: use labels only; no gate object schema yet.
+Decision gates: include structured planning gate status when available; gate status is not implementation, deployment, production-operation, legal/compliance, or risk-acceptance approval.
 
 Implementation boundary: list what the worker may change and what must stay out of scope.
 

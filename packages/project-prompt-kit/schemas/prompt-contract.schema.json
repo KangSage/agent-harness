@@ -289,6 +289,72 @@
       },
       "additionalProperties": false
     },
+    "decision_gates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "owner",
+          "required_evidence",
+          "pass_condition",
+          "status",
+          "evidence",
+          "rationale",
+          "blocking_reason",
+          "human_decision_required"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "owner": {
+            "type": "string",
+            "minLength": 1
+          },
+          "required_evidence": {
+            "type": "string",
+            "minLength": 1
+          },
+          "pass_condition": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pass",
+              "blocked",
+              "needs_human_decision",
+              "accepted_risk",
+              "not_applicable"
+            ]
+          },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1
+          },
+          "rationale": {
+            "type": "string",
+            "minLength": 1
+          },
+          "blocking_reason": {
+            "type": "string",
+            "minLength": 1
+          },
+          "human_decision_required": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "minItems": 1
+    },
     "success_criteria": {
       "type": "array",
       "items": {

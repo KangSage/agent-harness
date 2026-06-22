@@ -31,6 +31,9 @@ Review panel:
 Governance:
 `{{governance}}`
 
+Decision gates:
+`{{decision_gates}}`
+
 Success criteria:
 `{{success_criteria}}`
 
