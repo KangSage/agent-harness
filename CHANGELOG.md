@@ -3,6 +3,8 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+
+## [0.2.1] - 2026-06-25
 ### Added
 - Added scenario-template marker coverage for production-incident and regulated-data governance fixtures
 - Added renderer prompt-injection boundary smoke checks with hostile quoted-text rendered fixtures
