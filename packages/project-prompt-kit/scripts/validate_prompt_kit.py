@@ -935,6 +935,24 @@ def validate_governance_presets(errors: list[str]) -> None:
                 errors.append(f"Governance scenario `{scenario}` row missing: {phrase}")
 
 
+def validate_follow_up_plan(errors: list[str]) -> None:
+    follow_up_plan = PKG / "docs" / "v0.2-follow-up-plan.ko.md"
+    if not follow_up_plan.is_file():
+        errors.append(f"Missing follow-up plan: {rel(follow_up_plan)}")
+        return
+
+    text = read(follow_up_plan)
+    for phrase in [
+        "검토 후보이며 기능 약속이 아니다",
+        "PR6는 실행 가능한 CLI 파일을 추가하지 않는다.",
+        "future CLI file이 실제로 추가되는 PR에서는 validation cost guard의 scan 대상에 등록한다.",
+        "지원하지 않는 command는 fail closed해야 한다.",
+        "CLI는 gate 통과, risk acceptance, 법률/컴플라이언스 결론, production readiness 판단을 수행하지 않는다.",
+    ]:
+        if phrase not in text:
+            errors.append(f"Follow-up plan missing optional CLI boundary phrase: {phrase}")
+
+
 def validate_schema_contracts(schemas: dict[str, dict[str, Any]], errors: list[str]) -> None:
     contract_schema = schemas.get("contract", {})
     contract_description = contract_schema.get("description")
@@ -1893,6 +1911,7 @@ def validate_scaffold(schemas: dict[str, dict[str, Any]], errors: list[str]) -> 
     validate_mode_docs(schemas, errors)
     validate_templates(errors)
     validate_governance_presets(errors)
+    validate_follow_up_plan(errors)
     validate_schema_contracts(schemas, errors)
     validate_sample_contracts(schemas, errors)
     validate_sample_outputs(errors)

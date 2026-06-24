@@ -3,6 +3,8 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+### Changed
+- Recorded the optional CLI spike review decision and added validation for the local-only CLI boundary.
 
 ## [0.2.1] - 2026-06-25
 ### Added
