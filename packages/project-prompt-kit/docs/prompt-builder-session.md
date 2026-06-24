@@ -156,6 +156,18 @@ For v0.2, this is optional contract guidance. Keep it lightweight: choose the sm
 
 Detailed expansion rules live in `governance-presets.md`; this session guide only helps choose the governance layer.
 
+### Governance Selection Questions
+
+Ask these questions in order when the user did not already provide clear governance choices. The Prompt Builder may recommend a preset and scenario template, but it must not auto-decide when required evidence is missing.
+
+1. Does the task affect auth, permissions, privacy, payment, settlement, production data, customer impact, rollout, rollback, or support operations?
+2. Does the task involve a production incident, data inconsistency, customer-facing explanation, or follow-up after production impact?
+3. Does the task involve retention, deletion, consent, notice, policy, regulated data handling, or lawyer-review triggers?
+4. Is rollback, fallback, support path, customer communications ownership, or runbook readiness unclear?
+5. Is the task low-risk and local-only, with no external infrastructure, customer impact, or human approval boundary?
+
+If any high-risk trigger is clear, do not downgrade the preset to `standard` or `light`. If the answer is unclear, ask one concise user-facing question instead of guessing. This flow is a prompt-authoring guide, not an automatic risk classifier.
+
 Use `governance.preset` for review strength.
 
 - `light`: low-risk work that needs a quick scope, acceptance, and validation check.
@@ -173,6 +185,16 @@ Do not add a `none` preset.
 Do not create `governance.review_panel_preset`.
 
 When governance is selected, expand reviewer guidance through the existing `review_panel` structure. The legal/compliance role identifies risk triggers for qualified humans; it does not provide legal advice or compliance approval.
+
+### Over-trigger / Under-trigger Examples
+
+| Situation | Recommended choice | Why |
+| --- | --- | --- |
+| Typo-only docs edit with no policy, release, or customer-impact change | Omit `governance` or use `light` only if a quick acceptance check helps | High-risk review would add process without exposing new risk |
+| Normal feature planning with product, architecture, and QA uncertainty but no sensitive data or production boundary | `standard` | The plan needs review, but no high-risk trigger is present |
+| Auth module replacement, permission change, production data investigation, payment/settlement path, or customer-impacting incident | `high_risk`, plus the matching scenario template when applicable | A clear high-risk trigger must not be downgraded |
+| Production data inconsistency investigation where the worker must write SQL for a human to run | `high_risk` + `production_incident` | Production evidence and support impact need gates even when the worker has no direct DB access |
+| Policy, notice, retention, deletion, consent, or regulated-data planning | `high_risk` + `regulated_data_or_domain` | Legal/compliance review triggers must be surfaced without providing legal advice |
 
 Example:
 

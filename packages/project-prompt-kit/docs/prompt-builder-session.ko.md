@@ -156,6 +156,18 @@ v0.2에서는 이 내용을 optional contract guidance로 둡니다. 가볍게 �
 
 세부 확장 규칙의 기준은 `governance-presets.md`입니다. 이 세션 가이드는 어떤 governance layer를 고를지만 돕습니다.
 
+### 거버넌스 선택 질문
+
+사용자가 governance 선택을 명확히 주지 않았다면 아래 질문을 순서대로 확인합니다. Prompt Builder는 preset과 scenario template을 추천할 수 있지만, 필요한 근거가 부족한 상태에서 자동 결정하지 않습니다.
+
+1. 이 작업이 인증, 권한, 개인정보, 결제, 정산, 운영 데이터, 고객 영향, rollout, rollback, 지원 운영에 영향을 주는가?
+2. 운영 장애, 데이터 정합성 문제, 고객에게 보여줄 설명, 운영 영향 후속 조치가 관련되는가?
+3. 보관, 삭제, 동의, 고지, 정책, 규제 데이터 처리, 변호사 검토 트리거가 관련되는가?
+4. rollback, fallback, support path, 고객 커뮤니케이션 owner, runbook 준비 상태가 불명확한가?
+5. 외부 인프라, 고객 영향, 사람 승인 경계가 없는 낮은 위험의 local-only 작업인가?
+
+high-risk trigger가 하나라도 명확하면 preset을 `standard`나 `light`로 낮춰 선택하지 않습니다. 답이 불명확하면 추측하지 말고 사용자-facing 질문 하나를 짧게 묻습니다. 이 흐름은 prompt 작성 가이드이며 automatic risk classifier가 아닙니다.
+
 `governance.preset`은 검토 강도를 고를 때 사용합니다.
 
 - `light`: 낮은 위험의 작업에서 scope, acceptance, validation만 빠르게 확인할 때.
@@ -173,6 +185,16 @@ governance layer가 필요 없다면 `governance` block을 생략합니다.
 `governance.review_panel_preset`은 만들지 않습니다.
 
 governance를 선택했다면 reviewer 지시는 기존 `review_panel` 구조로 풀어 씁니다. Legal / Compliance 역할은 자격 있는 사람이 검토해야 할 리스크 트리거를 식별하는 용도이며, 법률 자문이나 컴플라이언스 승인을 제공하지 않습니다.
+
+### 과잉 적용 / 과소 적용 예시
+
+| 상황 | 권장 선택 | 이유 |
+| --- | --- | --- |
+| 정책, 릴리즈, 고객 영향이 없는 단순 문서 오타 수정 | `governance` 생략 또는 빠른 acceptance check가 필요할 때만 `light` | high-risk 검토는 새 리스크를 드러내지 못하고 절차만 늘립니다 |
+| 민감 데이터나 운영 경계는 없지만 제품, 아키텍처, QA 불확실성이 있는 일반 기능 기획 | `standard` | 계획 검토는 필요하지만 high-risk trigger는 없습니다 |
+| 인증 모듈 교체, 권한 변경, 운영 데이터 조사, 결제/정산 경로, 고객 영향 장애 | `high_risk`, 필요하면 맞는 scenario template 추가 | 명확한 high-risk trigger는 낮춰 선택하면 안 됩니다 |
+| worker가 직접 DB 접속은 하지 않고 사람이 실행할 SQL을 작성하는 운영 데이터 정합성 조사 | `high_risk` + `production_incident` | 직접 접속이 없어도 운영 근거와 지원 영향에는 gate가 필요합니다 |
+| 정책, 고지, 보관, 삭제, 동의, 규제 데이터 기획 | `high_risk` + `regulated_data_or_domain` | 법률 자문을 제공하지 않으면서 법무/컴플라이언스 검토 트리거를 드러내야 합니다 |
 
 예시:
 

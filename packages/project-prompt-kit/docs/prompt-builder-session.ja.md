@@ -156,6 +156,18 @@ v0.2 では、optional contract guidance として扱います。重くしすぎ
 
 詳細な展開ルールの基準は `governance-presets.md` です。この session guide は、どの governance layer を選ぶかだけを助けます。
 
+### ガバナンス選択の質問
+
+ユーザーが governance の選択を明確に指定していない場合は、次の質問を順に確認します。Prompt Builder は preset と scenario template を提案できますが、必要な根拠が足りない状態で自動決定しません。
+
+1. この作業は auth、permission、privacy、payment、精算、本番データ、customer impact、rollout、rollback、support operations に影響しますか。
+2. 本番 incident、データ不整合、顧客向け説明、本番影響後の対応が関係しますか。
+3. retention、deletion、consent、notice、policy、regulated data handling、lawyer-review trigger が関係しますか。
+4. rollback、fallback、support path、customer communication owner、runbook readiness が不明確ですか。
+5. 外部インフラ、customer impact、人間の approval boundary がない低リスクの local-only 作業ですか。
+
+high-risk trigger が一つでも明確な場合は、preset を `standard` や `light` に落としません。答えが不明確な場合は推測せず、user-facing question を1つだけ短く聞きます。この流れは prompt 作成ガイドであり、automatic risk classifier ではありません。
+
 `governance.preset` はレビューの強さを選ぶために使います。
 
 - `light`: 低リスクの作業で、scope、acceptance、validation だけを素早く確認する場合。
@@ -173,6 +185,16 @@ governance layer が不要な場合は `governance` block を省略します。
 `governance.review_panel_preset` は作りません。
 
 governance を選んだ場合、reviewer guidance は既存の `review_panel` 構造に展開します。Legal / Compliance の役割は、資格のある人が確認すべきリスク trigger を見つけるためのものです。法律助言や compliance approval は行いません。
+
+### 過剰適用 / 過少適用の例
+
+| 状況 | 推奨される選択 | 理由 |
+| --- | --- | --- |
+| policy、release、customer impact がない単純な docs typo 修正 | `governance` を省略、または短い acceptance check が役立つ場合だけ `light` | high-risk review は新しい risk を見つけず、手順だけを増やします |
+| sensitive data や本番境界はないが、product、architecture、QA に不確実性がある通常の feature planning | `standard` | 計画レビューは必要ですが、high-risk trigger はありません |
+| auth module replacement、permission change、本番データ調査、payment/settlement path、customer-impacting incident | `high_risk`、必要に応じて該当する scenario template | 明確な high-risk trigger は低い preset に落としてはいけません |
+| worker は DB に直接接続せず、人間が実行する SQL を作る本番データ不整合調査 | `high_risk` + `production_incident` | 直接接続しなくても、本番 evidence と support impact には gate が必要です |
+| policy、notice、retention、deletion、consent、regulated data planning | `high_risk` + `regulated_data_or_domain` | 法律助言をせずに、法務・コンプライアンスの review trigger を見えるようにします |
 
 例:
 
