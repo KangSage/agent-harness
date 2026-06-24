@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 ### Added
+- Added renderer prompt-injection boundary smoke checks with hostile quoted-text rendered fixtures
 - Added Prompt Builder governance-selection questions and over/under-trigger examples in English, Korean, and Japanese
 - Added structured `accepted_risk` payload validation for decision gates, including human acceptor, evidence, owner, and revisit-boundary checks
 - Added optional `decision_gates[]` contract schema, validation, fixtures, rendered examples, and planning references for structured non-executable gate status
