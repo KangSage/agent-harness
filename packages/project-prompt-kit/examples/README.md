@@ -7,8 +7,13 @@ This directory contains public-safe examples for `project-prompt-kit`.
 `sample-contract.*.json` files are normalized prompt payloads that validate against `schemas/prompt-contract.schema.json`.
 
 - `sample-contract.codex.json`
+- `sample-contract.accepted-risk.codex.json`
 - `sample-contract.claude.json`
+- `sample-contract.decision-gates.codex.json`
 - `sample-contract.generic.json`
+- `sample-contract.prompt-injection.claude.json`
+- `sample-contract.prompt-injection.codex.json`
+- `sample-contract.prompt-injection.generic.json`
 
 Use these as starting points when filling a new prompt contract.
 
@@ -17,7 +22,12 @@ Use these as starting points when filling a new prompt contract.
 `rendered/` contains final prompt examples after applying a sample contract to a target renderer template.
 
 - `rendered/codex-review.md`
+- `rendered/codex-plan-accepted-risk.md`
+- `rendered/codex-plan-decision-gates.md`
+- `rendered/codex-plan-prompt-injection-boundary.md`
+- `rendered/claude-plan-prompt-injection-boundary.md`
 - `rendered/claude-implement.md`
+- `rendered/generic-plan-prompt-injection-boundary.md`
 - `rendered/generic-task.md`
 
 Rendered examples are documentation fixtures, not generated snapshots. They show the intended prompt shape for manual use.

@@ -7,8 +7,13 @@
 `sample-contract.*.json` 파일은 `schemas/prompt-contract.schema.json`으로 검증되는 정규화된 프롬프트 입력값(normalized prompt payload)입니다.
 
 - `sample-contract.codex.json`
+- `sample-contract.accepted-risk.codex.json`
 - `sample-contract.claude.json`
+- `sample-contract.decision-gates.codex.json`
 - `sample-contract.generic.json`
+- `sample-contract.prompt-injection.claude.json`
+- `sample-contract.prompt-injection.codex.json`
+- `sample-contract.prompt-injection.generic.json`
 
 새 프롬프트 명세(prompt contract)를 작성할 때 이 파일들을 시작점으로 사용합니다.
 
@@ -17,7 +22,12 @@
 `rendered/`에는 샘플 명세(sample contract)를 대상 렌더러 템플릿(target renderer template)에 적용한 최종 프롬프트(prompt) 예제가 있습니다.
 
 - `rendered/codex-review.md`
+- `rendered/codex-plan-accepted-risk.md`
+- `rendered/codex-plan-decision-gates.md`
+- `rendered/codex-plan-prompt-injection-boundary.md`
+- `rendered/claude-plan-prompt-injection-boundary.md`
 - `rendered/claude-implement.md`
+- `rendered/generic-plan-prompt-injection-boundary.md`
 - `rendered/generic-task.md`
 
 렌더링된 예제(rendered example)는 문서용 고정 예제(documentation fixture)이며 생성된 스냅샷(generated snapshot)이 아닙니다. 수동 사용 시 기대되는 프롬프트 형태(prompt shape)를 보여줍니다.
