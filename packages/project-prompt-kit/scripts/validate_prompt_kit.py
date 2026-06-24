@@ -134,6 +134,25 @@ AUTH_MIGRATION_BOUNDARY_MARKERS = [
     "fallback",
     "cutover stop",
 ]
+SCENARIO_REQUIRED_MARKER_GROUPS = {
+    "production_incident": [
+        ("incident window", ["incident window"]),
+        ("evidence timeline", ["evidence timeline"]),
+        ("mitigation boundary", ["mitigation boundary"]),
+        ("customer impact scope", ["customer impact scope"]),
+        ("customer-facing comms owner", ["customer-facing comms owner"]),
+        ("support path", ["support path"]),
+        ("rollback/containment path", ["rollback or containment path", "containment path"]),
+    ],
+    "regulated_data_or_domain": [
+        ("data classification", ["data classification"]),
+        ("retention/deletion trigger", ["retention/deletion trigger", "retention trigger", "deletion trigger"]),
+        ("consent/notice trigger", ["consent/notice trigger", "consent trigger", "notice trigger"]),
+        ("lawyer-review trigger", ["lawyer-review trigger", "lawyer review trigger"]),
+        ("qualified human review trigger", ["qualified human review trigger"]),
+        ("data handling boundary", ["data handling boundary"]),
+    ],
+}
 
 NOT_APPLICABLE_RATIONALE_MARKERS = [
     "rationale",
@@ -208,7 +227,13 @@ EXPECTED_INVALID_FIXTURE_ERRORS = {
     "invalid-governance-not-applicable-without-rationale.contract.json": [
         "not_applicable without rationale marker"
     ],
+    "invalid-governance-production-incident-missing-containment-boundary.contract.json": [
+        "production_incident scenario missing rollback/containment path marker"
+    ],
     "invalid-governance-preset.contract.json": ["$.governance.preset value 'none' not in enum"],
+    "invalid-governance-regulated-data-missing-human-review-trigger.contract.json": [
+        "regulated_data_or_domain scenario missing qualified human review trigger marker"
+    ],
     "invalid-governance-scenario-missing-synthetic.contract.json": [
         "must use synthetic data marker"
     ],
@@ -1490,6 +1515,32 @@ def auth_migration_boundary_policy_errors(data: dict[str, Any], fixture: Path) -
     return []
 
 
+def scenario_required_marker_policy_errors(data: dict[str, Any], fixture: Path) -> list[str]:
+    governance = data.get("governance")
+    if not isinstance(governance, dict):
+        return []
+
+    scenario_template = governance.get("scenario_template")
+    if not isinstance(scenario_template, str):
+        return []
+
+    marker_groups = SCENARIO_REQUIRED_MARKER_GROUPS.get(scenario_template)
+    if not marker_groups:
+        return []
+
+    fixture_text = json.dumps(data, ensure_ascii=False, sort_keys=True).lower()
+    if "synthetic" not in fixture_text:
+        return []
+    if any(pattern.search(fixture_text) for _, pattern in UNSAFE_PUBLIC_FIXTURE_PATTERNS):
+        return []
+
+    policy_errors: list[str] = []
+    for label, markers in marker_groups:
+        if not any(marker in fixture_text for marker in markers):
+            policy_errors.append(f"{scenario_template} scenario missing {label} marker: {rel(fixture)}")
+    return policy_errors
+
+
 def high_risk_review_panel_policy_errors(data: dict[str, Any], fixture: Path) -> list[str]:
     governance = data.get("governance")
     if not isinstance(governance, dict) or governance.get("preset") != "high_risk":
@@ -1621,6 +1672,7 @@ def governance_contract_policy_errors(data: dict[str, Any], fixture: Path) -> li
     return [
         *governance_scenario_fixture_policy_errors(data, fixture),
         *auth_migration_boundary_policy_errors(data, fixture),
+        *scenario_required_marker_policy_errors(data, fixture),
         *high_risk_review_panel_policy_errors(data, fixture),
         *accepted_risk_policy_errors(data, fixture),
         *not_applicable_policy_errors(data, fixture),
@@ -1659,6 +1711,8 @@ def validate_fixture_files(schemas: dict[str, dict[str, Any]], errors: list[str]
         "invalid-governance-auth-migration-missing-rollback-boundary.contract.json",
         "invalid-governance-accepted-risk-without-human.contract.json",
         "invalid-governance-not-applicable-without-rationale.contract.json",
+        "invalid-governance-production-incident-missing-containment-boundary.contract.json",
+        "invalid-governance-regulated-data-missing-human-review-trigger.contract.json",
         "invalid-command.contract.json",
         "invalid-communication-policy.contract.json",
         "invalid-workspace-strategy.contract.json",
