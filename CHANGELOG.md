@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 ### Changed
+- Recorded the classifier/workflow-engine re-review decision and validation guard for keeping both deferred.
 - Recorded the optional CLI spike review decision and added validation for the local-only CLI boundary.
 
 ## [0.2.1] - 2026-06-25
