@@ -10,4 +10,4 @@
 - Follow the Korean v0.2 follow-up plan for planning governance contract hardening: `packages/project-prompt-kit/docs/v0.2-follow-up-plan.ko.md`
 - Expand prompt schemas and fixture coverage
 - Add renderer-specific examples while preserving host-neutral core
-- Introduce optional CLI only when contract surface is stable
+- Evaluate an optional local-only CLI wrapper only after the contract surface is stable; do not document it as an installable user path until it ships
