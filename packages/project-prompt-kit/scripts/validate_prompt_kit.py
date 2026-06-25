@@ -937,20 +937,33 @@ def validate_governance_presets(errors: list[str]) -> None:
 
 def validate_follow_up_plan(errors: list[str]) -> None:
     follow_up_plan = PKG / "docs" / "v0.2-follow-up-plan.ko.md"
+    classifier_workflow_note = PKG / "docs" / "v0.2-classifier-workflow-engine-rereview.ko.md"
     if not follow_up_plan.is_file():
         errors.append(f"Missing follow-up plan: {rel(follow_up_plan)}")
         return
+    if not classifier_workflow_note.is_file():
+        errors.append(f"Missing classifier/workflow re-review note: {rel(classifier_workflow_note)}")
 
     text = read(follow_up_plan)
-    for phrase in [
-        "검토 후보이며 기능 약속이 아니다",
-        "PR6는 실행 가능한 CLI 파일을 추가하지 않는다.",
-        "future CLI file이 실제로 추가되는 PR에서는 validation cost guard의 scan 대상에 등록한다.",
-        "지원하지 않는 command는 fail closed해야 한다.",
-        "CLI는 gate 통과, risk acceptance, 법률/컴플라이언스 결론, production readiness 판단을 수행하지 않는다.",
-    ]:
-        if phrase not in text:
-            errors.append(f"Follow-up plan missing optional CLI boundary phrase: {phrase}")
+    required_phrases = {
+        "optional CLI boundary": [
+            "검토 후보이며 기능 약속이 아니다",
+            "PR6는 실행 가능한 CLI 파일을 추가하지 않는다.",
+            "future CLI file이 실제로 추가되는 PR에서는 validation cost guard의 scan 대상에 등록한다.",
+            "지원하지 않는 command는 fail closed해야 한다.",
+            "CLI는 gate 통과, risk acceptance, 법률/컴플라이언스 결론, production readiness 판단을 수행하지 않는다.",
+        ],
+        "classifier/workflow boundary": [
+            "이번 PR7 결론: automatic risk classifier와 workflow engine은 계속 deferred로 둔다.",
+            "v0.2-classifier-workflow-engine-rereview.ko.md",
+            "limited preset-assist는 prompt-authoring recommendation 후보일 뿐 automatic classifier나 workflow engine이 아니다.",
+            "classifier가 high-risk trigger를 downgrade하거나 risk를 accept하면 중단",
+        ],
+    }
+    for label, phrases in required_phrases.items():
+        for phrase in phrases:
+            if phrase not in text:
+                errors.append(f"Follow-up plan missing {label} phrase: {phrase}")
 
 
 def validate_schema_contracts(schemas: dict[str, dict[str, Any]], errors: list[str]) -> None:
