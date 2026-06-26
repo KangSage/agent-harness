@@ -36,4 +36,6 @@ Combine reviewer results with this table:
 Role | Verdict | Key evidence | Decision impact | Residual risk
 ```
 
+Review panel execution policy: do not silently skip selected reviewers. If separate reviewer or subagent contexts are supported and capacity is unavailable, close only completed or no-longer-needed reviewer contexts owned by the current session, then retry. If a selected reviewer still cannot run separately, disclose the skipped role and reason. Label any self-review fallback and state its limits. For high-risk reviews, missing required reviewers must produce `no-go`, `needs human decision`, or explicit residual risk instead of a confident `go` verdict.
+
 `TIMELINE.md` is optional local evidence for repeated use of the same review pattern. It is not a required prompt contract field.

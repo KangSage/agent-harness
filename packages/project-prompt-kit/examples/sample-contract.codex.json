@@ -15,11 +15,12 @@
   "constraints": [
     "Keep v0.1 scaffold small",
     "Do not merge the PR",
-    "Avoid local-only framework coupling"
+    "Avoid local-only framework coupling",
+    "Do not silently skip selected reviewers; disclose skipped reviewer roles and any self-review fallback"
   ],
   "review_panel": {
     "preset": "implementation_review",
-    "selection_policy": "Choose reviewers needed to judge merge readiness without adding host-specific subagent names.",
+    "selection_policy": "Choose reviewers needed to judge merge readiness without adding host-specific subagent names. Do not silently skip selected reviewers; if a reviewer cannot run separately, disclose the skipped role and reason.",
     "reviewers": [
       {
         "role": "CTO Reviewer",
@@ -46,11 +47,12 @@
     "Package becomes handoff-only",
     "Examples leak private paths or account names"
   ],
-  "output_format": "Findings first, then validation evidence, a Role | Verdict | Key evidence | Decision impact | Residual risk table, and verdict. Include a Fact / inference boundary section.",
+  "output_format": "Findings first, then validation evidence, a Role | Verdict | Key evidence | Decision impact | Residual risk table, fallback disclosure for skipped reviewers or self-review fallback, and verdict. Include a Fact / inference boundary section.",
   "evidence_required": [
     "Commands run",
     "Files inspected",
-    "Validation result"
+    "Validation result",
+    "Reviewer execution status and fallback limits when any selected reviewer cannot run separately"
   ],
   "stop_condition": "Stop after the PR is reviewed, necessary scaffold fixes are committed, and validation evidence is collected.",
   "safety": {

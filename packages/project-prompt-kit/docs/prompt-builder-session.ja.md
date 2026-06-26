@@ -4,6 +4,62 @@ Prompt Builder セッションは、1つのエージェントセッションで 
 
 既存プロジェクト、リスクの高い作業、本番調査、長い handoff に向いています。Prompt Builder セッションは、まだ整理されていない意図を contract JSON と rendered prompt に変換します。コード編集、本番システムへの接続、実作業の実行は行いません。
 
+## 推奨 One-Shot フロー
+
+初めて使う場合は、セッション開始プロンプトと作業依頼を1つのメッセージにまとめて貼り付ける方法を推奨します。セッション開始プロンプトだけを送ると、Prompt Builder は目標、範囲、背景、制約が不足しているとして missing-information の質問をすることがあります。これは正常な動作です。
+
+```text
+あなたはこのプロジェクトの Prompt Builder です。
+
+.tools/project-prompt-kit を使って、project prompt のみを作成してください。
+コード編集、git commit、DB 接続、本番作業、依頼された実作業の実行はしないでください。
+
+私が提供する目標、範囲、背景、制約をもとに:
+1. mode と target renderer を選ぶ、または確認する
+2. contract JSON を作成する
+3. rendered prompt markdown を作成する
+4. workspace strategy が提供された場合は rendered prompt に反映する
+5. infrastructure boundaries が提供された場合は rendered prompt に反映する
+6. communication policy が提供された場合は rendered prompt に反映する
+7. role-specific review が worker prompt の品質を上げる場合は review panel を選ぶ
+8. 必須情報が不足している場合だけ、短い質問を1つする
+
+プロジェクトルール:
+- AGENTS.md と下位の AGENTS.md に従う
+- .promptkitignore を守る
+- secret、environment 値、credential-bearing URL、local absolute path を出力しない
+- 本番システムに接続しない
+
+依頼:
+mode: plan
+target renderer: codex
+
+workspace strategy:
+現在の checkout は他のセッションと共有されている可能性があり、無関係なローカル変更を含む可能性がある。
+worker は現在の checkout を read-only として扱う。
+送信前に `<exact remote base ref>` を対象 repository の実際の remote ref に置き換える。
+その正確な remote base ref を使ってから、タスク専用 worktree を作成する。
+曖昧な base branch 表現から `origin/main`、`main`、`master` を推測しない。
+正確な `base_ref` がない、または不明確な場合は、レンダリング前に正確な remote base ref を確認する短い質問を1つする。
+
+目標:
+依頼されたプロジェクト変更のための、レビュー済み実装計画を作る。
+
+範囲:
+私が指定した domain または feature area のみ。
+
+背景:
+.promptkitignore が許可する project context だけを使う。
+
+制約:
+- 作業範囲を小さく保つ
+- secret、env 値、credential-bearing URL、local absolute path を出力しない
+- 依頼された実作業は実行しない
+
+出力:
+contract JSON と rendered prompt markdown。
+```
+
 ## セッション開始プロンプト
 
 対象プロジェクト内で新しいエージェントセッションを開き、次のプロンプトを貼り付けます。
@@ -31,6 +87,8 @@ Prompt Builder セッションは、1つのエージェントセッションで 
 - 本番システムに接続しない
 ```
 
+セッション開始プロンプトだけを送ると、Prompt Builder は不足している目標、範囲、背景、制約を質問することがあります。この missing-information の質問はエラーではなく、正常な動作です。
+
 ## 依頼の形
 
 セッション開始プロンプトの後は、次の形で依頼します。
@@ -41,16 +99,19 @@ mode: debug
 target renderer:
 codex、claude、generic のいずれか
 
-作業スペース方針:
+workspace strategy:
 現在の checkout は他のセッションと共有されている可能性があり、無関係なローカル変更を含む可能性がある。
 worker は現在の checkout を read-only として扱う。
-編集前に remote を fetch し、指定された remote base ref を基準に新しい worktree を作成する。
+編集前に remote を fetch し、ユーザーまたは明確な依頼文脈が提供した正確な remote base ref を基準に新しい worktree を作成する。
+曖昧な base branch 表現から `origin/main`、`main`、`master` を推測しない。
+正確な `base_ref` がない、または不明確な場合は、レンダリング前に正確な remote base ref を確認する短い質問を1つする。
 codex/<task-slug> のようなタスク専用 branch を使う。
-例: git worktree add ../<repo>-<task-slug> -b codex/<task-slug> origin/<base-branch>
+正確な ref の例: origin/setup/example-base
+command 例: git worktree add ../<repo>-<task-slug> -b codex/<task-slug> origin/setup/example-base
 worker は新しい worktree の中だけで編集、テスト、commit、push を行う。
 worker は現在の checkout で reset、clean、checkout、revert を実行しない。
 
-インフラ境界:
+infrastructure boundaries:
 worker は本番 DB、本番 API、cloud console、secret store、admin dashboard に直接接続しない。
 本番データが必要な場合、worker は read-only SQL を段階的に作成する。
 私が本番 DB で各 SQL を実行し、その結果を返す。
@@ -74,7 +135,7 @@ review panel:
 policy、terms、customer notice では Legal / Compliance Risk Screener、Operations / CS Lead、Product / Information Architecture Reviewer、Growth / Marketing Reviewer を含める。
 新機能企画では CTO Reviewer、Product / Information Architecture Reviewer、UX / Product Designer、Growth / Marketing Reviewer、QA Engineer を含める。
 docs や handoff では Product / Information Architecture Reviewer、Operations / CS Lead、QA Engineer、CTO Reviewer を含める。
-Legal / Compliance Risk Screener は確定的な法律助言ではなく、法務・コンプライアンス上のリスク特定と、弁護士レビューが必要な箇所の明示に限定する。
+Legal / Compliance Risk Screener は確定的な法律助言や compliance approval ではなく、法務・コンプライアンス上のリスク特定と、弁護士レビューが必要な箇所の明示に限定する。
 
 目標:
 本番環境のポイント移転トランザクションデータの整合性を調査する。
@@ -101,12 +162,16 @@ contract JSON と rendered prompt markdown。
 
 v0.1 では、optional contract schema field として扱います。すべての prompt で必須にはしません。read-only 作業やドキュメント作業では、worktree 分離が不要な場合があるためです。
 
+`worktree.enabled` が true の場合、`base_ref` は正確な remote base ref である必要があります。`origin/main`、`main`、`master` のような default branch 名を推測しないでください。依頼に正確な remote base ref がなく、文脈からも明確でない場合は、contract をレンダリングする前に短い質問を1つして確認します。文書内の `origin/setup/example-base` は synthetic example data であり、default 値ではありません。
+
 推奨 worker 方針:
 
 ```text
 現在の checkout は read-only context として扱う。
 worktree 作成前に git fetch origin を実行する。
-指定された remote base ref からタスク専用 worktree を作成する。
+正確な remote base ref からタスク専用 worktree を作成する。例: origin/setup/example-base。
+曖昧な base branch 表現から origin/main、main、master を推測しない。
+正確な base_ref がない、または不明確な場合は、レンダリング前に短い質問を1つする。
 指定された branch prefix でタスク専用 branch を作成する。
 新しい worktree 内で AGENTS.md を再確認してから編集する。
 編集、テスト、commit、push は新しい worktree 内だけで行う。
@@ -246,6 +311,12 @@ CTO Reviewer, Product / Information Architecture Reviewer, UX / Product Designer
 docs_or_handoff:
 Product / Information Architecture Reviewer, Operations / CS Lead, QA Engineer, CTO Reviewer
 ```
+
+### レビューパネル実行ポリシー
+
+review panel を選んだ場合、worker は選択された reviewer を黙って省略してはいけません。host が別 reviewer または subagent context をサポートしていて capacity が不足している場合、現在のセッションが所有している完了済み、またはもう不要な reviewer context だけを閉じてから再試行します。panel を満たすために、まだ active または必要な reviewer context を閉じてはいけません。
+
+それでも選択された reviewer を別 context で実行できない場合は、省略された reviewer と理由を明示します。self-review fallback を使う場合は self-review fallback と明記し、その限界を書きます。high-risk 作業で必須 reviewer が欠けた場合、confident `go` verdict ではなく `no-go`、`needs human decision`、または explicit residual risk を残します。
 
 ### レビュー行動パターン
 

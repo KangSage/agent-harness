@@ -4,6 +4,62 @@ Prompt Builder 세션은 한 에이전트 세션이 project prompt만 만들고,
 
 이 패턴은 기존 프로젝트, 위험도가 높은 작업, 운영 조사, 장기 handoff에 유용합니다. Prompt Builder 세션은 아직 정리되지 않은 의도를 contract JSON과 rendered prompt로 바꿉니다. 코드 수정, 운영 시스템 접속, 실제 작업 수행은 하지 않아야 합니다.
 
+## 권장 One-Shot 흐름
+
+처음 사용할 때는 세션 시작 프롬프트와 작업 요청을 한 메시지에 함께 붙여넣는 방식을 권장합니다. 세션 시작 프롬프트만 보내면 Prompt Builder가 목표, 범위, 배경, 제약이 부족하다고 묻는 missing-information 질문을 할 수 있습니다. 이것은 정상 동작입니다.
+
+```text
+너는 이 프로젝트의 Prompt Builder다.
+
+.tools/project-prompt-kit를 사용해서 project prompt만 작성해라.
+직접 코드 수정, git commit, DB 접속, 운영 작업, 요청된 실제 작업 수행은 하지 마라.
+
+내가 제공하는 목표, 범위, 배경, 제약을 바탕으로:
+1. mode와 target renderer를 선택하거나 확인한다.
+2. contract JSON을 작성한다.
+3. rendered prompt markdown을 작성한다.
+4. 내가 workspace strategy를 제공하면 rendered prompt에 반영한다.
+5. 내가 infrastructure boundaries를 제공하면 rendered prompt에 반영한다.
+6. 내가 communication policy를 제공하면 rendered prompt에 반영한다.
+7. 역할별 검토가 worker prompt 품질을 높인다면 review panel을 고른다.
+8. 필수 정보가 부족할 때만 짧은 질문 하나를 한다.
+
+프로젝트 규칙:
+- AGENTS.md와 하위 AGENTS.md를 지켜라.
+- .promptkitignore를 지켜라.
+- secret, environment 값, credential-bearing URL, local absolute path를 출력하지 마라.
+- 운영 시스템에 접속하지 마라.
+
+요청:
+mode: plan
+target renderer: codex
+
+workspace strategy:
+현재 체크아웃은 다른 세션과 공유 중일 수 있고, 관련 없는 로컬 변경이 있을 수 있다.
+worker는 현재 체크아웃을 read-only로 취급한다.
+보내기 전에 `<exact remote base ref>`를 대상 저장소의 실제 remote ref로 바꾼다.
+그 정확한 remote base ref를 사용한 뒤 작업별 worktree를 만든다.
+애매한 base branch 표현에서 `origin/main`, `main`, `master`를 추론하지 않는다.
+정확한 `base_ref`가 없거나 불명확하면 렌더링 전에 정확한 remote base ref를 묻는 짧은 질문 하나를 한다.
+
+목표:
+요청한 프로젝트 변경을 위한 검토된 구현 계획을 만든다.
+
+범위:
+내가 지정한 도메인이나 기능 영역만.
+
+배경:
+.promptkitignore가 허용하는 프로젝트 맥락만 사용한다.
+
+제약:
+- 작업 범위를 좁게 유지한다.
+- secret, env 값, credential-bearing URL, local absolute path를 출력하지 않는다.
+- 요청된 실제 작업은 수행하지 않는다.
+
+출력:
+contract JSON과 rendered prompt markdown.
+```
+
 ## 세션 시작 프롬프트
 
 대상 프로젝트 안에서 새 에이전트 세션을 열고 아래 프롬프트를 붙여넣습니다.
@@ -31,6 +87,8 @@ Prompt Builder 세션은 한 에이전트 세션이 project prompt만 만들고,
 - 운영 시스템에 접속하지 마라.
 ```
 
+세션 시작 프롬프트만 보내면 Prompt Builder가 부족한 목표, 범위, 배경, 제약을 물을 수 있습니다. 이 missing-information 질문은 오류가 아니라 정상 동작입니다.
+
 ## 요청 형태
 
 세션 시작 프롬프트 뒤에는 아래 형태로 요청합니다.
@@ -44,9 +102,12 @@ codex, claude, generic 중 하나
 workspace strategy:
 현재 체크아웃은 다른 세션과 공유 중일 수 있고, 관련 없는 로컬 변경이 있을 수 있다.
 worker는 현재 체크아웃을 read-only로 취급한다.
-수정 작업 전에 remote를 fetch하고 요청된 remote base ref 기준의 새 worktree를 만든다.
+수정 작업 전에 remote를 fetch하고, 사용자나 명확한 요청 문맥이 제공한 정확한 remote base ref 기준의 새 worktree를 만든다.
+애매한 base branch 표현에서 `origin/main`, `main`, `master`를 추론하지 않는다.
+정확한 `base_ref`가 없거나 불명확하면 렌더링 전에 정확한 remote base ref를 묻는 짧은 질문 하나를 한다.
 codex/<task-slug> 같은 작업별 branch를 사용한다.
-예: git worktree add ../<repo>-<task-slug> -b codex/<task-slug> origin/<base-branch>
+정확한 ref 예: origin/setup/example-base
+명령 예: git worktree add ../<repo>-<task-slug> -b codex/<task-slug> origin/setup/example-base
 worker는 새 worktree 안에서만 수정, 테스트, 커밋, 푸시한다.
 worker는 현재 체크아웃에서 reset, clean, checkout, revert를 수행하지 않는다.
 
@@ -101,12 +162,16 @@ contract JSON과 rendered prompt markdown.
 
 v0.1에서는 이 내용을 optional contract schema field로 둡니다. 모든 prompt에 필수로 만들지는 않습니다. read-only 작업이나 문서 작업은 worktree 격리가 필요하지 않을 수 있기 때문입니다.
 
+`worktree.enabled`가 true라면 `base_ref`는 정확한 remote base ref여야 합니다. `origin/main`, `main`, `master` 같은 기본 브랜치 이름을 추측하지 마세요. 요청에 정확한 remote base ref가 없고 문맥에서도 명확하지 않다면 contract를 렌더링하기 전에 짧은 질문 하나로 확인합니다. 문서 예시의 `origin/setup/example-base`는 synthetic example data이며 기본값이 아닙니다.
+
 권장 worker 정책:
 
 ```text
 현재 체크아웃은 read-only context다.
 worktree 생성 전에 git fetch origin을 실행한다.
-요청된 remote base ref에서 작업별 worktree를 만든다.
+정확한 remote base ref에서 작업별 worktree를 만든다. 예: origin/setup/example-base.
+애매한 base branch 표현에서 origin/main, main, master를 추론하지 않는다.
+정확한 base_ref가 없거나 불명확하면 렌더링 전에 짧은 질문 하나를 한다.
 요청된 branch prefix로 작업별 branch를 만든다.
 새 worktree 안에서 AGENTS.md를 다시 읽고 수정한다.
 수정, 테스트, 커밋, 푸시는 새 worktree 안에서만 한다.
@@ -246,6 +311,12 @@ CTO Reviewer, Product / Information Architecture Reviewer, UX / Product Designer
 docs_or_handoff:
 Product / Information Architecture Reviewer, Operations / CS Lead, QA Engineer, CTO Reviewer
 ```
+
+### 리뷰 패널 실행 정책
+
+review panel을 선택했다면 worker는 선택된 reviewer를 조용히 생략하면 안 됩니다. host가 별도 reviewer 또는 subagent context를 지원하지만 capacity가 부족하다면, 현재 세션이 소유한 완료된 reviewer context 또는 더 이상 필요 없는 reviewer context만 닫고 다시 시도합니다. panel을 맞추기 위해 아직 활성 상태이거나 필요한 reviewer context를 닫지 않습니다.
+
+그래도 선택된 reviewer를 별도 context로 실행할 수 없다면 생략된 reviewer와 이유를 밝혀야 합니다. self-review fallback을 사용한다면 self-review fallback이라고 표시하고 한계를 적습니다. high-risk 작업에서 필수 reviewer가 빠졌다면 confident `go` verdict 대신 `no-go`, `needs human decision`, 또는 explicit residual risk를 남깁니다.
 
 ### 리뷰 행동 패턴
 

@@ -26,7 +26,7 @@ Constraints:
 Workspace strategy:
 - Current checkout: read_only
 - Worktree enabled: true
-- Base ref: origin/main
+- Base ref: origin/setup/example-base
 - Branch prefix: codex/
 - Write scope: Edit, test, commit, and push only inside the task-specific worktree.
 - Forbidden git actions: Do not reset, clean, checkout, or revert unrelated files in an existing checkout
@@ -51,6 +51,9 @@ Review panel:
 - Software Architect: domain boundaries, data flow, state transitions, responsibility splits -> missing design inputs and architecture risks
 - QA Engineer: edge cases, acceptance criteria, testability, pre-production verification -> test scenarios, acceptance criteria gaps, verification requirements
 - Security / Privacy Reviewer: auth, permission, personal data, logs, masking, secrets, abuse risk -> security and privacy risks, missing controls, required checks
+
+Review panel execution policy (applies only when a review panel is specified):
+When a review panel is specified, do not silently skip selected reviewer roles. If separate reviewer or subagent contexts are supported and capacity is unavailable, close only completed or no-longer-needed reviewer contexts owned by the current session, then retry. If a selected reviewer still cannot run separately, disclose the skipped role and reason. Label any self-review fallback and state its limits. For high-risk work, missing required reviewers must produce `no-go`, `needs human decision`, or explicit residual risk instead of a confident `go` verdict.
 
 Governance:
 - Preset: standard
