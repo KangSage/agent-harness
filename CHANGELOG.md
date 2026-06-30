@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.2.3] - 2026-06-30
+### Changed
+- Clarified Prompt Builder one-shot startup guidance, exact worktree `base_ref` handling, and review-panel fallback disclosure in English, Korean, and Japanese docs.
+- Updated rendered examples and narrow validation guards for prompt-builder dogfooding safety before the CLI design phase.
+
 ## [0.2.2] - 2026-06-25
 ### Changed
 - Recorded the classifier/workflow-engine re-review decision and validation guard for keeping both deferred.
