@@ -21,7 +21,7 @@
     "current_checkout": "read_only",
     "worktree": {
       "enabled": true,
-      "base_ref": "origin/main",
+      "base_ref": "origin/setup/example-base",
       "branch_prefix": "codex/"
     },
     "write_scope": "Edit, test, commit, and push only inside the task-specific worktree.",

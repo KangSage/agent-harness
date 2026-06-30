@@ -50,6 +50,8 @@ Recommended full high-risk panel:
 
 Validation currently enforces the minimum required high-risk reviewers. Prompt authors should include the recommended full high-risk panel when the task needs product, architecture, or QA decision review in addition to the safety-critical reviewers.
 
+If high-risk work selects required reviewers but any required reviewer cannot run in a separate reviewer context, the rendered prompt must disclose the skipped reviewer or self-review fallback. Missing required high-risk reviewers must not produce a confident `go` verdict; use `no-go`, `needs human decision`, or explicit residual risk.
+
 This is not legal advice. This identifies review triggers for qualified humans.
 
 Decision gates are structured planning metadata, not executable approval semantics.

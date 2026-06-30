@@ -4,6 +4,62 @@ Use a Prompt Builder session when you want one agent session to produce project 
 
 This pattern is useful for existing projects, risky operations, production investigations, and long-running handoffs. The Prompt Builder session turns loose intent into a contract JSON and rendered prompt. It must not edit code, connect to production systems, or perform the work itself.
 
+## Recommended One-Shot Flow
+
+For first-time use, paste the bootstrap prompt and the task request together in one message. This avoids a bootstrap-only prompt that may trigger a missing-information question before the Prompt Builder has the goal, scope, background, and constraints.
+
+```text
+You are the Prompt Builder for this project.
+
+Use .tools/project-prompt-kit to write project prompts only.
+Do not edit code, commit changes, connect to databases, run production operations, or perform the requested work.
+
+Given the goal, scope, background, and constraints I provide:
+1. choose or confirm the mode and target renderer
+2. write the contract JSON
+3. write the rendered prompt markdown
+4. include any workspace strategy I provide in the rendered prompt
+5. include any infrastructure boundaries I provide in the rendered prompt
+6. include any communication policy I provide in the rendered prompt
+7. choose a review panel when role-specific review would improve the worker prompt
+8. ask one concise question only when required information is missing
+
+Project rules:
+- follow AGENTS.md and any nested AGENTS.md files
+- respect .promptkitignore
+- do not output secrets, environment values, credential-bearing URLs, or local absolute paths
+- do not connect to production systems
+
+Request:
+mode: plan
+target renderer: codex
+
+workspace strategy:
+The current checkout may be shared with other sessions and may contain unrelated local changes.
+The worker must treat the current checkout as read-only.
+Replace `<exact remote base ref>` with the target repository's real remote ref before sending.
+Use that exact remote base ref before creating a task-specific worktree.
+Do not infer `origin/main`, `main`, or `master` from vague base-branch wording.
+If the exact `base_ref` is missing or unclear, ask one concise question for the exact remote base ref before rendering.
+
+goal:
+Create a reviewed implementation plan for the requested project change.
+
+scope:
+Only the domain or feature area I specify.
+
+background:
+Use only project context allowed by .promptkitignore.
+
+constraints:
+- keep the work scoped
+- do not output secrets, env values, credential-bearing URLs, or local absolute paths
+- do not perform the requested work
+
+output:
+contract JSON and rendered prompt markdown.
+```
+
 ## Session Bootstrap
 
 Start a new agent session inside the target project and paste this prompt:
@@ -31,6 +87,8 @@ Project rules:
 - do not connect to production systems
 ```
 
+If you send only this bootstrap prompt, the Prompt Builder may correctly ask for the missing goal, scope, background, and constraints. That missing-information question is expected, not an error.
+
 ## User Request Shape
 
 After the bootstrap prompt, send requests in this shape:
@@ -44,9 +102,12 @@ codex, claude, or generic
 workspace strategy:
 The current checkout may be shared with other sessions and may contain unrelated local changes.
 The worker must treat the current checkout as read-only.
-Before editing, the worker should fetch the remote and create a fresh worktree from the requested remote base ref.
+Before editing, the worker should fetch the remote and create a fresh worktree from the exact remote base ref supplied by the user or clear request context.
+Do not infer `origin/main`, `main`, or `master` from vague base-branch wording.
+If the exact `base_ref` is missing or unclear, ask one concise question for the exact remote base ref before rendering.
 Use a task-specific branch such as codex/<task-slug>.
-Example: git worktree add ../<repo>-<task-slug> -b codex/<task-slug> origin/<base-branch>
+Example exact ref: origin/setup/example-base
+Example command: git worktree add ../<repo>-<task-slug> -b codex/<task-slug> origin/setup/example-base
 The worker must edit, test, commit, and push only inside the new worktree.
 The worker must not reset, clean, checkout, or revert files in the current checkout.
 
@@ -101,12 +162,16 @@ Use a workspace strategy when the current checkout is shared, dirty, or already 
 
 For v0.1, this is an optional contract schema field. Do not make it required for every prompt because many read-only or documentation prompts do not need worktree isolation.
 
+When `worktree.enabled` is true, `base_ref` must be an exact remote base ref. Do not guess default branch names such as `origin/main`, `main`, or `master`. If the request does not provide an exact remote base ref and the request context does not make one clear, stop and ask one concise question before rendering the contract. Documentation examples use `origin/setup/example-base` as synthetic example data, not as a default.
+
 Recommended worker policy:
 
 ```text
 The current checkout is read-only context.
 Run git fetch origin before creating the worktree.
-Create a task-specific worktree from the requested remote base ref.
+Create a task-specific worktree from the exact remote base ref, for example origin/setup/example-base.
+Do not infer origin/main, main, or master from vague base-branch wording.
+If the exact base_ref is missing or unclear, ask one concise question before rendering.
 Use a task-specific branch with the requested branch prefix.
 Read AGENTS.md again inside the new worktree before editing.
 Only edit, test, commit, and push inside the new worktree.
@@ -246,6 +311,12 @@ CTO Reviewer, Product / Information Architecture Reviewer, UX / Product Designer
 docs_or_handoff:
 Product / Information Architecture Reviewer, Operations / CS Lead, QA Engineer, CTO Reviewer
 ```
+
+### Review Panel Execution Policy
+
+When a review panel is selected, the worker must not silently skip selected reviewers. If the host supports separate reviewer or subagent contexts and capacity is unavailable, close only completed or no-longer-needed reviewer contexts owned by the current session, then retry. Do not close active or still-needed reviewer contexts only to satisfy the panel.
+
+If a selected reviewer still cannot run in a separate context, disclose the skipped reviewer and the reason. If self-review fallback is used, label it as self-review fallback and state its limits. For high-risk work, missing required reviewers must result in `no-go`, `needs human decision`, or explicit residual risk instead of a confident `go` verdict.
 
 ### Review Behavior Pattern
 
